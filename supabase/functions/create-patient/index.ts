@@ -104,46 +104,11 @@ serve(async (req) => {
       console.error('Error generating magic link:', magicLinkError);
     }
 
-    // Send welcome email using admin generateLink
-    let emailSent = false;
-    let emailError = null;
+    // Note: Email non configurata in Supabase, quindi non inviamo email
+    // Il terapista riceverà sempre la password da fornire manualmente al paziente
     
-    try {
-      const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.generateLink({
-        type: 'invite',
-        email: email,
-        options: {
-          redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/`,
-          data: {
-            full_name: fullName,
-            password: password,
-            welcome_message: `Benvenuto ${fullName}! Usa la password: ${password}`
-          }
-        }
-      });
-
-      if (inviteError) {
-        console.error('Error sending email:', inviteError);
-        emailError = inviteError.message;
-      } else {
-        console.log(`Welcome email sent successfully to ${email}`);
-        emailSent = true;
-      }
-    } catch (emailException) {
-      console.error('Failed to send email:', emailException);
-      emailError = emailException.message;
-    }
-
-    // Prepare response message
-    let message = `Paziente ${fullName} creato con successo.`;
-    let warning = null;
-    
-    if (emailSent) {
-      message += ` Email inviata a ${email} con credenziali di accesso.`;
-    } else {
-      warning = `ATTENZIONE: Il paziente è stato creato ma l'email non è stata inviata. Errore: ${emailError}. Fornisci manualmente le credenziali al paziente.`;
-      message += ` IMPORTANTE: Fornisci al paziente la password: ${password}`;
-    }
+    const message = `Paziente ${fullName} creato con successo. Password: ${password}`;
+    const warning = `IMPORTANTE: Fornisci al paziente la password: ${password} e l'email ${email} per accedere.`;
 
     return new Response(
       JSON.stringify({ 
@@ -152,8 +117,8 @@ serve(async (req) => {
         magic_link: magicLinkData?.properties?.action_link,
         message: message,
         warning: warning,
-        emailSent: emailSent,
-        emailError: emailError
+        emailSent: false,
+        emailError: "Email non configurata in Supabase"
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
