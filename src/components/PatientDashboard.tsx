@@ -40,6 +40,8 @@ export const PatientDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [accessibilitySettings, setAccessibilitySettings] = useState<{fontSize: 'small' | 'medium' | 'large' | 'extra-large'}>({ fontSize: 'large' });
   const [selectedTheme, setSelectedTheme] = useState<ThemeType>('rainbow');
+  const [recentSessions, setRecentSessions] = useState<DBExerciseSession[]>([]);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   // Carica le preferenze salvate
   useEffect(() => {
@@ -71,6 +73,7 @@ export const PatientDashboard: React.FC = () => {
   useEffect(() => {
     if (profile) {
       fetchTodayExercise();
+      fetchRecentSessions();
     }
   }, [profile]);
 
@@ -121,6 +124,30 @@ export const PatientDashboard: React.FC = () => {
       console.error('Error fetching today exercise:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRecentSessions = async () => {
+    try {
+      setStatsLoading(true);
+      
+      // Recupera le ultime 10 sessioni dell'utente
+      const { data: sessions, error } = await supabase
+        .from('exercise_sessions')
+        .select('*')
+        .eq('patient_id', profile?.id)
+        .order('completed_at', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('Error fetching sessions:', error);
+      } else {
+        setRecentSessions(sessions || []);
+      }
+    } catch (error) {
+      console.error('Error fetching recent sessions:', error);
+    } finally {
+      setStatsLoading(false);
     }
   };
 
@@ -180,6 +207,7 @@ export const PatientDashboard: React.FC = () => {
           description: `Precisione: ${result.accuracy.toFixed(1)}%`,
         });
         setCompletedToday(true);
+        await fetchRecentSessions(); // Aggiorna anche le statistiche
       }
     } catch (error) {
       console.error('Error saving session:', error);
@@ -390,11 +418,119 @@ export const PatientDashboard: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <p className="text-gray-600">
-                  Le statistiche saranno disponibili dopo aver completato alcuni esercizi
-                </p>
-              </div>
+              {statsLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-600">Caricamento statistiche...</p>
+                </div>
+              ) : recentSessions.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-600">
+                    Completa il tuo primo esercizio per vedere le statistiche
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Statistiche generali */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-3 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {recentSessions.length}
+                      </div>
+                      <div className="text-xs text-blue-700">Sessioni</div>
+                    </div>
+                    <div className="text-center p-3 bg-green-50 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">
+                        {Math.round(recentSessions.reduce((acc, s) => acc + s.accuracy, 0) / recentSessions.length)}%
+                      </div>
+                      <div className="text-xs text-green-700">Precisione Media</div>
+                    </div>
+                    <div className="text-center p-3 bg-purple-50 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {Math.round(recentSessions.reduce((acc, s) => acc + s.duration, 0) / recentSessions.length / 1000)}s
+                      </div>
+                      <div className="text-xs text-purple-700">Tempo Medio</div>
+                    </div>
+                    <div className="text-center p-3 bg-orange-50 rounded-lg">
+                      <div className="text-2xl font-bold text-orange-600">
+                        {recentSessions.reduce((acc, s) => acc + s.total_words, 0)}
+                      </div>
+                      <div className="text-xs text-orange-700">Parole Totali</div>
+                    </div>
+                  </div>
+
+                  {/* Ultime sessioni */}
+                  <div>
+                    <h4 className="font-medium text-gray-800 mb-3">Ultime Sessioni</h4>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {recentSessions.slice(0, 5).map((session, index) => {
+                        const date = new Date(session.completed_at);
+                        const isToday = date.toDateString() === new Date().toDateString();
+                        const isYesterday = date.toDateString() === new Date(Date.now() - 86400000).toDateString();
+                        
+                        let dateLabel;
+                        if (isToday) {
+                          dateLabel = `Oggi ${date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`;
+                        } else if (isYesterday) {
+                          dateLabel = `Ieri ${date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`;
+                        } else {
+                          dateLabel = date.toLocaleDateString('it-IT', { 
+                            day: 'numeric', 
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          });
+                        }
+
+                        return (
+                          <div key={session.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-2 h-2 rounded-full ${
+                                session.accuracy >= 90 ? 'bg-green-500' :
+                                session.accuracy >= 70 ? 'bg-yellow-500' : 'bg-red-500'
+                              }`}></div>
+                              <div>
+                                <div className="text-sm font-medium text-gray-800">
+                                  {session.correct_words}/{session.total_words} parole ({Math.round(session.accuracy)}%)
+                                </div>
+                                <div className="text-xs text-gray-600">{dateLabel}</div>
+                              </div>
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {Math.round(session.duration / 1000)}s
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Progressi nel tempo */}
+                  {recentSessions.length >= 3 && (
+                    <div>
+                      <h4 className="font-medium text-gray-800 mb-3">Andamento Precisione</h4>
+                      <div className="flex items-end gap-2 h-20">
+                        {recentSessions.slice(0, 7).reverse().map((session, index) => {
+                          const height = (session.accuracy / 100) * 100;
+                          return (
+                            <div key={index} className="flex-1 flex flex-col items-center">
+                              <div 
+                                className={`w-full rounded-t ${
+                                  session.accuracy >= 90 ? 'bg-green-400' :
+                                  session.accuracy >= 70 ? 'bg-yellow-400' : 'bg-red-400'
+                                }`}
+                                style={{ height: `${height}%` }}
+                              ></div>
+                              <div className="text-xs text-gray-600 mt-1">
+                                {Math.round(session.accuracy)}%
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
