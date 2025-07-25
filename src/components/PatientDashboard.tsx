@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Exercise, ExerciseSession as DBExerciseSession, DAYS_OF_WEEK } from '@/types/database';
 import { SimpleExerciseDisplay } from './SimpleExerciseDisplay';
 import { DebugPanel } from './DebugPanel';
+import { AccessibilitySettings } from './AccessibilitySettings';
 import { toast } from '@/hooks/use-toast';
 
 interface ExerciseSession {
@@ -37,6 +38,7 @@ export const PatientDashboard: React.FC = () => {
   const [completedToday, setCompletedToday] = useState(false);
   const [currentSession, setCurrentSession] = useState<ExerciseSession | null>(null);
   const [loading, setLoading] = useState(true);
+  const [accessibilitySettings, setAccessibilitySettings] = useState<{fontSize: 'small' | 'medium' | 'large' | 'extra-large'}>({ fontSize: 'large' });
 
   useEffect(() => {
     if (profile) {
@@ -106,7 +108,10 @@ export const PatientDashboard: React.FC = () => {
 
     const session: ExerciseSession = {
       words: todayExercise.word_list.words,
-      settings: todayExercise.settings,
+      settings: {
+        ...todayExercise.settings,
+        fontSize: accessibilitySettings.fontSize // Usa le preferenze del paziente
+      },
       startTime: Date.now(),
       currentWordIndex: 0,
       errors: [],
@@ -219,18 +224,20 @@ export const PatientDashboard: React.FC = () => {
                     Contatta il tuo terapista per programmare gli esercizi.
                   </p>
                 </div>
-              ) : completedToday ? (
-                <div className="text-center py-8">
-                  <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-green-700 mb-2">
-                    Esercizio Completato!
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Hai già completato l'esercizio di oggi. Torna domani per il prossimo!
-                  </p>
-                </div>
               ) : (
                 <div className="space-y-6">
+                  {completedToday && (
+                    <div className="text-center py-4 bg-green-50 border border-green-200 rounded-lg">
+                      <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                      <p className="text-green-700 font-medium">
+                        Esercizio già completato oggi!
+                      </p>
+                      <p className="text-sm text-green-600 mt-1">
+                        Puoi ripeterlo per migliorare
+                      </p>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="text-center p-4 border rounded-lg">
                       <p className="text-2xl font-bold text-primary">
@@ -246,9 +253,11 @@ export const PatientDashboard: React.FC = () => {
                     </div>
                     <div className="text-center p-4 border rounded-lg">
                       <p className="text-2xl font-bold text-primary">
-                        {todayExercise.settings.fontSize}
+                        {accessibilitySettings.fontSize === 'small' ? 'Piccolo' :
+                         accessibilitySettings.fontSize === 'medium' ? 'Medio' :
+                         accessibilitySettings.fontSize === 'large' ? 'Grande' : 'Extra Grande'}
                       </p>
-                      <p className="text-sm text-muted-foreground">Dimensione</p>
+                      <p className="text-sm text-muted-foreground">Dimensione Testo</p>
                     </div>
                   </div>
 
@@ -259,18 +268,9 @@ export const PatientDashboard: React.FC = () => {
                         {todayExercise.word_list.description}
                       </p>
                     )}
-                    <div className="flex flex-wrap gap-2">
-                      {todayExercise.word_list?.words.slice(0, 10).map((word, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {word}
-                        </Badge>
-                      ))}
-                      {todayExercise.word_list && todayExercise.word_list.words.length > 10 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{todayExercise.word_list.words.length - 10} altre
-                        </Badge>
-                      )}
-                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {todayExercise.word_list?.words.length} parole da leggere
+                    </p>
                   </div>
 
                   <div className="text-center">
@@ -280,7 +280,7 @@ export const PatientDashboard: React.FC = () => {
                       className="min-h-[60px] px-8 text-lg touch-manipulation"
                     >
                       <Play className="h-6 w-6 mr-3" />
-                      Inizia Esercizio
+                      {completedToday ? "Ripeti Esercizio" : "Inizia Esercizio"}
                     </Button>
                   </div>
 
@@ -311,6 +311,11 @@ export const PatientDashboard: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+
+          <AccessibilitySettings 
+            onSettingsChange={setAccessibilitySettings}
+            initialSettings={accessibilitySettings}
+          />
 
           {/* Debug Panel - Solo in preview/development */}
           <DebugPanel />
