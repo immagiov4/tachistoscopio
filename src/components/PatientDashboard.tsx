@@ -242,119 +242,120 @@ export const PatientDashboard: React.FC = () => {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {completedToday && (
-                    <div className="text-center py-4 bg-green-50 border border-green-200 rounded-lg">
-                      <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                      <p className="text-green-700 font-medium">
+                    <div className="text-center py-3 bg-green-50 border border-green-200 rounded-lg">
+                      <CheckCircle className="h-6 w-6 text-green-500 mx-auto mb-1" />
+                      <p className="text-green-700 font-medium text-sm">
                         Esercizio già completato oggi!
                       </p>
-                      <p className="text-sm text-green-600 mt-1">
+                      <p className="text-xs text-green-600">
                         Puoi ripeterlo per migliorare
                       </p>
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center p-4 border rounded-lg">
-                      <p className="text-2xl font-bold text-primary">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center p-3 border rounded-lg">
+                      <p className="text-xl font-bold text-primary">
                         {todayExercise.word_list?.words.length}
                       </p>
-                      <p className="text-sm text-muted-foreground">Parole</p>
+                      <p className="text-xs text-muted-foreground">Parole</p>
                     </div>
-                    <div className="text-center p-4 border rounded-lg">
-                      <p className="text-2xl font-bold text-primary">
+                    <div className="text-center p-3 border rounded-lg">
+                      <p className="text-xl font-bold text-primary">
                         {todayExercise.settings.exposureDuration}ms
                       </p>
-                      <p className="text-sm text-muted-foreground">Durata</p>
+                      <p className="text-xs text-muted-foreground">Durata</p>
                     </div>
-                    <div className="text-center p-4 border rounded-lg">
-                      <div className="space-y-3">
-                        <p className="text-sm font-medium text-muted-foreground">Dimensione Testo</p>
-                        <div className="flex items-center justify-center gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => {
-                              const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
-                              const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
-                              if (currentIndex > 0) {
-                                setAccessibilitySettings({fontSize: sizes[currentIndex - 1]});
-                              }
-                            }}
-                            disabled={accessibilitySettings.fontSize === 'small'}
-                            className="w-8 h-8 p-0"
-                          >
-                            -
-                          </Button>
-                          <span className="text-lg font-bold text-primary min-w-[80px]">
-                            {accessibilitySettings.fontSize === 'small' ? 'Piccolo' :
-                             accessibilitySettings.fontSize === 'medium' ? 'Medio' :
-                             accessibilitySettings.fontSize === 'large' ? 'Grande' : 'XL'}
-                          </span>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => {
-                              const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
-                              const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
-                              if (currentIndex < sizes.length - 1) {
-                                setAccessibilitySettings({fontSize: sizes[currentIndex + 1]});
-                              }
-                            }}
-                            disabled={accessibilitySettings.fontSize === 'extra-large'}
-                            className="w-8 h-8 p-0"
-                          >
-                            +
-                          </Button>
-                        </div>
-                        <div className={`font-bold ${
-                          accessibilitySettings.fontSize === 'small' ? 'text-lg' :
-                          accessibilitySettings.fontSize === 'medium' ? 'text-xl' :
-                          accessibilitySettings.fontSize === 'large' ? 'text-2xl' : 'text-3xl'
-                        }`}>
-                          Aa
-                        </div>
+                  </div>
+
+                  <div className="border rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-medium text-muted-foreground">Dimensione Testo</p>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
+                            const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
+                            if (currentIndex > 0) {
+                              setAccessibilitySettings({fontSize: sizes[currentIndex - 1]});
+                            }
+                          }}
+                          disabled={accessibilitySettings.fontSize === 'small'}
+                          className="w-7 h-7 p-0"
+                        >
+                          -
+                        </Button>
+                        <span className="text-sm font-bold text-primary min-w-[60px] text-center">
+                          {accessibilitySettings.fontSize === 'small' ? 'Piccolo' :
+                           accessibilitySettings.fontSize === 'medium' ? 'Medio' :
+                           accessibilitySettings.fontSize === 'large' ? 'Grande' : 'XL'}
+                        </span>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
+                            const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
+                            if (currentIndex < sizes.length - 1) {
+                              setAccessibilitySettings({fontSize: sizes[currentIndex + 1]});
+                            }
+                          }}
+                          disabled={accessibilitySettings.fontSize === 'extra-large'}
+                          className="w-7 h-7 p-0"
+                        >
+                          +
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className={`font-bold ${
+                        accessibilitySettings.fontSize === 'small' ? 'text-lg' :
+                        accessibilitySettings.fontSize === 'medium' ? 'text-xl' :
+                        accessibilitySettings.fontSize === 'large' ? 'text-2xl' : 'text-3xl'
+                      }`}>
+                        Aa
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-muted/30 rounded-lg p-4 space-y-3">
-                    <div className="flex items-start gap-3">
-                      <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                  <div className="bg-muted/30 rounded-lg p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0"></div>
                       <div>
-                        <h4 className="font-semibold text-foreground">{todayExercise.word_list?.name}</h4>
+                        <h4 className="font-semibold text-foreground text-sm">{todayExercise.word_list?.name}</h4>
                         {todayExercise.word_list?.description && (
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="text-xs text-muted-foreground">
                             {todayExercise.word_list.description}
                           </p>
                         )}
-                        <p className="text-sm font-medium text-primary mt-1">
+                        <p className="text-xs font-medium text-primary">
                           {todayExercise.word_list?.words.length} parole da leggere
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="text-center">
-                    <Button 
-                      onClick={startExercise} 
-                      size="lg" 
-                      className="min-h-[60px] px-8 text-lg touch-manipulation"
-                    >
-                      <Play className="h-6 w-6 mr-3" />
-                      {completedToday ? "Ripeti Esercizio" : "Inizia Esercizio"}
-                    </Button>
-                  </div>
+                  <Button 
+                    onClick={startExercise} 
+                    size="lg" 
+                    className="w-full min-h-[50px] text-lg touch-manipulation"
+                  >
+                    <Play className="h-5 w-5 mr-2" />
+                    {completedToday ? "Ripeti Esercizio" : "Inizia Esercizio"}
+                  </Button>
 
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="text-blue-500 text-lg">💡</div>
-                      <div className="text-sm space-y-1">
-                        <p className="font-medium text-blue-800">Consigli per l'esercizio:</p>
-                        <div className="space-y-1 text-blue-700">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <div className="text-blue-500 text-sm">💡</div>
+                      <div className="text-xs">
+                        <p className="font-medium text-blue-800 mb-1">Consigli:</p>
+                        <div className="space-y-0.5 text-blue-700">
                           <p>• Siediti comodamente di fronte allo schermo</p>
-                          <p>• Leggi ogni parola ad alta voce appena la vedi</p>
+                          <p>• Leggi ogni parola ad alta voce</p>
                           <p>• Se sbagli, tocca ovunque sullo schermo</p>
                           <p>• Concentrati e non avere fretta</p>
                         </div>
