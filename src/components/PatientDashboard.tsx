@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Exercise, ExerciseSession as DBExerciseSession, DAYS_OF_WEEK } from '@/types/database';
 import { SimpleExerciseDisplay } from './SimpleExerciseDisplay';
 import { DebugPanel } from './DebugPanel';
+import { ThemeSelector, ThemeType, themes } from './ThemeSelector';
 import { toast } from '@/hooks/use-toast';
 
 interface ExerciseSession {
@@ -38,6 +39,7 @@ export const PatientDashboard: React.FC = () => {
   const [currentSession, setCurrentSession] = useState<ExerciseSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [accessibilitySettings, setAccessibilitySettings] = useState<{fontSize: 'small' | 'medium' | 'large' | 'extra-large'}>({ fontSize: 'large' });
+  const [selectedTheme, setSelectedTheme] = useState<ThemeType>('rainbow');
 
   // Carica le preferenze salvate
   useEffect(() => {
@@ -50,12 +52,21 @@ export const PatientDashboard: React.FC = () => {
         console.error('Error loading accessibility settings:', error);
       }
     }
+    
+    const savedTheme = localStorage.getItem('tachistoscope-theme');
+    if (savedTheme) {
+      setSelectedTheme(savedTheme as ThemeType);
+    }
   }, []);
 
   // Salva le preferenze quando cambiano
   useEffect(() => {
     localStorage.setItem('tachistoscope-accessibility', JSON.stringify(accessibilitySettings));
   }, [accessibilitySettings]);
+
+  useEffect(() => {
+    localStorage.setItem('tachistoscope-theme', selectedTheme);
+  }, [selectedTheme]);
 
   useEffect(() => {
     if (profile) {
@@ -127,7 +138,8 @@ export const PatientDashboard: React.FC = () => {
       words: todayExercise.word_list.words,
       settings: {
         ...todayExercise.settings,
-        fontSize: accessibilitySettings.fontSize // Usa le preferenze del paziente
+        fontSize: accessibilitySettings.fontSize, // Usa le preferenze del paziente
+        theme: selectedTheme // Aggiungi il tema
       },
       startTime: Date.now(),
       currentWordIndex: 0,
@@ -195,12 +207,16 @@ export const PatientDashboard: React.FC = () => {
         onComplete={handleExerciseComplete}
         onStop={handleStopExercise}
         onUpdateSession={setCurrentSession}
+        theme={selectedTheme}
       />
     );
   }
 
+  // Applica il tema alla dashboard
+  const currentTheme = themes.find(t => t.id === selectedTheme) || themes[3];
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen bg-gradient-to-br ${currentTheme.preview.background}`}>
       <div className="container mx-auto p-4 max-w-4xl">
         <header className="mb-8 flex justify-between items-center">
           <div>
@@ -254,21 +270,6 @@ export const PatientDashboard: React.FC = () => {
                       </p>
                     </div>
                   )}
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="text-center p-3 border rounded-lg">
-                      <p className="text-xl font-bold text-primary">
-                        {todayExercise.word_list?.words.length}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Parole</p>
-                    </div>
-                    <div className="text-center p-3 border rounded-lg">
-                      <p className="text-xl font-bold text-primary">
-                        {todayExercise.settings.exposureDuration}ms
-                      </p>
-                      <p className="text-xs text-muted-foreground">Durata</p>
-                    </div>
-                  </div>
 
                   <div className="border rounded-lg p-3">
                     <div className="flex items-center justify-between mb-2">
@@ -339,7 +340,12 @@ export const PatientDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  <Button 
+                  <ThemeSelector 
+                    selectedTheme={selectedTheme}
+                    onThemeChange={setSelectedTheme}
+                  />
+
+                  <Button
                     onClick={startExercise} 
                     size="lg" 
                     className="w-full min-h-[50px] text-lg touch-manipulation"

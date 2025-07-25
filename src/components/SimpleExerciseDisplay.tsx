@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Play, Pause, Square, X } from 'lucide-react';
+import { ThemeType, themes } from './ThemeSelector';
 
 interface ExerciseSession {
   words: string[];
@@ -29,6 +30,7 @@ interface SimpleExerciseDisplayProps {
   onComplete: (result: SessionResult) => void;
   onStop: () => void;
   onUpdateSession: (session: ExerciseSession) => void;
+  theme?: ThemeType;
 }
 
 export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
@@ -36,6 +38,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   onComplete,
   onStop,
   onUpdateSession,
+  theme = 'rainbow',
 }) => {
   const [displayState, setDisplayState] = useState<'countdown' | 'stimulus' | 'word' | 'mask' | 'interval'>('countdown');
   const [currentWord, setCurrentWord] = useState('');
@@ -62,7 +65,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   }, [session.settings.textCase]);
 
   const playErrorSound = () => {
-    // Crea un suono "blup" sintetico con volume basso
+    // Suono più dolce e delicato per bambini
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
@@ -70,15 +73,15 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
     
-    // Parametri per un suono tipo goccia d'acqua
-    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
+    // Suono più dolce - tono più basso e meno aggressivo
+    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.15);
     
-    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime); // Volume basso
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    gainNode.gain.setValueAtTime(0.05, audioContext.currentTime); // Volume molto più basso
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
     
     oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.1);
+    oscillator.stop(audioContext.currentTime + 0.15);
   };
 
   const markError = useCallback(() => {
@@ -172,6 +175,9 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       // Solo se l'esercizio è in corso e non è in pausa
       if (!session.isRunning || session.isPaused || isCountingDown) return;
       
+      // NON segnare errore durante lo stimolo visivo
+      if (displayState === 'stimulus') return;
+      
       // Evita di triggerare su click dei pulsanti di controllo
       const target = event.target as HTMLElement;
       if (target.closest('button') || target.closest('[role="button"]')) return;
@@ -242,13 +248,15 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     ((session.currentWordIndex - session.errors.length) / session.currentWordIndex) * 100 : 100;
 
   if (isCountingDown) {
+    const currentTheme = themes.find(t => t.id === theme) || themes[3];
+    
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className={`min-h-screen bg-gradient-to-br ${currentTheme.preview.background} flex items-center justify-center`}>
         <div className="text-center">
-          <h1 className="text-6xl font-bold text-primary mb-8">
+          <h1 className="text-6xl font-bold text-white drop-shadow-lg mb-8">
             {countdown > 0 ? countdown : 'INIZIA!'}
           </h1>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-xl text-white/80">
             Preparati a leggere le parole...
           </p>
         </div>
@@ -256,26 +264,36 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     );
   }
 
+  const currentTheme = themes.find(t => t.id === theme) || themes[3]; // Default rainbow
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex flex-col relative overflow-hidden">
+    <div className={`min-h-screen bg-gradient-to-br ${currentTheme.preview.background} flex flex-col relative overflow-hidden`}>
       {/* Forme decorative di sfondo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -left-20 w-40 h-40 bg-gradient-to-br from-yellow-300/20 to-orange-300/20 rounded-full blur-3xl"></div>
-        <div className="absolute top-20 -right-20 w-60 h-60 bg-gradient-to-br from-purple-300/20 to-pink-300/20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-20 left-1/4 w-80 h-80 bg-gradient-to-br from-blue-300/20 to-cyan-300/20 rounded-full blur-3xl"></div>
+        <div className="absolute -top-20 -left-20 w-40 h-40 bg-gradient-to-br from-white/10 to-white/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 -right-20 w-60 h-60 bg-gradient-to-br from-white/15 to-white/5 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-20 left-1/4 w-80 h-80 bg-gradient-to-br from-white/10 to-white/5 rounded-full blur-3xl"></div>
       </div>
       
       <div className="flex-1 flex items-center justify-center relative z-10">
         {!session.isPaused ? (
           <>
-            {/* Sfondo decorativo giocoso */}
+            {/* Sfondo decorativo giocoso con elementi del tema */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute top-10 left-10 w-20 h-20 bg-gradient-to-br from-pink-200 to-purple-200 rounded-3xl rotate-12 opacity-30"></div>
-              <div className="absolute top-32 right-16 w-16 h-16 bg-gradient-to-br from-blue-200 to-cyan-200 rounded-full opacity-30"></div>
-              <div className="absolute bottom-20 left-20 w-24 h-12 bg-gradient-to-br from-yellow-200 to-orange-200 rounded-full rotate-45 opacity-30"></div>
-              <div className="absolute bottom-32 right-12 w-14 h-20 bg-gradient-to-br from-green-200 to-emerald-200 rounded-3xl -rotate-12 opacity-30"></div>
-              <div className="absolute top-1/2 left-8 w-8 h-8 bg-gradient-to-br from-indigo-200 to-blue-200 rounded-lg rotate-45 opacity-40"></div>
-              <div className="absolute top-3/4 right-8 w-12 h-6 bg-gradient-to-br from-red-200 to-pink-200 rounded-full opacity-30"></div>
+              <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-3xl rotate-12 opacity-30 flex items-center justify-center text-2xl">
+                {currentTheme.preview.shapes[0]}
+              </div>
+              <div className="absolute top-32 right-16 w-16 h-16 bg-white/10 rounded-full opacity-30 flex items-center justify-center text-xl">
+                {currentTheme.preview.shapes[1]}
+              </div>
+              <div className="absolute bottom-20 left-20 w-24 h-12 bg-white/10 rounded-full rotate-45 opacity-30 flex items-center justify-center text-lg">
+                {currentTheme.preview.shapes[2]}
+              </div>
+              <div className="absolute bottom-32 right-12 w-14 h-20 bg-white/10 rounded-3xl -rotate-12 opacity-30 flex items-center justify-center text-lg">
+                {currentTheme.preview.shapes[3] || currentTheme.preview.shapes[0]}
+              </div>
+              <div className="absolute top-1/2 left-8 w-8 h-8 bg-white/20 rounded-lg rotate-45 opacity-40"></div>
+              <div className="absolute top-3/4 right-8 w-12 h-6 bg-white/10 rounded-full opacity-30"></div>
             </div>
             
             <div className="relative z-10 text-center">
@@ -286,10 +304,10 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
                   }`}>
                     <div className="relative">
                       <div className="text-8xl filter drop-shadow-lg">
-                        {['🌟', '✨', '🎈', '🎁', '🌈', '🦋'][session.currentWordIndex % 6]}
+                        {currentTheme.preview.shapes[session.currentWordIndex % currentTheme.preview.shapes.length]}
                       </div>
                       <div className="absolute inset-0 animate-ping text-8xl opacity-20">
-                        {['🌟', '✨', '🎈', '🎁', '🌈', '🦋'][session.currentWordIndex % 6]}
+                        {currentTheme.preview.shapes[session.currentWordIndex % currentTheme.preview.shapes.length]}
                       </div>
                     </div>
                   </div>
@@ -318,13 +336,13 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
           </div>
         )}
 
-        <div className="absolute top-4 left-4 right-4 bg-card p-4 rounded-lg shadow-sm">
+        <div className="absolute top-4 left-4 right-4 bg-white/85 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/30">
           <div className="text-center space-y-2 mb-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-700 font-medium">
               Progresso: {session.currentWordIndex}/{session.words.length}
             </p>
             <Progress value={progress} className="w-full" />
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-700 font-medium">
               Precisione: {accuracy.toFixed(1)}%
             </p>
           </div>
@@ -340,12 +358,12 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         </div>
 
         <div className="absolute bottom-4 left-4 right-4 text-center">
-          <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border shadow-sm">
-            <p className="text-sm font-medium text-foreground mb-1">
+          <div className="bg-white/85 backdrop-blur-md rounded-xl p-3 border border-white/30 shadow-lg">
+            <p className="text-sm font-medium text-gray-800 mb-1">
               💭 Tocca lo schermo per segnare un errore
             </p>
-            <p className="text-xs text-muted-foreground">
-              Comandi: <kbd className="px-2 py-1 bg-muted rounded text-xs">X</kbd> = Marca errore
+            <p className="text-xs text-gray-600">
+              Comandi: <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">X</kbd> = Marca errore
             </p>
           </div>
         </div>
