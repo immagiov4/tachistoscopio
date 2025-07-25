@@ -252,7 +252,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         setStimulusVisible(false);
         
         // Aspetta che l'animazione finisca prima di mostrare la parola
-        setTimeout(() => {
+        const wordShowTimer = setTimeout(() => {
           console.log('Showing word:', currentWordToShow);
           setDisplayState('word');
           setCurrentWord(formatWord(currentWordToShow));
@@ -260,23 +260,28 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
           const wordTimer = setTimeout(() => {
             if (session.settings.useMask) {
               setDisplayState('mask');
-              setTimeout(() => {
+              const maskTimer = setTimeout(() => {
                 setDisplayState('interval');
-                setTimeout(nextWord, session.settings.intervalDuration);
+                const intervalTimer = setTimeout(nextWord, session.settings.intervalDuration);
+                return () => clearTimeout(intervalTimer);
               }, session.settings.maskDuration);
+              return () => clearTimeout(maskTimer);
             } else {
               setDisplayState('interval');
-              setTimeout(nextWord, session.settings.intervalDuration);
+              const intervalTimer = setTimeout(nextWord, session.settings.intervalDuration);
+              return () => clearTimeout(intervalTimer);
             }
           }, session.settings.exposureDuration);
 
           return () => clearTimeout(wordTimer);
         }, 600); // Aspetta che l'animazione di uscita finisca
+
+        return () => clearTimeout(wordShowTimer);
       }, 800); // Durata dello stimolo più lunga
 
       return () => clearTimeout(stimulusTimer);
     }
-  }, [session, nextWord, formatWord, isCountingDown]);
+  }, [session.isRunning, session.isPaused, session.currentWordIndex, isCountingDown, formatWord, nextWord]);
 
   const progress = (session.currentWordIndex / session.words.length) * 100;
   const accuracy = session.currentWordIndex > 0 ? 
@@ -387,13 +392,13 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
           </div>
         )}
 
-        <div className="absolute top-4 left-4 right-4 bg-white/20 backdrop-blur-xl border border-white/30 p-4 rounded-2xl shadow-2xl">
+        <div className="absolute top-4 left-4 right-4 bg-white/90 backdrop-blur-sm border border-white/30 p-4 rounded-2xl shadow-lg" style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
           <div className="text-center space-y-2 mb-4">
-            <p className="text-sm text-gray-700 font-medium">
+            <p className="text-sm text-gray-800 font-medium">
               Progresso: {session.currentWordIndex}/{session.words.length}
             </p>
             <Progress value={progress} className="w-full" />
-            <p className="text-sm text-gray-700 font-medium">
+            <p className="text-sm text-gray-800 font-medium">
               Precisione: {accuracy.toFixed(1)}%
             </p>
           </div>
@@ -409,12 +414,12 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         </div>
 
         <div className="absolute bottom-4 left-4 right-4 text-center">
-          <div className="bg-white/20 backdrop-blur-xl rounded-2xl p-3 border border-white/30 shadow-2xl">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-3 border border-white/30 shadow-lg" style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
             <p className="text-sm font-medium text-gray-800 mb-1">
               💭 Tocca lo schermo per segnare un errore
             </p>
-            <p className="text-xs text-gray-600">
-              Comandi: <kbd className="px-2 py-1 bg-white/30 rounded text-xs">X</kbd> = Marca errore
+            <p className="text-xs text-gray-700">
+              Comandi: <kbd className="px-2 py-1 bg-gray-700/80 text-white rounded text-xs">X</kbd> = Marca errore
             </p>
           </div>
         </div>
