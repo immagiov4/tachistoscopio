@@ -79,6 +79,7 @@ export const TherapistDashboard: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      console.log('Fetched word lists:', data);
       setWordLists(data || []);
     } catch (error) {
       console.error('Error fetching word lists:', error);
@@ -166,6 +167,8 @@ export const TherapistDashboard: React.FC = () => {
         .map(word => word.trim())
         .filter(word => word.length > 0);
 
+      console.log('Words array:', words, 'Length:', words.length);
+
       const { error } = await supabase
         .from('word_lists')
         .insert({
@@ -241,6 +244,41 @@ export const TherapistDashboard: React.FC = () => {
       });
     } finally {
       setCreateExerciseLoading(false);
+    }
+  };
+
+  const deletePatient = async (patientId: string) => {
+    if (!confirm('Sei sicuro di voler eliminare questo paziente? Verranno eliminati anche tutti i suoi esercizi.')) return;
+    
+    try {
+      // Prima elimina gli esercizi del paziente
+      await supabase
+        .from('exercises')
+        .delete()
+        .eq('patient_id', patientId);
+
+      // Poi elimina il paziente
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', patientId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Successo',
+        description: 'Paziente eliminato con successo',
+      });
+
+      await fetchPatients();
+      await fetchExercises();
+    } catch (error) {
+      console.error('Error deleting patient:', error);
+      toast({
+        title: 'Errore',
+        description: 'Errore durante l\'eliminazione del paziente',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -406,17 +444,27 @@ export const TherapistDashboard: React.FC = () => {
                     </p>
                   ) : (
                     <div className="grid gap-4">
-                      {patients.map((patient) => (
-                        <div key={patient.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <h3 className="font-medium">{patient.full_name}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              Creato il {new Date(patient.created_at).toLocaleDateString('it-IT')}
-                            </p>
-                          </div>
-                          <Badge variant="secondary">Paziente</Badge>
-                        </div>
-                      ))}
+                       {patients.map((patient) => (
+                         <div key={patient.id} className="flex items-center justify-between p-4 border rounded-lg">
+                           <div>
+                             <h3 className="font-medium">{patient.full_name}</h3>
+                             <p className="text-sm text-muted-foreground">
+                               Creato il {new Date(patient.created_at).toLocaleDateString('it-IT')}
+                             </p>
+                           </div>
+                           <div className="flex items-center gap-2">
+                             <Badge variant="secondary">Paziente</Badge>
+                             <Button
+                               variant="outline"
+                               size="sm"
+                               onClick={() => deletePatient(patient.id)}
+                               className="h-8 w-8 p-0"
+                             >
+                               <Trash2 className="h-4 w-4" />
+                             </Button>
+                           </div>
+                         </div>
+                       ))}
                     </div>
                   )}
                 </CardContent>
