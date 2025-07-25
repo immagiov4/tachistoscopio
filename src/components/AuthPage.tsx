@@ -14,8 +14,6 @@ export const AuthPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [hasTherapists, setHasTherapists] = useState(false);
-  const [checkingTherapists, setCheckingTherapists] = useState(true);
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
@@ -26,31 +24,6 @@ export const AuthPage: React.FC = () => {
   const [signupPassword, setSignupPassword] = useState('');
   const [signupFullName, setSignupFullName] = useState('');
 
-  useEffect(() => {
-    checkIfTherapistsExist();
-  }, []);
-
-  const checkIfTherapistsExist = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('role', 'therapist')
-        .limit(1);
-
-      if (error) {
-        console.error('Error checking therapists:', error);
-        setHasTherapists(true); // Allow signup on error
-      } else {
-        setHasTherapists(data && data.length > 0);
-      }
-    } catch (error) {
-      console.error('Error checking therapists:', error);
-      setHasTherapists(true); // Allow signup on error
-    } finally {
-      setCheckingTherapists(false);
-    }
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,13 +71,6 @@ export const AuthPage: React.FC = () => {
     setLoading(false);
   };
 
-  if (checkingTherapists) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -121,9 +87,7 @@ export const AuthPage: React.FC = () => {
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">Accedi</TabsTrigger>
-            <TabsTrigger value="signup" disabled={hasTherapists}>
-              {hasTherapists ? 'Registrazione chiusa' : 'Registrati'}
-            </TabsTrigger>
+            <TabsTrigger value="signup">Registrati come Terapista</TabsTrigger>
           </TabsList>
 
           <TabsContent value="login">
@@ -131,7 +95,7 @@ export const AuthPage: React.FC = () => {
               <CardHeader>
                 <CardTitle>Accesso</CardTitle>
                 <CardDescription>
-                  Inserisci le tue credenziali per accedere
+                  Inserisci le tue credenziali per accedere alla piattaforma
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -183,78 +147,71 @@ export const AuthPage: React.FC = () => {
               <CardHeader>
                 <CardTitle>Registrazione Terapista</CardTitle>
                 <CardDescription>
-                  {hasTherapists 
-                    ? 'La registrazione è disponibile solo se non ci sono terapisti nella piattaforma'
-                    : 'Crea il tuo account da terapista per iniziare'
-                  }
+                  Crea il tuo account da terapista per gestire pazienti ed esercizi
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {!hasTherapists ? (
-                  <form onSubmit={handleSignup} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-name">Nome completo</Label>
-                      <Input
-                        id="signup-name"
-                        type="text"
-                        placeholder="Il tuo nome completo"
-                        value={signupFullName}
-                        onChange={(e) => setSignupFullName(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email</Label>
-                      <Input
-                        id="signup-email"
-                        type="email"
-                        placeholder="la-tua-email@esempio.it"
-                        value={signupEmail}
-                        onChange={(e) => setSignupEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-password">Password</Label>
-                      <Input
-                        id="signup-password"
-                        type="password"
-                        placeholder="Almeno 6 caratteri"
-                        value={signupPassword}
-                        onChange={(e) => setSignupPassword(e.target.value)}
-                        required
-                        minLength={6}
-                      />
-                    </div>
-                    {error && (
-                      <Alert variant="destructive">
-                        <AlertDescription>{error}</AlertDescription>
-                      </Alert>
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Nome completo</Label>
+                    <Input
+                      id="signup-name"
+                      type="text"
+                      placeholder="Il tuo nome completo"
+                      value={signupFullName}
+                      onChange={(e) => setSignupFullName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="la-tua-email@esempio.it"
+                      value={signupEmail}
+                      onChange={(e) => setSignupEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="Almeno 6 caratteri"
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  {error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+                  {success && (
+                    <Alert>
+                      <AlertDescription>{success}</AlertDescription>
+                    </Alert>
+                  )}
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Registrazione in corso...
+                      </>
+                    ) : (
+                      'Registrati come Terapista'
                     )}
-                    {success && (
-                      <Alert>
-                        <AlertDescription>{success}</AlertDescription>
-                      </Alert>
-                    )}
-                    <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Registrazione in corso...
-                        </>
-                      ) : (
-                        'Registrati come Terapista'
-                      )}
-                    </Button>
-                  </form>
-                ) : (
-                  <Alert>
-                    <AlertDescription>
-                      La registrazione è disponibile solo quando non ci sono terapisti nella piattaforma.
-                      Contatta un terapista esistente per creare il tuo account paziente.
-                    </AlertDescription>
-                  </Alert>
-                )}
+                  </Button>
+                  <div className="text-center text-sm text-muted-foreground mt-4 p-4 bg-muted/50 rounded-lg">
+                    <p className="font-medium mb-2">ℹ️ Informazioni per i pazienti:</p>
+                    <p>Se sei un paziente, non puoi registrarti autonomamente.</p>
+                    <p>Chiedi al tuo terapista di creare il tuo account e utilizzare i dati di accesso forniti.</p>
+                  </div>
+                </form>
               </CardContent>
             </Card>
           </TabsContent>
