@@ -60,19 +60,39 @@ serve(async (req) => {
     
     console.log(`👥 Patients: ${patientsCount} deleted`, patientsError || '✅');
 
+    // 5. Delete all users from auth.users (except the current user)
+    const { data: allUsers, error: getUsersError } = await supabaseAdmin.auth.admin.listUsers();
+    let deletedUsersCount = 0;
+    let userDeletionErrors = [];
+    
+    if (allUsers && allUsers.users) {
+      for (const user of allUsers.users) {
+        const { error: deleteUserError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
+        if (deleteUserError) {
+          userDeletionErrors.push(deleteUserError.message);
+        } else {
+          deletedUsersCount++;
+        }
+      }
+    }
+    
+    console.log(`🔐 Auth users: ${deletedUsersCount} deleted`, userDeletionErrors.length > 0 ? userDeletionErrors : '✅');
+
     const summary = {
       success: true,
       deletedCounts: {
         sessions: sessionsCount || 0,
         exercises: exercisesCount || 0,
         wordLists: wordListsCount || 0,
-        patients: patientsCount || 0
+        patients: patientsCount || 0,
+        users: deletedUsersCount || 0
       },
       errors: {
         sessions: sessionsError?.message || null,
         exercises: exercisesError?.message || null,
         wordLists: wordListsError?.message || null,
-        patients: patientsError?.message || null
+        patients: patientsError?.message || null,
+        users: userDeletionErrors.length > 0 ? userDeletionErrors.join(', ') : null
       }
     };
 
