@@ -107,10 +107,16 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   }, [session, onUpdateSession]);
 
   useEffect(() => {
+    console.log('Countdown effect:', { isCountingDown, countdown, sessionIsRunning: session.isRunning });
+    
     if (isCountingDown && countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      const timer = setTimeout(() => {
+        console.log('Countdown decreasing:', countdown - 1);
+        setCountdown(countdown - 1);
+      }, 1000);
       return () => clearTimeout(timer);
     } else if (isCountingDown && countdown === 0) {
+      console.log('Countdown finished, starting exercise');
       setIsCountingDown(false);
       onUpdateSession({ ...session, isRunning: true });
     }
@@ -129,8 +135,16 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
 
   useEffect(() => {
     const currentWordToShow = session.words[session.currentWordIndex];
+    console.log('Word display effect:', { 
+      isRunning: session.isRunning, 
+      isPaused: session.isPaused, 
+      currentWordIndex: session.currentWordIndex,
+      currentWordToShow,
+      isCountingDown
+    });
     
-    if (session.isRunning && !session.isPaused && currentWordToShow) {
+    if (session.isRunning && !session.isPaused && currentWordToShow && !isCountingDown) {
+      console.log('Showing word:', currentWordToShow);
       setDisplayState('word');
       setCurrentWord(formatWord(currentWordToShow));
 
@@ -149,7 +163,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
 
       return () => clearTimeout(wordTimer);
     }
-  }, [session, nextWord, formatWord]);
+  }, [session, nextWord, formatWord, isCountingDown]);
 
   const progress = (session.currentWordIndex / session.words.length) * 100;
   const accuracy = session.currentWordIndex > 0 ? 
