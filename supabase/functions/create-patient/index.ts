@@ -104,16 +104,25 @@ serve(async (req) => {
       console.error('Error generating magic link:', magicLinkError);
     }
 
-    // Send password reset email using the same method as AuthPage
+    // Send welcome email using admin generateLink
     try {
-      const { error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
-        redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/reset-password`,
+      const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.generateLink({
+        type: 'invite',
+        email: email,
+        options: {
+          redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/`,
+          data: {
+            full_name: fullName,
+            password: password,
+            welcome_message: `Benvenuto ${fullName}! Usa la password: ${password}`
+          }
+        }
       });
 
-      if (resetError) {
-        console.error('Error sending email:', resetError);
+      if (inviteError) {
+        console.error('Error sending email:', inviteError);
       } else {
-        console.log(`Password reset email sent successfully to ${email}`);
+        console.log(`Welcome email sent successfully to ${email}`);
       }
     } catch (emailError) {
       console.error('Failed to send email:', emailError);
