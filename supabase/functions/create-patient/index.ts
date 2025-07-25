@@ -39,7 +39,14 @@ serve(async (req) => {
       throw userError;
     }
 
-    // Create patient profile
+    // Create patient profile (delete existing profile if needed)
+    // First, delete any existing profile (in case trigger created one)
+    await supabaseAdmin
+      .from('profiles')
+      .delete()
+      .eq('user_id', user.user.id);
+
+    // Now create the correct patient profile
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .insert({
