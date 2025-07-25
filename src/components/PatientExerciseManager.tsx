@@ -205,7 +205,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
 
       toast({
         title: 'Successo',
-        description: 'Paziente creato con successo. Email inviata con credenziali di accesso.',
+        description: 'Paziente creato con successo. Email inviata al genitore/tutore con link di accesso rapido e password temporanea.',
       });
 
       setNewPatientEmail('');
@@ -256,7 +256,9 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
         <CardHeader>
           <CardTitle>Crea Nuovo Paziente</CardTitle>
           <CardDescription>
-            Aggiungi un nuovo paziente al tuo gruppo
+            Aggiungi un nuovo paziente al tuo gruppo. Verrà inviata automaticamente un'email al genitore/tutore con:
+            <br />• <strong>Link di accesso rapido</strong> (magic link) per entrare immediatamente
+            <br />• <strong>Password temporanea</strong> come alternativa per l'accesso manuale
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -271,7 +273,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="patient-email">Email (genitore/tutore)</Label>
+              <Label htmlFor="patient-email">Email (genitore/tutore) *</Label>
               <Input
                 id="patient-email"
                 type="email"
@@ -279,6 +281,9 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                 value={newPatientEmail}
                 onChange={(e) => setNewPatientEmail(e.target.value)}
               />
+              <p className="text-xs text-muted-foreground">
+                L'email verrà inviata a questo indirizzo con le credenziali di accesso
+              </p>
             </div>
           </div>
           <Button 
