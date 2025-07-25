@@ -398,7 +398,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         )}
 
         <div className="absolute top-4 left-4 right-4 bg-white/40 backdrop-blur-md border border-white/30 p-4 rounded-2xl shadow-lg" style={{ 
-          boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)',
+          boxShadow: 'inset 0 2px 0 rgba(0,0,0,0.1)',
           background: 'linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.3) 100%)',
           backdropFilter: 'blur(12px) saturate(1.5)'
         }}>
