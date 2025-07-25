@@ -448,7 +448,7 @@ export const PatientDashboard: React.FC = () => {
                       <div className="text-2xl font-bold text-purple-600">
                         {Math.round(recentSessions.reduce((acc, s) => acc + s.duration, 0) / recentSessions.length / 1000)}s
                       </div>
-                      <div className="text-xs text-purple-700">Tempo Medio</div>
+                      <div className="text-xs text-purple-700">Durata Media</div>
                     </div>
                     <div className="text-center p-3 bg-orange-50 rounded-lg">
                       <div className="text-2xl font-bold text-orange-600">
@@ -461,7 +461,7 @@ export const PatientDashboard: React.FC = () => {
                   {/* Ultime sessioni */}
                   <div>
                     <h4 className="font-medium text-gray-800 mb-3">Ultime Sessioni</h4>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                       {recentSessions.slice(0, 5).map((session, index) => {
                         const date = new Date(session.completed_at);
                         const isToday = date.toDateString() === new Date().toDateString();
@@ -508,24 +508,30 @@ export const PatientDashboard: React.FC = () => {
                   {recentSessions.length >= 3 && (
                     <div>
                       <h4 className="font-medium text-gray-800 mb-3">Andamento Precisione</h4>
-                      <div className="flex items-end gap-2 h-20">
-                        {recentSessions.slice(0, 7).reverse().map((session, index) => {
-                          const height = (session.accuracy / 100) * 100;
-                          return (
-                            <div key={index} className="flex-1 flex flex-col items-center">
-                              <div 
-                                className={`w-full rounded-t ${
-                                  session.accuracy >= 90 ? 'bg-green-400' :
-                                  session.accuracy >= 70 ? 'bg-yellow-400' : 'bg-red-400'
-                                }`}
-                                style={{ height: `${height}%` }}
-                              ></div>
-                              <div className="text-xs text-gray-600 mt-1">
-                                {Math.round(session.accuracy)}%
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="flex items-end justify-between gap-1 h-24">
+                          {recentSessions.slice(0, 7).reverse().map((session, index) => {
+                            const height = Math.max((session.accuracy / 100) * 80, 8); // Minimo 8px di altezza
+                            return (
+                              <div key={index} className="flex-1 flex flex-col items-center gap-1">
+                                <div className="text-xs text-gray-600 font-medium">
+                                  {Math.round(session.accuracy)}%
+                                </div>
+                                <div 
+                                  className={`w-full rounded transition-all duration-300 ${
+                                    session.accuracy >= 90 ? 'bg-green-500' :
+                                    session.accuracy >= 70 ? 'bg-yellow-500' : 'bg-red-500'
+                                  }`}
+                                  style={{ height: `${height}px` }}
+                                  title={`Precisione: ${Math.round(session.accuracy)}%`}
+                                ></div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
+                        <div className="text-xs text-gray-500 text-center mt-2">
+                          Ultime {Math.min(recentSessions.length, 7)} sessioni
+                        </div>
                       </div>
                     </div>
                   )}
