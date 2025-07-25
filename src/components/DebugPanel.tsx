@@ -48,8 +48,10 @@ export const DebugPanel: React.FC = () => {
         description: "Tutte le sessioni di Mario sono state eliminate",
       });
 
-      // Ricarica la pagina per aggiornare i dati
-      window.location.reload();
+      // Forza ricarica della pagina per aggiornare tutti i componenti
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
       toast({
         title: "Errore",
