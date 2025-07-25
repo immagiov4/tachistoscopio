@@ -49,12 +49,12 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   // Funzione per ottenere l'ombra appropriata per ogni tema
   const getThemeShadow = (themeId: ThemeType) => {
     switch(themeId) {
-      case 'space': return 'drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]'; // Ombra bianca per temi scuri
-      case 'nature': return 'drop-shadow-[0_0_8px_rgba(0,0,0,0.4)]'; // Ombra scura per temi chiari
-      case 'ocean': return 'drop-shadow-[0_0_8px_rgba(0,0,0,0.3)]'; // Ombra scura per temi medi
-      case 'rainbow': return 'drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]'; // Ombra scura per temi colorati
-      case 'clouds': return 'drop-shadow-[0_0_8px_rgba(0,0,0,0.4)]'; // Ombra scura per temi chiari
-      default: return 'drop-shadow-lg';
+      case 'space': return 'drop-shadow-[0_0_50px_rgba(255,255,255,0.15)]'; // Ombra molto estesa e quasi impercettibile
+      case 'nature': return 'drop-shadow-[0_0_50px_rgba(0,0,0,0.1)]'; // Ombra molto estesa per temi chiari
+      case 'ocean': return 'drop-shadow-[0_0_50px_rgba(0,0,0,0.12)]'; // Ombra molto estesa
+      case 'rainbow': return 'drop-shadow-[0_0_50px_rgba(0,0,0,0.15)]'; // Ombra molto estesa
+      case 'clouds': return 'drop-shadow-[0_0_50px_rgba(0,0,0,0.1)]'; // Ombra molto estesa per temi chiari
+      default: return 'drop-shadow-[0_0_50px_rgba(0,0,0,0.1)]';
     }
   };
 
@@ -72,12 +72,12 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   // Ombra invisibile per le parole - grande raggio, bassa opacità per aumentare contrasto senza essere vista
   const getWordShadow = (themeId: ThemeType) => {
     switch(themeId) {
-      case 'space': return 'drop-shadow-[0_0_40px_rgba(255,255,255,0.15)] drop-shadow-[0_0_80px_rgba(255,255,255,0.1)]';
-      case 'nature': return 'drop-shadow-[0_0_40px_rgba(0,0,0,0.2)] drop-shadow-[0_0_80px_rgba(0,0,0,0.15)]';
-      case 'ocean': return 'drop-shadow-[0_0_40px_rgba(0,0,0,0.25)] drop-shadow-[0_0_80px_rgba(0,0,0,0.15)]';
-      case 'rainbow': return 'drop-shadow-[0_0_40px_rgba(0,0,0,0.3)] drop-shadow-[0_0_80px_rgba(0,0,0,0.2)]';
-      case 'clouds': return 'drop-shadow-[0_0_40px_rgba(0,0,0,0.2)] drop-shadow-[0_0_80px_rgba(0,0,0,0.15)]';
-      default: return 'drop-shadow-[0_0_40px_rgba(0,0,0,0.2)]';
+      case 'space': return 'drop-shadow-[0_0_60px_rgba(255,255,255,0.2)] drop-shadow-[0_0_120px_rgba(255,255,255,0.15)]';
+      case 'nature': return 'drop-shadow-[0_0_60px_rgba(0,0,0,0.25)] drop-shadow-[0_0_120px_rgba(0,0,0,0.2)]';
+      case 'ocean': return 'drop-shadow-[0_0_60px_rgba(0,0,0,0.3)] drop-shadow-[0_0_120px_rgba(0,0,0,0.2)]';
+      case 'rainbow': return 'drop-shadow-[0_0_60px_rgba(0,0,0,0.35)] drop-shadow-[0_0_120px_rgba(0,0,0,0.25)]';
+      case 'clouds': return 'drop-shadow-[0_0_60px_rgba(0,0,0,0.25)] drop-shadow-[0_0_120px_rgba(0,0,0,0.2)]';
+      default: return 'drop-shadow-[0_0_60px_rgba(0,0,0,0.25)]';
     }
   };
 
@@ -369,7 +369,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
                   </div>
                 )}
                 {displayState === 'word' && (
-                  <div className={`animate-fade-in filter ${getWordShadow(theme)}`}>
+                  <div className={`animate-fade-in filter ${getWordShadow(theme)} ${getTextShadow(theme)}`}>
                     {currentWord}
                   </div>
                 )}
@@ -392,13 +392,13 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
           </div>
         )}
 
-        <div className="absolute top-4 left-4 right-4 bg-white/90 backdrop-blur-sm border border-white/30 p-4 rounded-2xl shadow-lg" style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
+        <div className="absolute top-4 left-4 right-4 bg-white/60 backdrop-blur-sm border border-white/20 p-4 rounded-2xl shadow-lg" style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
           <div className="text-center space-y-2 mb-4">
-            <p className="text-sm text-gray-800 font-medium">
+            <p className="text-sm text-gray-700 font-medium">
               Progresso: {session.currentWordIndex}/{session.words.length}
             </p>
             <Progress value={progress} className="w-full" />
-            <p className="text-sm text-gray-800 font-medium">
+            <p className="text-sm text-gray-700 font-medium">
               Precisione: {accuracy.toFixed(1)}%
             </p>
           </div>
@@ -414,11 +414,11 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         </div>
 
         <div className="absolute bottom-4 left-4 right-4 text-center">
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-3 border border-white/30 shadow-lg" style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
-            <p className="text-sm font-medium text-gray-800 mb-1">
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-3 border border-white/20 shadow-lg">
+            <p className="text-sm font-medium text-gray-700 mb-1">
               💭 Tocca lo schermo per segnare un errore
             </p>
-            <p className="text-xs text-gray-700">
+            <p className="text-xs text-gray-600">
               Comandi: <kbd className="px-2 py-1 bg-gray-700/80 text-white rounded text-xs">X</kbd> = Marca errore
             </p>
           </div>
