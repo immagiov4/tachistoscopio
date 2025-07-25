@@ -15,6 +15,7 @@ import { Profile, WordList, Exercise, ExerciseSettings, DEFAULT_SETTINGS, DAYS_O
 import { toast } from '@/hooks/use-toast';
 import { DebugPanel } from '@/components/DebugPanel';
 import { PatientExerciseManager } from '@/components/PatientExerciseManager';
+import { TutorialModal } from '@/components/TutorialModal';
 
 export const TherapistDashboard: React.FC = () => {
   const { profile, signOut } = useAuth();
@@ -41,9 +42,17 @@ export const TherapistDashboard: React.FC = () => {
   const [exerciseSettings, setExerciseSettings] = useState<ExerciseSettings>(DEFAULT_SETTINGS);
   const [createExerciseLoading, setCreateExerciseLoading] = useState(false);
 
+  // Tutorial state
+  const [showTutorial, setShowTutorial] = useState(false);
+
   useEffect(() => {
     if (profile) {
       fetchData();
+      // Controlla se è il primo accesso
+      const tutorialCompleted = localStorage.getItem('tachistoscope_tutorial_completed');
+      if (!tutorialCompleted) {
+        setShowTutorial(true);
+      }
     }
   }, [profile]);
 
@@ -201,10 +210,10 @@ export const TherapistDashboard: React.FC = () => {
   };
 
   const createExercise = async () => {
-    if (!selectedWordList || !selectedDay) {
+    if (!selectedWordList) {
       toast({
         title: 'Errore',
-        description: 'Seleziona lista di parole e giorno',
+        description: 'Seleziona una lista di parole',
         variant: 'destructive',
       });
       return;
@@ -212,32 +221,19 @@ export const TherapistDashboard: React.FC = () => {
 
     setCreateExerciseLoading(true);
     try {
-      const { error } = await supabase
-        .from('exercises')
-        .upsert({
-          patient_id: 'global',
-          therapist_id: profile?.id!,
-          word_list_id: selectedWordList,
-          day_of_week: parseInt(selectedDay),
-          settings: exerciseSettings as any,
-        });
-
-      if (error) throw error;
-
+      // Salva solo le impostazioni come template globale
       toast({
         title: 'Successo',
-        description: 'Esercizio creato/aggiornato con successo',
+        description: 'Template di esercizio salvato. Puoi ora assegnarlo ai pazienti tramite Gestione Pazienti.',
       });
 
       setSelectedWordList('');
-      setSelectedDay('');
       setExerciseSettings(DEFAULT_SETTINGS);
-      await fetchExercises();
     } catch (error) {
-      console.error('Error creating exercise:', error);
+      console.error('Error creating exercise template:', error);
       toast({
         title: 'Errore',
-        description: 'Errore durante la creazione dell\'esercizio',
+        description: 'Errore durante la creazione del template',
         variant: 'destructive',
       });
     } finally {
@@ -371,6 +367,17 @@ export const TherapistDashboard: React.FC = () => {
         {/* Debug Panel - Solo durante sviluppo */}
         <div className="mb-6">
           <DebugPanel />
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => {
+              localStorage.removeItem('tachistoscope_tutorial_completed');
+              setShowTutorial(true);
+            }}
+            className="ml-2"
+          >
+            Rivedi Tutorial
+          </Button>
         </div>
 
         <Tabs defaultValue="patients" className="w-full">
@@ -491,44 +498,26 @@ export const TherapistDashboard: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Crea/Modifica Esercizio</CardTitle>
-                  <CardDescription>
-                    Assegna un esercizio giornaliero a un paziente
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div className="space-y-2">
-                       <Label>Lista di Parole</Label>
-                       <Select value={selectedWordList} onValueChange={setSelectedWordList}>
-                         <SelectTrigger>
-                           <SelectValue placeholder="Seleziona lista" />
-                         </SelectTrigger>
-                         <SelectContent>
-                           {wordLists.map((list) => (
-                             <SelectItem key={list.id} value={list.id}>
-                               {list.name} ({list.words.length} parole)
-                             </SelectItem>
-                           ))}
-                         </SelectContent>
-                       </Select>
-                     </div>
-
-                     <div className="space-y-2">
-                       <Label>Giorno della Settimana</Label>
-                       <Select value={selectedDay} onValueChange={setSelectedDay}>
-                         <SelectTrigger>
-                           <SelectValue placeholder="Seleziona giorno" />
-                         </SelectTrigger>
-                         <SelectContent>
-                           {DAYS_OF_WEEK.map((day, index) => (
-                             <SelectItem key={index} value={index.toString()}>
-                               {day}
-                             </SelectItem>
-                           ))}
-                         </SelectContent>
-                       </Select>
-                     </div>
-                   </div>
+                 <CardDescription>
+                     Crea template di esercizi che potrai assegnare ai pazienti
+                   </CardDescription>
+                 </CardHeader>
+                 <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Lista di Parole</Label>
+                      <Select value={selectedWordList} onValueChange={setSelectedWordList}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleziona lista" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {wordLists.map((list) => (
+                            <SelectItem key={list.id} value={list.id}>
+                              {list.name} ({list.words.length} parole)
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
@@ -578,60 +567,21 @@ export const TherapistDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  <Button 
-                    onClick={createExercise} 
-                    disabled={createExerciseLoading}
-                    className="w-full md:w-auto"
-                  >
-                    {createExerciseLoading ? 'Salvataggio...' : 'Salva Esercizio'}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Esercizi Programmati ({exercises.length})</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {exercises.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">
-                      Non hai ancora programmato nessun esercizio
-                    </p>
-                  ) : (
-                    <div className="grid gap-4">
-                       {exercises.map((exercise) => (
-                         <div key={exercise.id} className="p-4 border rounded-lg">
-                           <div className="flex items-center justify-between mb-2">
-                             <h3 className="font-medium">
-                               {exercise.patient?.full_name} - {DAYS_OF_WEEK[exercise.day_of_week]}
-                             </h3>
-                             <div className="flex items-center gap-2">
-                               <Badge variant="outline">
-                                 {exercise.word_list?.words.length} parole
-                               </Badge>
-                               <Button
-                                 variant="outline"
-                                 size="sm"
-                                 onClick={() => deleteExercise(exercise.id)}
-                                 className="h-8 w-8 p-0"
-                               >
-                                 <Trash2 className="h-4 w-4" />
-                               </Button>
-                             </div>
-                           </div>
-                           <p className="text-sm text-muted-foreground mb-1">
-                             Lista: {exercise.word_list?.name}
-                           </p>
-                           <p className="text-sm text-muted-foreground">
-                             Durata: {exercise.settings.exposureDuration}ms, 
-                             Intervallo: {exercise.settings.intervalDuration}ms
-                           </p>
-                         </div>
-                       ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                   <Button 
+                     onClick={createExercise} 
+                     disabled={createExerciseLoading}
+                     className="w-full md:w-auto"
+                   >
+                     {createExerciseLoading ? 'Salvataggio...' : 'Salva Template'}
+                   </Button>
+                   
+                   <Alert>
+                     <AlertDescription>
+                       I template creati qui possono essere assegnati ai pazienti tramite la sezione "Gestione Pazienti"
+                     </AlertDescription>
+                   </Alert>
+                 </CardContent>
+               </Card>
             </div>
           </TabsContent>
 
@@ -651,6 +601,12 @@ export const TherapistDashboard: React.FC = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Tutorial Modal */}
+        <TutorialModal 
+          open={showTutorial} 
+          onOpenChange={setShowTutorial} 
+        />
       </div>
     </div>
   );

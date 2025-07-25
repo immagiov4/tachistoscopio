@@ -264,10 +264,10 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
             {paginatedPatients.map((patient) => (
               <div
                 key={patient.id}
-                className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                className={`p-3 border-2 border-dashed rounded-lg cursor-pointer transition-all hover:shadow-md ${
                   selectedPatient?.id === patient.id
-                    ? 'bg-primary/10 border-primary shadow-md'
-                    : 'hover:bg-muted border-dashed'
+                    ? 'bg-primary/10 border-primary border-solid shadow-md'
+                    : 'hover:bg-muted border-muted-foreground/30'
                 }`}
                 onClick={() => setSelectedPatient(patient)}
               >
