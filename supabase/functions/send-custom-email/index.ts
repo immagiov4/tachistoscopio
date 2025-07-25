@@ -88,10 +88,11 @@ const handler = async (req: Request): Promise<Response> => {
         const resetUrl = `${email_data.site_url}/reset-password?token_hash=${email_data.token_hash}&type=${email_data.email_action_type}&redirect_to=${encodeURIComponent(email_data.redirect_to)}`;
         
         console.log("Invio email di recovery a:", user.email);
+        console.log("NOTA: In modalità test, invio sempre a giovbran03@gmail.com");
         
         const emailResponse = await resend.emails.send({
           from: 'onboarding@resend.dev',
-          to: user.email,
+          to: 'giovbran03@gmail.com',  // Sempre al tuo indirizzo in modalità test
           subject: 'Tachistoscopio - Reimposta la tua password',
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
