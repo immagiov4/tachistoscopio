@@ -25,18 +25,35 @@ serve(async (req) => {
 
     const { email, password, fullName, therapistId } = await req.json();
 
-    // Create user
-    const { data: user, error: userError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: {
-        full_name: fullName
-      }
-    });
+    // Check if user already exists
+    const { data: existingUser, error: userLookupError } = await supabaseAdmin.auth.admin.listUsers();
+    
+    let user;
+    let userId;
+    
+    const existingUserRecord = existingUser?.users?.find(u => u.email === email);
+    
+    if (existingUserRecord) {
+      // User already exists, use existing user ID
+      userId = existingUserRecord.id;
+      user = { user: existingUserRecord };
+    } else {
+      // Create new user
+      const { data: newUser, error: userError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: fullName
+        }
+      });
 
-    if (userError) {
-      throw userError;
+      if (userError) {
+        throw userError;
+      }
+      
+      user = newUser;
+      userId = newUser.user.id;
     }
 
     // Create patient profile (delete existing profile if needed)
@@ -44,13 +61,13 @@ serve(async (req) => {
     await supabaseAdmin
       .from('profiles')
       .delete()
-      .eq('user_id', user.user.id);
+     .eq('user_id', userId);
 
-    // Now create the correct patient profile
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .insert({
-        user_id: user.user.id,
+     // Now create the correct patient profile
+     const { error: profileError } = await supabaseAdmin
+       .from('profiles')
+       .insert({
+         user_id: userId,
         role: 'patient',
         full_name: fullName,
         created_by: therapistId,
