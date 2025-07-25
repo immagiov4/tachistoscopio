@@ -23,7 +23,7 @@ const themes: Theme[] = [
     icon: '🚀',
     description: 'Stelle, pianeti e galassie',
     preview: {
-      background: 'from-indigo-900 via-purple-800 via-blue-900 to-violet-800',
+      background: 'from-indigo-200 via-purple-200 via-blue-200 to-violet-300',
       shapes: ['🌟'] // Emoji principale per lo stimolo
     }
   },
@@ -33,7 +33,7 @@ const themes: Theme[] = [
     icon: '🌳',
     description: 'Foreste, fiori e animali',
     preview: {
-      background: 'from-emerald-400 via-teal-300 via-green-300 to-lime-400',
+      background: 'from-emerald-200 via-teal-200 via-green-200 to-lime-300',
       shapes: ['🦋'] // Emoji principale per lo stimolo
     }
   },
@@ -43,7 +43,7 @@ const themes: Theme[] = [
     icon: '🌊',
     description: 'Mare, pesci e coralli',
     preview: {
-      background: 'from-cyan-400 via-blue-500 via-indigo-400 to-teal-500',
+      background: 'from-cyan-200 via-blue-200 via-sky-200 to-teal-300',
       shapes: ['🐠'] // Emoji principale per lo stimolo
     }
   },
@@ -53,7 +53,7 @@ const themes: Theme[] = [
     icon: '🌈',
     description: 'Colori vivaci e gioia',
     preview: {
-      background: 'from-pink-400 via-rose-300 via-orange-300 via-yellow-300 via-green-300 via-blue-300 to-purple-400',
+      background: 'from-pink-200 via-rose-200 via-orange-200 via-yellow-200 via-green-200 via-blue-200 to-purple-300',
       shapes: ['🌈'] // Emoji principale per lo stimolo
     }
   },
@@ -63,7 +63,7 @@ const themes: Theme[] = [
     icon: '☁️',
     description: 'Cielo sereno e dolcezza',
     preview: {
-      background: 'from-sky-300 via-blue-200 via-indigo-200 to-purple-200',
+      background: 'from-sky-100 via-blue-100 via-indigo-100 to-purple-200',
       shapes: ['☁️'] // Emoji principale per lo stimolo
     }
   }
