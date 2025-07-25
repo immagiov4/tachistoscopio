@@ -79,7 +79,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
   onThemeChange
 }) => {
   return (
-    <Card className="bg-white/5 backdrop-blur-sm border-white/10 shadow-2xl">
+    <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-2xl">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Palette className="h-5 w-5" />
