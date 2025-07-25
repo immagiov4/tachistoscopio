@@ -77,7 +77,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ onRevealTutorial }) => {
       const { error } = await supabase
         .from('exercise_sessions')
         .delete()
-        .gte('created_at', '1970-01-01'); // Matcha tutti i record
+        .gte('completed_at', '1970-01-01'); // Matcha tutti i record
 
       if (error) {
         toast({
@@ -305,7 +305,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ onRevealTutorial }) => {
       const { error: sessionsError } = await supabase
         .from('exercise_sessions')
         .delete()
-        .gte('created_at', '1970-01-01');
+        .gte('completed_at', '1970-01-01');
       
       if (sessionsError) throw sessionsError;
 
