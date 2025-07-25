@@ -96,21 +96,41 @@ export const ExerciseDisplay: React.FC<ExerciseDisplayProps> = ({
 
   // Countdown effect
   useEffect(() => {
+    console.log('Countdown effect:', { countdown, isCountingDown });
     if (isCountingDown && countdown > 0) {
       const timer = setTimeout(() => {
+        console.log('Countdown timer fired, new value:', countdown - 1);
         setCountdown(countdown - 1);
       }, 1000);
       return () => clearTimeout(timer);
     } else if (isCountingDown && countdown === 0) {
+      console.log('Countdown finished, setting isCountingDown to false');
       setIsCountingDown(false);
     }
   }, [countdown, isCountingDown]);
 
   // Main exercise timing effect
   useEffect(() => {
-    if (isCountingDown || session.isPaused) return;
+    console.log('Main exercise effect:', { 
+      isCountingDown, 
+      isPaused: session.isPaused, 
+      currentWordIndex: session.currentWordIndex,
+      wordListLength: session.wordList.words.length 
+    });
+    
+    if (isCountingDown || session.isPaused) {
+      console.log('Skipping exercise effect - counting down or paused');
+      return;
+    }
+
+    if (session.currentWordIndex >= session.wordList.words.length) {
+      console.log('Exercise should be complete, currentWordIndex:', session.currentWordIndex);
+      onComplete(session);
+      return;
+    }
 
     const currentWordText = session.wordList.words[session.currentWordIndex];
+    console.log('Starting exercise for word:', currentWordText);
     setCurrentWord(formatWord(currentWordText));
 
     let timeoutId: NodeJS.Timeout;
