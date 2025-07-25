@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Users, Calendar, BookOpen, LogOut, BarChart3 } from 'lucide-react';
+import { Users, Calendar, BookOpen, LogOut, BarChart3, Edit2, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, WordList, Exercise, ExerciseSettings, DEFAULT_SETTINGS, DAYS_OF_WEEK } from '@/types/database';
@@ -92,7 +92,7 @@ export const TherapistDashboard: React.FC = () => {
         .select(`
           *,
           word_list:word_lists(*),
-          patient:profiles(*)
+          patient:profiles!exercises_patient_id_fkey(*)
         `)
         .eq('therapist_id', profile?.id)
         .order('day_of_week', { ascending: true });
@@ -241,6 +241,60 @@ export const TherapistDashboard: React.FC = () => {
       });
     } finally {
       setCreateExerciseLoading(false);
+    }
+  };
+
+  const deleteWordList = async (listId: string) => {
+    if (!confirm('Sei sicuro di voler eliminare questa lista di parole?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('word_lists')
+        .delete()
+        .eq('id', listId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Successo',
+        description: 'Lista di parole eliminata con successo',
+      });
+
+      await fetchWordLists();
+    } catch (error) {
+      console.error('Error deleting word list:', error);
+      toast({
+        title: 'Errore',
+        description: 'Errore durante l\'eliminazione della lista',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const deleteExercise = async (exerciseId: string) => {
+    if (!confirm('Sei sicuro di voler eliminare questo esercizio?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('exercises')
+        .delete()
+        .eq('id', exerciseId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Successo',
+        description: 'Esercizio eliminato con successo',
+      });
+
+      await fetchExercises();
+    } catch (error) {
+      console.error('Error deleting exercise:', error);
+      toast({
+        title: 'Errore',
+        description: 'Errore durante l\'eliminazione dell\'esercizio',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -431,21 +485,31 @@ export const TherapistDashboard: React.FC = () => {
                     </p>
                   ) : (
                     <div className="grid gap-4">
-                      {wordLists.map((list) => (
-                        <div key={list.id} className="p-4 border rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-medium">{list.name}</h3>
-                            <Badge variant="outline">{list.words.length} parole</Badge>
-                          </div>
-                          {list.description && (
-                            <p className="text-sm text-muted-foreground mb-2">{list.description}</p>
-                          )}
-                          <p className="text-sm text-muted-foreground">
-                            Prime parole: {list.words.slice(0, 5).join(', ')}
-                            {list.words.length > 5 && '...'}
-                          </p>
-                        </div>
-                      ))}
+                       {wordLists.map((list) => (
+                         <div key={list.id} className="p-4 border rounded-lg">
+                           <div className="flex items-center justify-between mb-2">
+                             <h3 className="font-medium">{list.name}</h3>
+                             <div className="flex items-center gap-2">
+                               <Badge variant="outline">{list.words.length} parole</Badge>
+                               <Button
+                                 variant="outline"
+                                 size="sm"
+                                 onClick={() => deleteWordList(list.id)}
+                                 className="h-8 w-8 p-0"
+                               >
+                                 <Trash2 className="h-4 w-4" />
+                               </Button>
+                             </div>
+                           </div>
+                           {list.description && (
+                             <p className="text-sm text-muted-foreground mb-2">{list.description}</p>
+                           )}
+                           <p className="text-sm text-muted-foreground">
+                             Prime parole: {list.words.slice(0, 5).join(', ')}
+                             {list.words.length > 5 && '...'}
+                           </p>
+                         </div>
+                       ))}
                     </div>
                   )}
                 </CardContent>
@@ -602,25 +666,35 @@ export const TherapistDashboard: React.FC = () => {
                     </p>
                   ) : (
                     <div className="grid gap-4">
-                      {exercises.map((exercise) => (
-                        <div key={exercise.id} className="p-4 border rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-medium">
-                              {exercise.patient?.full_name} - {DAYS_OF_WEEK[exercise.day_of_week]}
-                            </h3>
-                            <Badge variant="outline">
-                              {exercise.word_list?.words.length} parole
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-1">
-                            Lista: {exercise.word_list?.name}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            Durata: {exercise.settings.exposureDuration}ms, 
-                            Intervallo: {exercise.settings.intervalDuration}ms
-                          </p>
-                        </div>
-                      ))}
+                       {exercises.map((exercise) => (
+                         <div key={exercise.id} className="p-4 border rounded-lg">
+                           <div className="flex items-center justify-between mb-2">
+                             <h3 className="font-medium">
+                               {exercise.patient?.full_name} - {DAYS_OF_WEEK[exercise.day_of_week]}
+                             </h3>
+                             <div className="flex items-center gap-2">
+                               <Badge variant="outline">
+                                 {exercise.word_list?.words.length} parole
+                               </Badge>
+                               <Button
+                                 variant="outline"
+                                 size="sm"
+                                 onClick={() => deleteExercise(exercise.id)}
+                                 className="h-8 w-8 p-0"
+                               >
+                                 <Trash2 className="h-4 w-4" />
+                               </Button>
+                             </div>
+                           </div>
+                           <p className="text-sm text-muted-foreground mb-1">
+                             Lista: {exercise.word_list?.name}
+                           </p>
+                           <p className="text-sm text-muted-foreground">
+                             Durata: {exercise.settings.exposureDuration}ms, 
+                             Intervallo: {exercise.settings.intervalDuration}ms
+                           </p>
+                         </div>
+                       ))}
                     </div>
                   )}
                 </CardContent>
