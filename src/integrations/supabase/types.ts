@@ -14,7 +14,191 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      exercise_sessions: {
+        Row: {
+          accuracy: number
+          completed_at: string
+          correct_words: number
+          duration: number
+          exercise_id: string
+          id: string
+          incorrect_words: number
+          missed_words: string[] | null
+          patient_id: string
+          total_words: number
+        }
+        Insert: {
+          accuracy: number
+          completed_at?: string
+          correct_words: number
+          duration: number
+          exercise_id: string
+          id?: string
+          incorrect_words: number
+          missed_words?: string[] | null
+          patient_id: string
+          total_words: number
+        }
+        Update: {
+          accuracy?: number
+          completed_at?: string
+          correct_words?: number
+          duration?: number
+          exercise_id?: string
+          id?: string
+          incorrect_words?: number
+          missed_words?: string[] | null
+          patient_id?: string
+          total_words?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_sessions_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exercise_sessions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exercises: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          id: string
+          patient_id: string
+          settings: Json
+          therapist_id: string
+          updated_at: string
+          word_list_id: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          id?: string
+          patient_id: string
+          settings: Json
+          therapist_id: string
+          updated_at?: string
+          word_list_id: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          patient_id?: string
+          settings?: Json
+          therapist_id?: string
+          updated_at?: string
+          word_list_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercises_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exercises_therapist_id_fkey"
+            columns: ["therapist_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exercises_word_list_id_fkey"
+            columns: ["word_list_id"]
+            isOneToOne: false
+            referencedRelation: "word_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          full_name: string
+          id?: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          full_name?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      word_lists: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          words: string[]
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          words: string[]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          words?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "word_lists_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +207,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "therapist" | "patient"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +334,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["therapist", "patient"],
+    },
   },
 } as const
