@@ -37,10 +37,11 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   onStop,
   onUpdateSession,
 }) => {
-  const [displayState, setDisplayState] = useState<'countdown' | 'word' | 'mask' | 'interval'>('countdown');
+  const [displayState, setDisplayState] = useState<'countdown' | 'stimulus' | 'word' | 'mask' | 'interval'>('countdown');
   const [currentWord, setCurrentWord] = useState('');
   const [countdown, setCountdown] = useState(3);
   const [isCountingDown, setIsCountingDown] = useState(true);
+  const [stimulusVisible, setStimulusVisible] = useState(false);
 
   const getFontSize = (size: string): string => {
     switch (size) {
@@ -60,9 +61,37 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     }
   }, [session.settings.textCase]);
 
+  const playErrorSound = () => {
+    // Crea un suono "blup" sintetico con volume basso
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Parametri per un suono tipo goccia d'acqua
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime); // Volume basso
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.1);
+  };
+
   const markError = useCallback(() => {
     console.log('Marking error for word index:', session.currentWordIndex);
     console.log('Current errors before:', session.errors);
+    
+    // Riproduci suono
+    try {
+      playErrorSound();
+    } catch (error) {
+      console.log('Audio not available:', error);
+    }
+    
     const newSession = {
       ...session,
       errors: [...session.errors, session.currentWordIndex]
@@ -171,24 +200,39 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     });
     
     if (session.isRunning && !session.isPaused && currentWordToShow && !isCountingDown) {
-      console.log('Showing word:', currentWordToShow);
-      setDisplayState('word');
-      setCurrentWord(formatWord(currentWordToShow));
+      console.log('Showing stimulus before word:', currentWordToShow);
+      
+      // Prima mostra lo stimolo visivo
+      setDisplayState('stimulus');
+      setStimulusVisible(true);
+      
+      const stimulusTimer = setTimeout(() => {
+        setStimulusVisible(false);
+        
+        // Poi mostra la parola
+        setTimeout(() => {
+          console.log('Showing word:', currentWordToShow);
+          setDisplayState('word');
+          setCurrentWord(formatWord(currentWordToShow));
 
-      const wordTimer = setTimeout(() => {
-        if (session.settings.useMask) {
-          setDisplayState('mask');
-          setTimeout(() => {
-            setDisplayState('interval');
-            setTimeout(nextWord, session.settings.intervalDuration);
-          }, session.settings.maskDuration);
-        } else {
-          setDisplayState('interval');
-          setTimeout(nextWord, session.settings.intervalDuration);
-        }
-      }, session.settings.exposureDuration);
+          const wordTimer = setTimeout(() => {
+            if (session.settings.useMask) {
+              setDisplayState('mask');
+              setTimeout(() => {
+                setDisplayState('interval');
+                setTimeout(nextWord, session.settings.intervalDuration);
+              }, session.settings.maskDuration);
+            } else {
+              setDisplayState('interval');
+              setTimeout(nextWord, session.settings.intervalDuration);
+            }
+          }, session.settings.exposureDuration);
 
-      return () => clearTimeout(wordTimer);
+          return () => clearTimeout(wordTimer);
+        }, 200); // Breve pausa tra stimolo e parola
+      }, 500); // Durata dello stimolo
+
+      return () => clearTimeout(stimulusTimer);
     }
   }, [session, nextWord, formatWord, isCountingDown]);
 
@@ -217,6 +261,11 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         {!session.isPaused ? (
           <div className="text-center">
             <div className={`font-bold text-foreground ${getFontSize(session.settings.fontSize)} min-h-[200px] flex items-center justify-center`}>
+              {displayState === 'stimulus' && (
+                <div className={`animate-bounce ${stimulusVisible ? 'animate-scale-in' : 'animate-scale-out'}`}>
+                  <div className="text-6xl animate-pulse">⭐</div>
+                </div>
+              )}
               {displayState === 'word' && currentWord}
               {displayState === 'mask' && '####'}
               {displayState === 'interval' && ' '}
@@ -250,14 +299,18 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
             <Button onClick={onStop} variant="outline" size="lg" className="flex items-center gap-2 min-w-[120px] touch-manipulation">
               <Square className="h-5 w-5" />Stop
             </Button>
-            <Button onClick={markError} variant="destructive" size="lg" className="flex items-center gap-2 min-w-[120px] touch-manipulation">
-              <X className="h-5 w-5" />Errore
-            </Button>
           </div>
         </div>
 
-        <div className="text-center text-muted-foreground mt-4 absolute bottom-4">
-          <p>Comandi: <kbd className="px-2 py-1 bg-muted rounded text-xs">X</kbd> = Marca errore | Usa i pulsanti per controllare</p>
+        <div className="absolute bottom-4 left-4 right-4 text-center">
+          <div className="bg-card/90 backdrop-blur-sm rounded-lg p-3 border shadow-sm">
+            <p className="text-sm font-medium text-foreground mb-1">
+              💭 Tocca lo schermo per segnare un errore
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Comandi: <kbd className="px-2 py-1 bg-muted rounded text-xs">X</kbd> = Marca errore
+            </p>
+          </div>
         </div>
       </div>
     </div>
