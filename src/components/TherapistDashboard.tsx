@@ -163,7 +163,7 @@ export const TherapistDashboard: React.FC = () => {
     setCreateListLoading(true);
     try {
       const words = newListWords
-        .split(/[\n,]/)
+        .split(/[\n,\s]+/)
         .map(word => word.trim())
         .filter(word => word.length > 0);
 
