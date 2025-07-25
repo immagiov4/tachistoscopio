@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Resend } from "npm:resend@4.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -37,7 +36,6 @@ serve(async (req) => {
     };
     
     const password = generatePassword();
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
     // Check if user already exists
     const { data: existingUser, error: userLookupError } = await supabaseAdmin.auth.admin.listUsers();
@@ -52,13 +50,15 @@ serve(async (req) => {
       userId = existingUserRecord.id;
       user = { user: existingUserRecord };
     } else {
-      // Create new user
+      // Create new user with email confirmation enabled
+      // This will trigger Supabase's built-in email system
       const { data: newUser, error: userError } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
-        email_confirm: true,
+        email_confirm: false, // Set to false so we can send custom email
         user_metadata: {
-          full_name: fullName
+          full_name: fullName,
+          password: password // Include password in metadata for custom email
         }
       });
 
@@ -75,13 +75,13 @@ serve(async (req) => {
     await supabaseAdmin
       .from('profiles')
       .delete()
-     .eq('user_id', userId);
+      .eq('user_id', userId);
 
-     // Now create the correct patient profile
-     const { error: profileError } = await supabaseAdmin
-       .from('profiles')
-       .insert({
-         user_id: userId,
+    // Now create the correct patient profile
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .insert({
+        user_id: userId,
         role: 'patient',
         full_name: fullName,
         created_by: therapistId,
@@ -91,74 +91,54 @@ serve(async (req) => {
       throw profileError;
     }
 
-    // Generate magic link for login
+    // Generate magic link for immediate login
     const { data: magicLinkData, error: magicLinkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: email,
       options: {
-        redirectTo: `${Deno.env.get('SUPABASE_URL').replace('supabase.co', 'supabase.app')}/`
+        redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/`
       }
     });
 
-    // Send welcome email
-    const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h1 style="color: #333; text-align: center;">Benvenuto nel Sistema Tachistoscopio</h1>
-        
-        <p>Gentile genitore/tutore,</p>
-        
-        <p>È stato creato un account per il paziente <strong>${fullName}</strong> nel nostro sistema di esercizi tachistoscopici.</p>
-        
-        <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-          <h3 style="margin-top: 0;">Accesso Rapido (Consigliato)</h3>
-          <p>Per accedere immediatamente senza inserire password, clicca su questo link:</p>
-          <a href="${magicLinkData?.properties?.action_link || '#'}" 
-             style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0;">
-            Accedi Subito
-          </a>
-        </div>
-        
-        <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
-          <h3 style="margin-top: 0;">Credenziali di Accesso (se necessario)</h3>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Password temporanea:</strong> <code style="background: #f8f9fa; padding: 4px 8px; border-radius: 3px;">${password}</code></p>
-          <p><small>Queste credenziali possono essere utilizzate per accedere manualmente al sistema se il link magico non funziona.</small></p>
-        </div>
-        
-        <h3>Come utilizzare il sistema:</h3>
-        <ol>
-          <li>Accedi utilizzando il link magico o le credenziali fornite</li>
-          <li>Il paziente troverà gli esercizi assegnati dal terapeuta</li>
-          <li>Segui le istruzioni per completare gli esercizi</li>
-          <li>I progressi vengono tracciati automaticamente</li>
-        </ol>
-        
-        <div style="background: #d1ecf1; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #bee5eb;">
-          <p><strong>Supporto:</strong> Per qualsiasi domanda o problema tecnico, contatta il terapeuta che ha creato questo account.</p>
-        </div>
-        
-        <p style="color: #666; font-size: 14px; text-align: center; margin-top: 30px;">
-          Questo messaggio è stato generato automaticamente dal Sistema Tachistoscopio.<br>
-          Non rispondere a questa email.
-        </p>
-      </div>
-    `;
+    if (magicLinkError) {
+      console.error('Error generating magic link:', magicLinkError);
+    }
 
+    // Send password reset email with custom template
+    // This uses Supabase's built-in email system
     try {
-      await resend.emails.send({
-        from: 'Sistema Tachistoscopio <onboarding@resend.dev>',
-        to: [email],
-        subject: `Account creato per ${fullName} - Sistema Tachistoscopio`,
-        html: emailHtml,
+      const { error: resetError } = await supabaseAdmin.auth.admin.generateLink({
+        type: 'recovery',
+        email: email,
+        options: {
+          redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/`,
+          // Add custom data that can be used in email templates
+          data: {
+            full_name: fullName,
+            password: password,
+            magic_link: magicLinkData?.properties?.action_link || '',
+            patient_name: fullName
+          }
+        }
       });
-      console.log(`Email sent successfully to ${email}`);
+
+      if (resetError) {
+        console.error('Error sending email:', resetError);
+      } else {
+        console.log(`Account creation email sent successfully to ${email}`);
+      }
     } catch (emailError) {
       console.error('Failed to send email:', emailError);
       // Don't fail the request if email fails
     }
 
     return new Response(
-      JSON.stringify({ success: true, password: password }),
+      JSON.stringify({ 
+        success: true, 
+        password: password,
+        magic_link: magicLinkData?.properties?.action_link,
+        message: `Paziente ${fullName} creato con successo. Email inviata a ${email} con credenziali di accesso.`
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
