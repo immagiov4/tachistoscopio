@@ -16,6 +16,42 @@ const handler = async (req: Request): Promise<Response> => {
     // Test endpoint
     if (req.method === "GET") {
       console.log("GET request");
+      
+      // Test Resend se c'è il parametro test=email
+      const url = new URL(req.url);
+      if (url.searchParams.get('test') === 'email') {
+        console.log("Test invio email...");
+        try {
+          const emailResponse = await resend.emails.send({
+            from: 'onboarding@resend.dev',
+            to: 'giovbran03@duck.com',
+            subject: 'Test Tachistoscopio',
+            html: '<h1>Test email funziona!</h1><p>Se ricevi questa email, Resend è configurato correttamente.</p>'
+          });
+          
+          console.log("Test email inviata:", emailResponse);
+          
+          return new Response(JSON.stringify({ 
+            status: "ok", 
+            message: "Test email inviata",
+            emailResponse: emailResponse
+          }), {
+            status: 200,
+            headers: { "Content-Type": "application/json", ...corsHeaders }
+          });
+        } catch (error) {
+          console.error("Errore test email:", error);
+          return new Response(JSON.stringify({ 
+            status: "error", 
+            message: "Errore nell'invio test email",
+            error: error.message
+          }), {
+            status: 500,
+            headers: { "Content-Type": "application/json", ...corsHeaders }
+          });
+        }
+      }
+      
       return new Response(JSON.stringify({ 
         status: "ok", 
         message: "Funzione attiva" 
