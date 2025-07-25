@@ -283,9 +283,16 @@ export const TherapistDashboard: React.FC = () => {
   };
 
   const deleteWordList = async (listId: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questa lista di parole?')) return;
+    if (!confirm('Sei sicuro di voler eliminare questa lista di parole? Verranno eliminati anche tutti gli esercizi che la utilizzano.')) return;
     
     try {
+      // Prima elimina tutti gli esercizi che usano questa lista
+      await supabase
+        .from('exercises')
+        .delete()
+        .eq('word_list_id', listId);
+
+      // Poi elimina la lista di parole
       const { error } = await supabase
         .from('word_lists')
         .delete()
@@ -295,10 +302,11 @@ export const TherapistDashboard: React.FC = () => {
 
       toast({
         title: 'Successo',
-        description: 'Lista di parole eliminata con successo',
+        description: 'Lista di parole e relativi esercizi eliminati con successo',
       });
 
       await fetchWordLists();
+      await fetchExercises();
     } catch (error) {
       console.error('Error deleting word list:', error);
       toast({
