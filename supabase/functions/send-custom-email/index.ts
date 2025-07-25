@@ -24,7 +24,7 @@ const handler = async (req: Request): Promise<Response> => {
         try {
           const emailResponse = await resend.emails.send({
             from: 'onboarding@resend.dev',
-            to: 'giovbran03@duck.com',
+            to: 'giovbran03@gmail.com',  // Il tuo indirizzo registrato
             subject: 'Test Tachistoscopio',
             html: '<h1>Test email funziona!</h1><p>Se ricevi questa email, Resend è configurato correttamente.</p>'
           });
