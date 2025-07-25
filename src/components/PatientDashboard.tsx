@@ -9,7 +9,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Exercise, ExerciseSession as DBExerciseSession, DAYS_OF_WEEK } from '@/types/database';
 import { SimpleExerciseDisplay } from './SimpleExerciseDisplay';
 import { DebugPanel } from './DebugPanel';
-import { AccessibilitySettings } from './AccessibilitySettings';
 import { toast } from '@/hooks/use-toast';
 
 interface ExerciseSession {
@@ -39,6 +38,24 @@ export const PatientDashboard: React.FC = () => {
   const [currentSession, setCurrentSession] = useState<ExerciseSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [accessibilitySettings, setAccessibilitySettings] = useState<{fontSize: 'small' | 'medium' | 'large' | 'extra-large'}>({ fontSize: 'large' });
+
+  // Carica le preferenze salvate
+  useEffect(() => {
+    const saved = localStorage.getItem('tachistoscope-accessibility');
+    if (saved) {
+      try {
+        const parsedSettings = JSON.parse(saved);
+        setAccessibilitySettings(parsedSettings);
+      } catch (error) {
+        console.error('Error loading accessibility settings:', error);
+      }
+    }
+  }, []);
+
+  // Salva le preferenze quando cambiano
+  useEffect(() => {
+    localStorage.setItem('tachistoscope-accessibility', JSON.stringify(accessibilitySettings));
+  }, [accessibilitySettings]);
 
   useEffect(() => {
     if (profile) {
@@ -252,25 +269,71 @@ export const PatientDashboard: React.FC = () => {
                       <p className="text-sm text-muted-foreground">Durata</p>
                     </div>
                     <div className="text-center p-4 border rounded-lg">
-                      <p className="text-2xl font-bold text-primary">
-                        {accessibilitySettings.fontSize === 'small' ? 'Piccolo' :
-                         accessibilitySettings.fontSize === 'medium' ? 'Medio' :
-                         accessibilitySettings.fontSize === 'large' ? 'Grande' : 'Extra Grande'}
-                      </p>
-                      <p className="text-sm text-muted-foreground">Dimensione Testo</p>
+                      <div className="space-y-3">
+                        <p className="text-sm font-medium text-muted-foreground">Dimensione Testo</p>
+                        <div className="flex items-center justify-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
+                              const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
+                              if (currentIndex > 0) {
+                                setAccessibilitySettings({fontSize: sizes[currentIndex - 1]});
+                              }
+                            }}
+                            disabled={accessibilitySettings.fontSize === 'small'}
+                            className="w-8 h-8 p-0"
+                          >
+                            -
+                          </Button>
+                          <span className="text-lg font-bold text-primary min-w-[80px]">
+                            {accessibilitySettings.fontSize === 'small' ? 'Piccolo' :
+                             accessibilitySettings.fontSize === 'medium' ? 'Medio' :
+                             accessibilitySettings.fontSize === 'large' ? 'Grande' : 'XL'}
+                          </span>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
+                              const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
+                              if (currentIndex < sizes.length - 1) {
+                                setAccessibilitySettings({fontSize: sizes[currentIndex + 1]});
+                              }
+                            }}
+                            disabled={accessibilitySettings.fontSize === 'extra-large'}
+                            className="w-8 h-8 p-0"
+                          >
+                            +
+                          </Button>
+                        </div>
+                        <div className={`font-bold ${
+                          accessibilitySettings.fontSize === 'small' ? 'text-lg' :
+                          accessibilitySettings.fontSize === 'medium' ? 'text-xl' :
+                          accessibilitySettings.fontSize === 'large' ? 'text-2xl' : 'text-3xl'
+                        }`}>
+                          Aa
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Lista: {todayExercise.word_list?.name}</h4>
-                    {todayExercise.word_list?.description && (
-                      <p className="text-sm text-muted-foreground">
-                        {todayExercise.word_list.description}
-                      </p>
-                    )}
-                    <p className="text-sm text-muted-foreground">
-                      {todayExercise.word_list?.words.length} parole da leggere
-                    </p>
+                  <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                      <div>
+                        <h4 className="font-semibold text-foreground">{todayExercise.word_list?.name}</h4>
+                        {todayExercise.word_list?.description && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {todayExercise.word_list.description}
+                          </p>
+                        )}
+                        <p className="text-sm font-medium text-primary mt-1">
+                          {todayExercise.word_list?.words.length} parole da leggere
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="text-center">
@@ -284,12 +347,19 @@ export const PatientDashboard: React.FC = () => {
                     </Button>
                   </div>
 
-                  <div className="text-center text-sm text-muted-foreground space-y-1">
-                    <p>💡 Consigli per l'esercizio:</p>
-                    <p>• Siediti comodamente di fronte allo schermo</p>
-                    <p>• Leggi ogni parola ad alta voce appena la vedi</p>
-                    <p>• Se sbagli, tocca il pulsante "Errore"</p>
-                    <p>• Concentrati e non avere fretta</p>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="text-blue-500 text-lg">💡</div>
+                      <div className="text-sm space-y-1">
+                        <p className="font-medium text-blue-800">Consigli per l'esercizio:</p>
+                        <div className="space-y-1 text-blue-700">
+                          <p>• Siediti comodamente di fronte allo schermo</p>
+                          <p>• Leggi ogni parola ad alta voce appena la vedi</p>
+                          <p>• Se sbagli, tocca ovunque sullo schermo</p>
+                          <p>• Concentrati e non avere fretta</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -311,11 +381,6 @@ export const PatientDashboard: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-
-          <AccessibilitySettings 
-            onSettingsChange={setAccessibilitySettings}
-            initialSettings={accessibilitySettings}
-          />
 
           {/* Debug Panel - Solo in preview/development */}
           <DebugPanel />
