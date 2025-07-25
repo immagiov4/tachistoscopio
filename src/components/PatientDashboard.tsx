@@ -431,7 +431,7 @@ export const PatientDashboard: React.FC = () => {
               ) : (
                 <div className="space-y-4">
                   {/* Statistiche generali */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     <div className="text-center p-3 bg-blue-50 rounded-lg">
                       <div className="text-2xl font-bold text-blue-600">
                         {recentSessions.length}
@@ -443,12 +443,6 @@ export const PatientDashboard: React.FC = () => {
                         {Math.round(recentSessions.reduce((acc, s) => acc + s.accuracy, 0) / recentSessions.length)}%
                       </div>
                       <div className="text-xs text-green-700">Precisione Media</div>
-                    </div>
-                    <div className="text-center p-3 bg-purple-50 rounded-lg">
-                      <div className="text-2xl font-bold text-purple-600">
-                        {Math.round(recentSessions.reduce((acc, s) => acc + s.duration, 0) / recentSessions.length / 1000)}s
-                      </div>
-                      <div className="text-xs text-purple-700">Durata Media</div>
                     </div>
                     <div className="text-center p-3 bg-orange-50 rounded-lg">
                       <div className="text-2xl font-bold text-orange-600">
