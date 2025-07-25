@@ -23,22 +23,22 @@ const tutorialSteps = [
     content: "Nella sezione 'Gestione Pazienti' puoi:\n• Creare nuovi pazienti inserendo nome ed email del tutore\n• Cercare pazienti esistenti\n• Cliccare su un paziente per modificare il suo piano settimanale\n• Visualizzare le statistiche individuali di ogni paziente"
   },
   {
+    title: "Piano Settimanale",
+    description: "Assegna esercizi giornalieri",
+    icon: BarChart3,
+    content: "Una volta selezionato un paziente:\n• Visualizzi il piano settimanale (Lunedì-Venerdì)\n• Puoi assegnare/modificare esercizi per ogni giorno\n• Monitorare le statistiche del paziente"
+  },
+  {
     title: "Liste Parole",
     description: "Crea le tue liste personalizzate",
     icon: BookOpen,
-    content: "Nella sezione 'Liste Parole' puoi:\n• Creare nuove liste di parole per gli esercizi\n• Inserire parole separate da virgole o nuove righe\n• Visualizzare e gestire tutte le tue liste\n• Ogni lista mostra il numero di parole contenute"
+    content: "Nella sezione 'Liste Parole' puoi:\n• Creare nuove liste di parole per gli esercizi\n• Visualizzare e gestire tutte le tue liste"
   },
   {
     title: "Template Esercizi",
     description: "Configura i parametri degli esercizi",
     icon: Calendar,
-    content: "Nella sezione 'Crea Esercizio' puoi:\n• Selezionare una lista di parole\n• Configurare durata esposizione e intervallo\n• Scegliere il formato del testo\n• Salvare template da assegnare ai pazienti"
-  },
-  {
-    title: "Piano Settimanale",
-    description: "Assegna esercizi giornalieri",
-    icon: BarChart3,
-    content: "Una volta selezionato un paziente in 'Gestione Pazienti':\n• Visualizzi il piano settimanale (Lunedì-Venerdì)\n• Puoi assegnare esercizi diversi per ogni giorno\n• Modificare le liste di parole per ogni giorno\n• Monitorare le statistiche del paziente"
+    content: "Crea template con impostazioni personalizzate da riutilizzare nell'assegnazione degli esercizi ai pazienti."
   }
 ];
 
