@@ -61,14 +61,21 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   }, [session.settings.textCase]);
 
   const markError = useCallback(() => {
-    onUpdateSession({
+    console.log('Marking error for word index:', session.currentWordIndex);
+    console.log('Current errors before:', session.errors);
+    const newSession = {
       ...session,
       errors: [...session.errors, session.currentWordIndex]
-    });
+    };
+    console.log('New errors after:', newSession.errors);
+    onUpdateSession(newSession);
   }, [session, onUpdateSession]);
 
   const nextWord = useCallback(() => {
     const newIndex = session.currentWordIndex + 1;
+    console.log('Next word called. Current index:', session.currentWordIndex, 'New index:', newIndex);
+    console.log('Current errors in nextWord:', session.errors);
+    
     if (newIndex >= session.words.length) {
       const endTime = Date.now();
       const duration = endTime - session.startTime;
@@ -93,10 +100,13 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       return;
     }
 
-    onUpdateSession({
+    // IMPORTANTE: Preservo tutti i dati della sessione inclusi gli errori
+    const newSession = {
       ...session,
       currentWordIndex: newIndex
-    });
+    };
+    console.log('Updating session with preserved errors:', newSession.errors);
+    onUpdateSession(newSession);
   }, [session, onComplete, onUpdateSession]);
 
   const pauseResume = useCallback(() => {
@@ -124,14 +134,31 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (!session.isRunning) return;
+      if (!session.isRunning || session.isPaused) return;
       if (event.key === 'x' || event.key === 'X') markError();
       if (event.key === 'Escape') onStop();
     };
 
+    const handleClick = (event: MouseEvent) => {
+      // Solo se l'esercizio è in corso e non è in pausa
+      if (!session.isRunning || session.isPaused || isCountingDown) return;
+      
+      // Evita di triggerare su click dei pulsanti di controllo
+      const target = event.target as HTMLElement;
+      if (target.closest('button') || target.closest('[role="button"]')) return;
+      
+      console.log('Screen clicked, marking error');
+      markError();
+    };
+
     window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [session.isRunning, markError, onStop]);
+    window.addEventListener('click', handleClick);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [session.isRunning, session.isPaused, isCountingDown, markError, onStop]);
 
   useEffect(() => {
     const currentWordToShow = session.words[session.currentWordIndex];
