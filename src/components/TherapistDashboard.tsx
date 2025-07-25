@@ -8,12 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Users, Calendar, BookOpen, LogOut, BarChart3, Edit2, Trash2 } from 'lucide-react';
+import { Users, Calendar, BookOpen, LogOut, BarChart3, Edit2, Trash2, UserCog } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, WordList, Exercise, ExerciseSettings, DEFAULT_SETTINGS, DAYS_OF_WEEK } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
 import { DebugPanel } from '@/components/DebugPanel';
+import { PatientExerciseManager } from '@/components/PatientExerciseManager';
 
 export const TherapistDashboard: React.FC = () => {
   const { profile, signOut } = useAuth();
@@ -24,7 +25,6 @@ export const TherapistDashboard: React.FC = () => {
 
   // Patient creation state
   const [newPatientEmail, setNewPatientEmail] = useState('');
-  const [newPatientPassword, setNewPatientPassword] = useState('');
   const [newPatientName, setNewPatientName] = useState('');
   const [createPatientLoading, setCreatePatientLoading] = useState(false);
 
@@ -107,7 +107,7 @@ export const TherapistDashboard: React.FC = () => {
   };
 
   const createPatient = async () => {
-    if (!newPatientEmail || !newPatientPassword || !newPatientName) {
+    if (!newPatientEmail || !newPatientName) {
       toast({
         title: 'Errore',
         description: 'Compila tutti i campi',
@@ -122,7 +122,6 @@ export const TherapistDashboard: React.FC = () => {
       const { error } = await supabase.functions.invoke('create-patient', {
         body: {
           email: newPatientEmail,
-          password: newPatientPassword,
           fullName: newPatientName,
           therapistId: profile?.id,
         },
@@ -132,11 +131,10 @@ export const TherapistDashboard: React.FC = () => {
 
       toast({
         title: 'Successo',
-        description: 'Paziente creato con successo',
+        description: 'Paziente creato con successo. Email inviata con credenziali di accesso.',
       });
 
       setNewPatientEmail('');
-      setNewPatientPassword('');
       setNewPatientName('');
       await fetchPatients();
     } catch (error) {
@@ -377,7 +375,7 @@ export const TherapistDashboard: React.FC = () => {
         </div>
 
         <Tabs defaultValue="patients" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="patients" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Pazienti
@@ -389,6 +387,10 @@ export const TherapistDashboard: React.FC = () => {
             <TabsTrigger value="exercises" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               Esercizi
+            </TabsTrigger>
+            <TabsTrigger value="manage" className="flex items-center gap-2">
+              <UserCog className="h-4 w-4" />
+              Gestione
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
@@ -406,7 +408,7 @@ export const TherapistDashboard: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="patient-name">Nome Completo</Label>
                       <Input
@@ -417,7 +419,7 @@ export const TherapistDashboard: React.FC = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="patient-email">Email</Label>
+                      <Label htmlFor="patient-email">Email (genitore/tutore)</Label>
                       <Input
                         id="patient-email"
                         type="email"
@@ -426,17 +428,12 @@ export const TherapistDashboard: React.FC = () => {
                         placeholder="email@esempio.it"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="patient-password">Password</Label>
-                      <Input
-                        id="patient-password"
-                        type="password"
-                        value={newPatientPassword}
-                        onChange={(e) => setNewPatientPassword(e.target.value)}
-                        placeholder="Password temporanea"
-                      />
-                    </div>
                   </div>
+                  <Alert>
+                    <AlertDescription>
+                      La password verrà generata automaticamente e inviata via email insieme alle credenziali di accesso.
+                    </AlertDescription>
+                  </Alert>
                   <Button 
                     onClick={createPatient} 
                     disabled={createPatientLoading}
@@ -639,7 +636,7 @@ export const TherapistDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label>Durata Esposizione (ms)</Label>
                       <Input
@@ -667,27 +664,7 @@ export const TherapistDashboard: React.FC = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Dimensione Font</Label>
-                      <Select 
-                        value={exerciseSettings.fontSize} 
-                        onValueChange={(value: any) => setExerciseSettings(prev => ({
-                          ...prev,
-                          fontSize: value
-                        }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="small">Piccolo</SelectItem>
-                          <SelectItem value="medium">Medio</SelectItem>
-                          <SelectItem value="large">Grande</SelectItem>
-                          <SelectItem value="extra-large">Extra Grande</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Caso Testo</Label>
+                      <Label>Formato Testo</Label>
                       <Select 
                         value={exerciseSettings.textCase} 
                         onValueChange={(value: any) => setExerciseSettings(prev => ({
@@ -762,6 +739,10 @@ export const TherapistDashboard: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="manage" className="mt-6">
+            <PatientExerciseManager therapistId={profile?.id || ''} />
           </TabsContent>
 
           <TabsContent value="analytics" className="mt-6">
