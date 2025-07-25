@@ -218,29 +218,29 @@ export const PatientDashboard: React.FC = () => {
   return (
     <div className={`min-h-screen bg-gradient-to-br ${currentTheme.preview.background}`}>
       <div className="container mx-auto p-4 max-w-4xl">
-        <header className="mb-8 flex justify-between items-center">
+        <header className="mb-8 flex justify-between items-center bg-white/90 backdrop-blur-md rounded-xl p-4 shadow-lg border border-white/30">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">
               La Mia Area
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg text-gray-600">
               Benvenuto, {profile?.full_name}
             </p>
           </div>
-          <Button onClick={handleSignOut} variant="outline">
+          <Button onClick={handleSignOut} variant="outline" className="bg-white/80 border-gray-300 text-gray-700 hover:bg-white">
             <LogOut className="h-4 w-4 mr-2" />
             Esci
           </Button>
         </header>
 
-        <div className="grid gap-6">
-          <Card>
+        <div className="grid gap-4">
+          <Card className="bg-white/90 backdrop-blur-md border-white/30 shadow-lg">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-gray-800">
                 <Calendar className="h-5 w-5" />
                 Esercizio di Oggi - {DAYS_OF_WEEK[new Date().getDay()]}
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-600">
                 {todayExercise 
                   ? `${todayExercise.word_list?.words.length} parole da leggere`
                   : 'Nessun esercizio programmato per oggi'
@@ -250,10 +250,10 @@ export const PatientDashboard: React.FC = () => {
             <CardContent>
               {!todayExercise ? (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">
+                  <p className="text-gray-600 mb-4">
                     Non c'è nessun esercizio programmato per oggi.
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500">
                     Contatta il tuo terapista per programmare gli esercizi.
                   </p>
                 </div>
@@ -271,9 +271,28 @@ export const PatientDashboard: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="border rounded-lg p-3">
+                  {/* Info della lista in alto */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0"></div>
+                      <div>
+                        <h4 className="font-semibold text-gray-800 text-sm">{todayExercise.word_list?.name}</h4>
+                        {todayExercise.word_list?.description && (
+                          <p className="text-xs text-gray-600">
+                            {todayExercise.word_list.description}
+                          </p>
+                        )}
+                        <p className="text-xs font-medium text-primary">
+                          {todayExercise.word_list?.words.length} parole da leggere
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Controlli compatti */}
+                  <div className="border rounded-lg p-3 bg-white">
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-medium text-muted-foreground">Dimensione Testo</p>
+                      <p className="text-sm font-medium text-gray-700">Dimensione Testo</p>
                       <div className="flex items-center gap-2">
                         <Button 
                           variant="outline" 
@@ -323,23 +342,7 @@ export const PatientDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="bg-muted/30 rounded-lg p-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0"></div>
-                      <div>
-                        <h4 className="font-semibold text-foreground text-sm">{todayExercise.word_list?.name}</h4>
-                        {todayExercise.word_list?.description && (
-                          <p className="text-xs text-muted-foreground">
-                            {todayExercise.word_list.description}
-                          </p>
-                        )}
-                        <p className="text-xs font-medium text-primary">
-                          {todayExercise.word_list?.words.length} parole da leggere
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
+                  {/* Tema compatto */}
                   <ThemeSelector 
                     selectedTheme={selectedTheme}
                     onThemeChange={setSelectedTheme}
@@ -348,7 +351,7 @@ export const PatientDashboard: React.FC = () => {
                   <Button
                     onClick={startExercise} 
                     size="lg" 
-                    className="w-full min-h-[50px] text-lg touch-manipulation"
+                    className="w-full min-h-[50px] text-lg touch-manipulation bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <Play className="h-5 w-5 mr-2" />
                     {completedToday ? "Ripeti Esercizio" : "Inizia Esercizio"}
@@ -373,16 +376,16 @@ export const PatientDashboard: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white/90 backdrop-blur-md border-white/30 shadow-lg">
             <CardHeader>
-              <CardTitle>I Tuoi Progressi</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-gray-800">I Tuoi Progressi</CardTitle>
+              <CardDescription className="text-gray-600">
                 Statistiche degli esercizi completati
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-8">
-                <p className="text-muted-foreground">
+                <p className="text-gray-600">
                   Le statistiche saranno disponibili dopo aver completato alcuni esercizi
                 </p>
               </div>

@@ -86,30 +86,31 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
           Tema dell'Esercizio
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-5 gap-2">
           {themes.map((theme) => (
             <Button
               key={theme.id}
-              variant={selectedTheme === theme.id ? "default" : "outline"}
+              variant="outline"
               onClick={() => onThemeChange(theme.id)}
-              className="h-auto p-3 flex flex-col items-center gap-2"
+              className={`h-auto p-2 flex flex-col items-center gap-1 hover:bg-transparent border-2 transition-colors ${
+                selectedTheme === theme.id 
+                  ? 'border-blue-500 border-4' 
+                  : 'border-gray-200 hover:border-blue-300'
+              }`}
             >
-              <div className={`w-full h-12 rounded-lg bg-gradient-to-r ${theme.preview.background} flex items-center justify-center gap-1`}>
-                {theme.preview.shapes.slice(0, 3).map((shape, index) => (
-                  <span key={index} className="text-sm opacity-80">{shape}</span>
-                ))}
+              <div className={`w-full h-8 rounded bg-gradient-to-r ${theme.preview.background} flex items-center justify-center`}>
+                <span className="text-xs opacity-80">{theme.icon}</span>
               </div>
               <div className="text-center">
-                <div className="text-lg">{theme.icon}</div>
-                <div className="text-xs font-medium">{theme.name}</div>
+                <div className="text-xs font-medium text-gray-700">{theme.name}</div>
               </div>
             </Button>
           ))}
         </div>
         
         <div className="text-center">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-gray-600">
             Il tema scelto influenzerà lo sfondo durante l'esercizio
           </p>
         </div>
