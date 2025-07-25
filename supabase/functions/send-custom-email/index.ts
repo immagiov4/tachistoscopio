@@ -105,56 +105,54 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (email_data.email_action_type === "recovery") {
       console.log("Sending recovery email to:", user.email);
+      console.log("Resend API key available:", !!Deno.env.get("RESEND_API_KEY"));
       
       const resetUrl = `${email_data.site_url}/reset-password?token_hash=${email_data.token_hash}&type=${email_data.email_action_type}&redirect_to=${encodeURIComponent(email_data.redirect_to)}`;
       
-      const emailResponse = await resend.emails.send({
-        from: "Tachistoscopio <onboarding@resend.dev>",
-        to: [user.email],
-        subject: "Tachistoscopio - Reimposta la tua password",
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <title>Reimposta Password</title>
-          </head>
-          <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: #667eea; color: white; padding: 20px; text-align: center; border-radius: 8px;">
-              <h1>Tachistoscopio</h1>
-              <p>Reimposta la tua password</p>
-            </div>
-            
-            <div style="padding: 20px; background: #f8f9fa; margin: 20px 0; border-radius: 8px;">
-              <h2>Ciao ${userName}!</h2>
-              <p>Hai richiesto di reimpostare la password per il tuo account Tachistoscopio.</p>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${resetUrl}" 
-                   style="background: #667eea; color: white; text-decoration: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; display: inline-block;">
-                  Reimposta Password
-                </a>
-              </div>
-              
-              <p style="font-size: 14px; color: #666;">
-                Se non riesci a cliccare il pulsante, copia questo link: ${resetUrl}
-              </p>
-              
-              <p style="font-size: 12px; color: #999;">
-                Questo link è valido per 60 minuti. Se non hai richiesto questa reimpostazione, ignora questa email.
-              </p>
-            </div>
-          </body>
-          </html>
-        `
-      });
+      try {
+        console.log("Attempting to send email via Resend...");
+        const emailResponse = await resend.emails.send({
+          from: "Tachistoscopio <onboarding@resend.dev>",  // Usa il dominio di test di Resend
+          to: [user.email],
+          subject: "Tachistoscopio - Reimposta la tua password",
+          html: `
+            <h1>Ciao ${userName}!</h1>
+            <p>Clicca qui per reimpostare la password:</p>
+            <a href="${resetUrl}" style="background: #667eea; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+              Reimposta Password
+            </a>
+            <p>Link: ${resetUrl}</p>
+          `
+        });
 
-      console.log("Email inviata:", emailResponse);
-      
-      return new Response(JSON.stringify({ success: true, emailId: emailResponse.data?.id }), {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders }
-      });
+        console.log("Email response:", JSON.stringify(emailResponse, null, 2));
+        
+        if (emailResponse.error) {
+          console.error("Resend error:", emailResponse.error);
+          throw new Error(`Resend error: ${JSON.stringify(emailResponse.error)}`);
+        }
+        
+        console.log("Email inviata con successo! ID:", emailResponse.data?.id);
+        
+        return new Response(JSON.stringify({ 
+          success: true, 
+          emailId: emailResponse.data?.id,
+          message: "Email inviata con successo"
+        }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
+        });
+        
+      } catch (emailError) {
+        console.error("Errore nell'invio email:", emailError);
+        return new Response(JSON.stringify({ 
+          error: "Errore invio email", 
+          details: emailError.message 
+        }), {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
+        });
+      }
     }
 
     return new Response(JSON.stringify({ success: true, message: "Webhook ricevuto ma non processato" }), {
