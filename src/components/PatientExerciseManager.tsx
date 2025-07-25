@@ -27,6 +27,11 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
   const [currentPage, setCurrentPage] = useState(1);
   const patientsPerPage = 15;
 
+  // Patient creation state
+  const [newPatientName, setNewPatientName] = useState('');
+  const [newPatientEmail, setNewPatientEmail] = useState('');
+  const [createPatientLoading, setCreatePatientLoading] = useState(false);
+
   // Exercise settings for each day
   const [weeklyExercises, setWeeklyExercises] = useState<{[key: number]: Partial<Exercise>}>({});
 
@@ -176,6 +181,48 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
     }
   };
 
+  const createPatient = async () => {
+    if (!newPatientEmail || !newPatientName) {
+      toast({
+        title: 'Errore',
+        description: 'Compila tutti i campi',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setCreatePatientLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('create-patient', {
+        body: {
+          email: newPatientEmail,
+          fullName: newPatientName,
+          therapistId: therapistId,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Successo',
+        description: 'Paziente creato con successo. Email inviata con credenziali di accesso.',
+      });
+
+      setNewPatientEmail('');
+      setNewPatientName('');
+      await fetchInitialData();
+    } catch (error) {
+      console.error('Error creating patient:', error);
+      toast({
+        title: 'Errore',
+        description: 'Errore durante la creazione del paziente',
+        variant: 'destructive',
+      });
+    } finally {
+      setCreatePatientLoading(false);
+    }
+  };
+
   const copyExerciseToDay = (fromDay: number, toDay: number) => {
     const sourceExercise = weeklyExercises[fromDay];
     if (!sourceExercise) return;
@@ -219,6 +266,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
               <Input
                 id="patient-name"
                 placeholder="Nome del paziente"
+                value={newPatientName}
+                onChange={(e) => setNewPatientName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -227,11 +276,17 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                 id="patient-email"
                 type="email"
                 placeholder="email@esempio.it"
+                value={newPatientEmail}
+                onChange={(e) => setNewPatientEmail(e.target.value)}
               />
             </div>
           </div>
-          <Button className="w-full md:w-auto">
-            Crea Paziente
+          <Button 
+            className="w-full md:w-auto"
+            onClick={createPatient}
+            disabled={createPatientLoading}
+          >
+            {createPatientLoading ? 'Creazione...' : 'Crea Paziente'}
           </Button>
         </CardContent>
       </Card>
