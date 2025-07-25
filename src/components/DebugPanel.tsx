@@ -300,43 +300,60 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ onRevealTutorial }) => {
 
     setLoading(true);
     try {
-      // Elimina in ordine per rispettare le foreign key
-      // Usa una condizione che matcha tutti i record
-      const { error: sessionsError } = await supabase
+      // Prima elimina tutte le sessioni esistenti (di tutti i pazienti)
+      const { error: allSessionsError } = await supabase
         .from('exercise_sessions')
         .delete()
-        .gte('completed_at', '1970-01-01');
+        .gte('completed_at', '1900-01-01');
       
-      if (sessionsError) throw sessionsError;
+      console.log('Sessions deletion result:', allSessionsError);
 
+      // Poi elimina tutti gli esercizi
       const { error: exercisesError } = await supabase
         .from('exercises')
         .delete()
-        .gte('created_at', '1970-01-01');
+        .gte('created_at', '1900-01-01');
       
-      if (exercisesError) throw exercisesError;
+      console.log('Exercises deletion result:', exercisesError);
 
+      // Poi elimina tutte le liste di parole
       const { error: wordListsError } = await supabase
         .from('word_lists')
         .delete()
-        .gte('created_at', '1970-01-01');
+        .gte('created_at', '1900-01-01');
       
-      if (wordListsError) throw wordListsError;
+      console.log('Word lists deletion result:', wordListsError);
 
+      // Infine elimina tutti i pazienti
       const { error: patientsError } = await supabase
         .from('profiles')
         .delete()
         .eq('role', 'patient');
       
-      if (patientsError) throw patientsError;
+      console.log('Patients deletion result:', patientsError);
+
+      // Mostra eventuali errori specifici
+      if (allSessionsError) {
+        console.error('Errore eliminazione sessioni:', allSessionsError);
+      }
+      if (exercisesError) {
+        console.error('Errore eliminazione esercizi:', exercisesError);
+      }
+      if (wordListsError) {
+        console.error('Errore eliminazione liste:', wordListsError);
+      }
+      if (patientsError) {
+        console.error('Errore eliminazione pazienti:', patientsError);
+      }
 
       toast({
         title: "Database Pulito",
-        description: "Tutti i dati sono stati eliminati dal database",
+        description: "Operazione completata. Controlla la console per dettagli.",
       });
 
       window.location.reload();
     } catch (error) {
+      console.error('Errore generale:', error);
       toast({
         title: "Errore",
         description: "Errore durante la pulizia del database: " + (error as Error).message,
