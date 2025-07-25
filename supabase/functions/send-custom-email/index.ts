@@ -29,9 +29,27 @@ interface WebhookPayload {
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log("=== WEBHOOK RICEVUTO ===");
+  console.log("=== FUNZIONE CHIAMATA ===");
   console.log("Method:", req.method);
+  console.log("URL:", req.url);
   console.log("Headers:", Object.fromEntries(req.headers.entries()));
+  
+  // Test endpoint
+  if (req.method === "GET") {
+    console.log("Test endpoint chiamato");
+    return new Response(JSON.stringify({ 
+      status: "success", 
+      message: "Funzione attiva",
+      timestamp: new Date().toISOString(),
+      secrets: {
+        resend: !!Deno.env.get("RESEND_API_KEY"),
+        webhook: !!Deno.env.get("SEND_EMAIL_HOOK_SECRET")
+      }
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders }
+    });
+  }
   
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -41,10 +59,11 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const body = await req.text();
-    console.log("Raw body:", body);
+    console.log("Raw body length:", body.length);
+    console.log("Raw body preview:", body.substring(0, 200));
     
     const payload: WebhookPayload = JSON.parse(body);
-    console.log("Parsed payload:", JSON.stringify(payload, null, 2));
+    console.log("Parsed payload keys:", Object.keys(payload));
     const { user, email_data } = payload;
 
     let subject = "";
