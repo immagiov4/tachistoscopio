@@ -23,7 +23,7 @@ const themes: Theme[] = [
     icon: '🚀',
     description: 'Stelle, pianeti e galassie',
     preview: {
-      background: 'from-indigo-200 via-purple-200 via-blue-200 to-violet-300',
+      background: 'from-indigo-300 via-purple-300 via-blue-300 to-violet-400',
       shapes: ['🌟'] // Emoji principale per lo stimolo
     }
   },
