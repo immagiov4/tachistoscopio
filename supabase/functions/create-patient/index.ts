@@ -104,28 +104,16 @@ serve(async (req) => {
       console.error('Error generating magic link:', magicLinkError);
     }
 
-    // Send password reset email with custom template
-    // This uses Supabase's built-in email system
+    // Send password reset email using the same method as AuthPage
     try {
-      const { error: resetError } = await supabaseAdmin.auth.admin.generateLink({
-        type: 'recovery',
-        email: email,
-        options: {
-          redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/`,
-          // Add custom data that can be used in email templates
-          data: {
-            full_name: fullName,
-            password: password,
-            magic_link: magicLinkData?.properties?.action_link || '',
-            patient_name: fullName
-          }
-        }
+      const { error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
+        redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/reset-password`,
       });
 
       if (resetError) {
         console.error('Error sending email:', resetError);
       } else {
-        console.log(`Account creation email sent successfully to ${email}`);
+        console.log(`Password reset email sent successfully to ${email}`);
       }
     } catch (emailError) {
       console.error('Failed to send email:', emailError);
