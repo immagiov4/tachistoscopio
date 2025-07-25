@@ -29,16 +29,22 @@ interface WebhookPayload {
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log("Webhook received:", req.method);
+  console.log("=== WEBHOOK RICEVUTO ===");
+  console.log("Method:", req.method);
+  console.log("Headers:", Object.fromEntries(req.headers.entries()));
   
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
+    console.log("Returning CORS response");
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const payload: WebhookPayload = await req.json();
-    console.log("Payload received:", JSON.stringify(payload, null, 2));
+    const body = await req.text();
+    console.log("Raw body:", body);
+    
+    const payload: WebhookPayload = JSON.parse(body);
+    console.log("Parsed payload:", JSON.stringify(payload, null, 2));
     const { user, email_data } = payload;
 
     let subject = "";
