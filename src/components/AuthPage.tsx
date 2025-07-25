@@ -24,6 +24,10 @@ export const AuthPage: React.FC = () => {
   const [signupPassword, setSignupPassword] = useState('');
   const [signupFullName, setSignupFullName] = useState('');
 
+  // Reset password state
+  const [resetEmail, setResetEmail] = useState('');
+  const [showResetPassword, setShowResetPassword] = useState(false);
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +70,29 @@ export const AuthPage: React.FC = () => {
       setSignupEmail('');
       setSignupPassword('');
       setSignupFullName('');
+    }
+
+    setLoading(false);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      setSuccess('Ti abbiamo inviato un link per reimpostare la password. Controlla la tua email.');
+      setResetEmail('');
+      setShowResetPassword(false);
+    } catch (error: any) {
+      setError('Errore durante l\'invio dell\'email. Riprova.');
     }
 
     setLoading(false);
@@ -127,16 +154,80 @@ export const AuthPage: React.FC = () => {
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   )}
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Accesso in corso...
-                      </>
-                    ) : (
-                      'Accedi'
-                    )}
-                  </Button>
+                  {success && (
+                    <Alert>
+                      <AlertDescription>{success}</AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  {!showResetPassword ? (
+                    <>
+                      <Button type="submit" className="w-full" disabled={loading}>
+                        {loading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Accesso in corso...
+                          </>
+                        ) : (
+                          'Accedi'
+                        )}
+                      </Button>
+                      <div className="text-center">
+                        <Button
+                          type="button"
+                          variant="link"
+                          className="text-sm"
+                          onClick={() => setShowResetPassword(true)}
+                        >
+                          Hai dimenticato la password?
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="reset-email">Email per reset password</Label>
+                        <Input
+                          id="reset-email"
+                          type="email"
+                          placeholder="la-tua-email@esempio.it"
+                          value={resetEmail}
+                          onChange={(e) => setResetEmail(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => {
+                            setShowResetPassword(false);
+                            setResetEmail('');
+                            setError(null);
+                            setSuccess(null);
+                          }}
+                        >
+                          Annulla
+                        </Button>
+                        <Button
+                          type="button"
+                          className="flex-1"
+                          onClick={handleResetPassword}
+                          disabled={loading || !resetEmail}
+                        >
+                          {loading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Invio...
+                            </>
+                          ) : (
+                            'Invia reset'
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </form>
               </CardContent>
             </Card>
