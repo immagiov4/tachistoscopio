@@ -243,20 +243,21 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     if (session.isRunning && !session.isPaused && currentWordToShow && !isCountingDown) {
       console.log('Showing stimulus before word:', currentWordToShow);
       
-      // Prima mostra lo stimolo visivo
+      // Reset state e mostra stimolo con timing fisso
       setDisplayState('stimulus');
       setStimulusVisible(true);
       
+      // Timer fisso per stimolo - sempre 1000ms
       const stimulusTimer = setTimeout(() => {
-        // Nascondi lo stimolo con animazione fluida
         setStimulusVisible(false);
         
-        // Aspetta che l'animazione finisca prima di mostrare la parola
-        const wordShowTimer = setTimeout(() => {
+        // Timer fisso per transizione - sempre 300ms
+        const transitionTimer = setTimeout(() => {
           console.log('Showing word:', currentWordToShow);
           setDisplayState('word');
           setCurrentWord(formatWord(currentWordToShow));
 
+          // Timer per durata parola - basato su settings
           const wordTimer = setTimeout(() => {
             if (session.settings.useMask) {
               setDisplayState('mask');
@@ -274,12 +275,16 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
           }, session.settings.exposureDuration);
 
           return () => clearTimeout(wordTimer);
-        }, 600); // Aspetta che l'animazione di uscita finisca
+        }, 300); // Timing fisso per transizione
 
-        return () => clearTimeout(wordShowTimer);
-      }, 800); // Durata dello stimolo più lunga
+        return () => clearTimeout(transitionTimer);
+      }, 1000); // Timing fisso per stimolo
 
-      return () => clearTimeout(stimulusTimer);
+      return () => {
+        clearTimeout(stimulusTimer);
+        // Cleanup di eventuali timer annidati
+        setDisplayState('interval');
+      };
     }
   }, [session.isRunning, session.isPaused, session.currentWordIndex, isCountingDown, formatWord, nextWord]);
 
@@ -392,7 +397,11 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
           </div>
         )}
 
-        <div className="absolute top-4 left-4 right-4 bg-white/60 backdrop-blur-sm border border-white/20 p-4 rounded-2xl shadow-lg" style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
+        <div className="absolute top-4 left-4 right-4 bg-white/40 backdrop-blur-md border border-white/30 p-4 rounded-2xl shadow-lg" style={{ 
+          boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)',
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.3) 100%)',
+          backdropFilter: 'blur(12px) saturate(1.5)'
+        }}>
           <div className="text-center space-y-2 mb-4">
             <p className="text-sm text-gray-700 font-medium">
               Progresso: {session.currentWordIndex}/{session.words.length}
@@ -414,7 +423,10 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         </div>
 
         <div className="absolute bottom-4 left-4 right-4 text-center">
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-3 border border-white/20 shadow-lg">
+          <div className="bg-white/40 backdrop-blur-md rounded-2xl p-3 border border-white/30 shadow-lg" style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.3) 100%)',
+            backdropFilter: 'blur(12px) saturate(1.5)'
+          }}>
             <p className="text-sm font-medium text-gray-700 mb-1">
               💭 Tocca lo schermo per segnare un errore
             </p>

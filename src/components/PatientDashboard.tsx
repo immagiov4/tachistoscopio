@@ -212,6 +212,7 @@ export const PatientDashboard: React.FC = () => {
     } catch (error) {
       console.error('Error saving session:', error);
     } finally {
+      // Evita doppio trigger rimuovendo immediatamente la sessione corrente
       setCurrentSession(null);
     }
   };
@@ -306,7 +307,7 @@ export const PatientDashboard: React.FC = () => {
                   )}
 
                   {/* Info della lista in alto */}
-                  <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="bg-white/70 backdrop-blur-sm border border-white/30 rounded-lg p-3 shadow-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0"></div>
                       <div>
@@ -432,19 +433,31 @@ export const PatientDashboard: React.FC = () => {
                 <div className="space-y-4">
                   {/* Statistiche generali */}
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-3 bg-white/95 rounded-lg border-l-4 border-blue-500" style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
+                    <div className="text-center p-3 rounded-lg border-l-4 border-blue-500" style={{
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.6) 100%)',
+                      backdropFilter: 'blur(8px) saturate(1.2)',
+                      boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+                    }}>
                       <div className="text-2xl font-bold text-blue-700">
                         {recentSessions.length}
                       </div>
                       <div className="text-xs text-blue-600">Sessioni</div>
                     </div>
-                    <div className="text-center p-3 bg-white/95 rounded-lg border-l-4 border-green-500" style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
+                    <div className="text-center p-3 rounded-lg border-l-4 border-green-500" style={{
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.6) 100%)',
+                      backdropFilter: 'blur(8px) saturate(1.2)',
+                      boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+                    }}>
                       <div className="text-2xl font-bold text-green-700">
                         {Math.round(recentSessions.reduce((acc, s) => acc + s.accuracy, 0) / recentSessions.length)}%
                       </div>
                       <div className="text-xs text-green-600">Precisione Media</div>
                     </div>
-                    <div className="text-center p-3 bg-white/95 rounded-lg border-l-4 border-orange-500" style={{ boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
+                    <div className="text-center p-3 rounded-lg border-l-4 border-orange-500" style={{
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.6) 100%)',
+                      backdropFilter: 'blur(8px) saturate(1.2)',
+                      boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+                    }}>
                       <div className="text-2xl font-bold text-orange-700">
                         {recentSessions.reduce((acc, s) => acc + s.total_words, 0)}
                       </div>
