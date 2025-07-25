@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, BookOpen, BarChart3, Search, Copy, Plus } from 'lucide-react';
+import { Calendar, Clock, BookOpen, BarChart3, Search, Copy, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, WordList, Exercise, ExerciseSettings, DAYS_OF_WEEK } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
@@ -177,12 +177,44 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
 
   return (
     <div className="space-y-6">
+      {/* Create new patient */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Crea Nuovo Paziente</CardTitle>
+          <CardDescription>
+            Aggiungi un nuovo paziente al tuo gruppo
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="patient-name">Nome Completo</Label>
+              <Input
+                id="patient-name"
+                placeholder="Nome del paziente"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="patient-email">Email (genitore/tutore)</Label>
+              <Input
+                id="patient-email"
+                type="email"
+                placeholder="email@esempio.it"
+              />
+            </div>
+          </div>
+          <Button className="w-full md:w-auto">
+            Crea Paziente
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* Patient Search and Selection */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
-            Seleziona Paziente
+            Gestione Pazienti
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -199,29 +231,43 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
           </div>
           
           <div className="grid gap-2 max-h-60 overflow-y-auto">
-            {filteredPatients.map((patient) => (
-              <div
-                key={patient.id}
-                className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                  selectedPatient?.id === patient.id
-                    ? 'bg-primary/10 border-primary'
-                    : 'hover:bg-muted'
-                }`}
-                onClick={() => setSelectedPatient(patient)}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">{patient.full_name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Creato il {new Date(patient.created_at).toLocaleDateString('it-IT')}
-                    </p>
+            {filteredPatients.map((patient) => {
+              const exerciseCount = patientExercises.filter(ex => ex.patient_id === patient.id).length;
+              return (
+                <div
+                  key={patient.id}
+                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                    selectedPatient?.id === patient.id
+                      ? 'bg-primary/10 border-primary'
+                      : 'hover:bg-muted'
+                  }`}
+                  onClick={() => setSelectedPatient(patient)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">{patient.full_name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Creato il {new Date(patient.created_at).toLocaleDateString('it-IT')} • {exerciseCount} esercizi
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">{exerciseCount} esercizi</Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Add delete functionality here
+                        }}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <Badge variant="secondary">
-                    {patientExercises.filter(ex => ex.patient_id === patient.id).length} esercizi
-                  </Badge>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>
@@ -246,108 +292,75 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                   const exercise = weeklyExercises[dayOfWeek];
                   
                   return (
-                    <div key={dayOfWeek} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-medium text-lg">{day}</h3>
-                        <div className="flex gap-2">
-                          {exercise && (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  // Copy to other days dropdown could be implemented
-                                }}
-                              >
-                                <Copy className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => removeExercise(dayOfWeek)}
-                              >
-                                Rimuovi
-                              </Button>
-                            </>
-                          )}
-                        </div>
+                    <div key={dayOfWeek} className="border rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">{day}</h4>
+                        {exercise && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeExercise(dayOfWeek)}
+                            className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        )}
                       </div>
 
                       {exercise ? (
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-4">
-                            <Badge variant="outline">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Badge variant="outline" className="text-xs">
                               {exercise.word_list?.name}
                             </Badge>
-                            <Badge variant="secondary">
-                              {exercise.word_list?.words?.length} parole
-                            </Badge>
+                            <span className="text-muted-foreground">
+                              {exercise.word_list?.words?.length} parole • {exercise.settings?.exposureDuration}ms
+                            </span>
                           </div>
                           
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                            <div>
-                              <span className="text-muted-foreground">Durata: </span>
-                              {exercise.settings?.exposureDuration}ms
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">Intervallo: </span>
-                              {exercise.settings?.intervalDuration}ms
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">Formato: </span>
-                              {exercise.settings?.textCase === 'original' ? 'Originale' :
-                               exercise.settings?.textCase === 'uppercase' ? 'MAIUSCOLO' : 'minuscolo'}
-                            </div>
-                          </div>
-
-                          <div className="flex gap-2">
-                            <Select
-                              value={exercise.word_list_id}
-                              onValueChange={(value) => {
-                                updateExercise(dayOfWeek, value, exercise.settings as ExerciseSettings);
-                              }}
-                            >
-                              <SelectTrigger className="w-48">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {wordLists.map((list) => (
-                                  <SelectItem key={list.id} value={list.id}>
-                                    {list.name} ({list.words.length})
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          <p className="text-muted-foreground">Nessun esercizio programmato</p>
                           <Select
+                            value={exercise.word_list_id}
                             onValueChange={(value) => {
-                              const defaultSettings: ExerciseSettings = {
-                                exposureDuration: 500,
-                                intervalDuration: 200,
-                                fontSize: 'large',
-                                textCase: 'original',
-                                useMask: false,
-                                maskDuration: 200,
-                              };
-                              updateExercise(dayOfWeek, value, defaultSettings);
+                              updateExercise(dayOfWeek, value, exercise.settings as ExerciseSettings);
                             }}
                           >
-                            <SelectTrigger className="w-64">
-                              <SelectValue placeholder="Aggiungi esercizio..." />
+                            <SelectTrigger className="h-8 text-sm">
+                              <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                               {wordLists.map((list) => (
                                 <SelectItem key={list.id} value={list.id}>
-                                  {list.name} ({list.words.length} parole)
+                                  {list.name} ({list.words.length})
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
+                      ) : (
+                        <Select
+                          onValueChange={(value) => {
+                            const defaultSettings: ExerciseSettings = {
+                              exposureDuration: 500,
+                              intervalDuration: 200,
+                              fontSize: 'large',
+                              textCase: 'original',
+                              useMask: false,
+                              maskDuration: 200,
+                            };
+                            updateExercise(dayOfWeek, value, defaultSettings);
+                          }}
+                        >
+                          <SelectTrigger className="h-8 text-sm">
+                            <SelectValue placeholder="Aggiungi..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {wordLists.map((list) => (
+                              <SelectItem key={list.id} value={list.id}>
+                                {list.name} ({list.words.length})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       )}
                     </div>
                   );

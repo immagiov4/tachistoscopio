@@ -201,10 +201,10 @@ export const TherapistDashboard: React.FC = () => {
   };
 
   const createExercise = async () => {
-    if (!selectedPatient || !selectedWordList || !selectedDay) {
+    if (!selectedWordList || !selectedDay) {
       toast({
         title: 'Errore',
-        description: 'Seleziona paziente, lista di parole e giorno',
+        description: 'Seleziona lista di parole e giorno',
         variant: 'destructive',
       });
       return;
@@ -215,7 +215,7 @@ export const TherapistDashboard: React.FC = () => {
       const { error } = await supabase
         .from('exercises')
         .upsert({
-          patient_id: selectedPatient,
+          patient_id: 'global',
           therapist_id: profile?.id!,
           word_list_id: selectedWordList,
           day_of_week: parseInt(selectedDay),
@@ -229,7 +229,6 @@ export const TherapistDashboard: React.FC = () => {
         description: 'Esercizio creato/aggiornato con successo',
       });
 
-      setSelectedPatient('');
       setSelectedWordList('');
       setSelectedDay('');
       setExerciseSettings(DEFAULT_SETTINGS);
@@ -375,10 +374,10 @@ export const TherapistDashboard: React.FC = () => {
         </div>
 
         <Tabs defaultValue="patients" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="patients" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Pazienti
+              <UserCog className="h-4 w-4" />
+              Gestione Pazienti
             </TabsTrigger>
             <TabsTrigger value="wordlists" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
@@ -386,11 +385,7 @@ export const TherapistDashboard: React.FC = () => {
             </TabsTrigger>
             <TabsTrigger value="exercises" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Esercizi
-            </TabsTrigger>
-            <TabsTrigger value="manage" className="flex items-center gap-2">
-              <UserCog className="h-4 w-4" />
-              Gestione
+              Crea Esercizio
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
@@ -399,88 +394,7 @@ export const TherapistDashboard: React.FC = () => {
           </TabsList>
 
           <TabsContent value="patients" className="mt-6">
-            <div className="grid gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Crea Nuovo Paziente</CardTitle>
-                  <CardDescription>
-                    Aggiungi un nuovo paziente al tuo gruppo
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="patient-name">Nome Completo</Label>
-                      <Input
-                        id="patient-name"
-                        value={newPatientName}
-                        onChange={(e) => setNewPatientName(e.target.value)}
-                        placeholder="Nome del paziente"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="patient-email">Email (genitore/tutore)</Label>
-                      <Input
-                        id="patient-email"
-                        type="email"
-                        value={newPatientEmail}
-                        onChange={(e) => setNewPatientEmail(e.target.value)}
-                        placeholder="email@esempio.it"
-                      />
-                    </div>
-                  </div>
-                  <Alert>
-                    <AlertDescription>
-                      La password verrà generata automaticamente e inviata via email insieme alle credenziali di accesso.
-                    </AlertDescription>
-                  </Alert>
-                  <Button 
-                    onClick={createPatient} 
-                    disabled={createPatientLoading}
-                    className="w-full md:w-auto"
-                  >
-                    {createPatientLoading ? 'Creazione...' : 'Crea Paziente'}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>I Miei Pazienti ({patients.length})</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {patients.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">
-                      Non hai ancora creato nessun paziente
-                    </p>
-                  ) : (
-                    <div className="grid gap-4">
-                       {patients.map((patient) => (
-                         <div key={patient.id} className="flex items-center justify-between p-4 border rounded-lg">
-                           <div>
-                             <h3 className="font-medium">{patient.full_name}</h3>
-                             <p className="text-sm text-muted-foreground">
-                               Creato il {new Date(patient.created_at).toLocaleDateString('it-IT')}
-                             </p>
-                           </div>
-                           <div className="flex items-center gap-2">
-                             <Badge variant="secondary">Paziente</Badge>
-                             <Button
-                               variant="outline"
-                               size="sm"
-                               onClick={() => deletePatient(patient.id)}
-                               className="h-8 w-8 p-0"
-                             >
-                               <Trash2 className="h-4 w-4" />
-                             </Button>
-                           </div>
-                         </div>
-                       ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+            <PatientExerciseManager therapistId={profile?.id || ''} />
           </TabsContent>
 
           <TabsContent value="wordlists" className="mt-6">
@@ -586,55 +500,39 @@ export const TherapistDashboard: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label>Paziente</Label>
-                      <Select value={selectedPatient} onValueChange={setSelectedPatient}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleziona paziente" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {patients.map((patient) => (
-                            <SelectItem key={patient.id} value={patient.id}>
-                              {patient.full_name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div className="space-y-2">
+                       <Label>Lista di Parole</Label>
+                       <Select value={selectedWordList} onValueChange={setSelectedWordList}>
+                         <SelectTrigger>
+                           <SelectValue placeholder="Seleziona lista" />
+                         </SelectTrigger>
+                         <SelectContent>
+                           {wordLists.map((list) => (
+                             <SelectItem key={list.id} value={list.id}>
+                               {list.name} ({list.words.length} parole)
+                             </SelectItem>
+                           ))}
+                         </SelectContent>
+                       </Select>
+                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Lista di Parole</Label>
-                      <Select value={selectedWordList} onValueChange={setSelectedWordList}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleziona lista" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {wordLists.map((list) => (
-                            <SelectItem key={list.id} value={list.id}>
-                              {list.name} ({list.words.length} parole)
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Giorno della Settimana</Label>
-                      <Select value={selectedDay} onValueChange={setSelectedDay}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleziona giorno" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {DAYS_OF_WEEK.map((day, index) => (
-                            <SelectItem key={index} value={index.toString()}>
-                              {day}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+                     <div className="space-y-2">
+                       <Label>Giorno della Settimana</Label>
+                       <Select value={selectedDay} onValueChange={setSelectedDay}>
+                         <SelectTrigger>
+                           <SelectValue placeholder="Seleziona giorno" />
+                         </SelectTrigger>
+                         <SelectContent>
+                           {DAYS_OF_WEEK.map((day, index) => (
+                             <SelectItem key={index} value={index.toString()}>
+                               {day}
+                             </SelectItem>
+                           ))}
+                         </SelectContent>
+                       </Select>
+                     </div>
+                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
@@ -739,10 +637,6 @@ export const TherapistDashboard: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-
-          <TabsContent value="manage" className="mt-6">
-            <PatientExerciseManager therapistId={profile?.id || ''} />
           </TabsContent>
 
           <TabsContent value="analytics" className="mt-6">
