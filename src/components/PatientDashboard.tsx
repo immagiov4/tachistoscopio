@@ -262,7 +262,7 @@ export const PatientDashboard: React.FC = () => {
               Benvenuto, {profile?.full_name}
             </p>
           </div>
-          <Button onClick={handleSignOut} variant="outline" className="bg-white/20 border-white/30 text-gray-800 hover:bg-gray-100/80 hover:text-gray-900 backdrop-blur-sm transition-colors duration-200">
+          <Button onClick={handleSignOut} variant="outline" className="bg-white/20 border-white/30 text-gray-800 hover:bg-white/40 hover:border-gray-800 hover:text-gray-900 backdrop-blur-sm transition-all duration-200">
             <LogOut className="h-4 w-4 mr-2" />
             Esci
           </Button>
