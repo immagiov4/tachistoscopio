@@ -216,7 +216,13 @@ export const PatientDashboard: React.FC = () => {
   const currentTheme = themes.find(t => t.id === selectedTheme) || themes[3];
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${currentTheme.preview.background}`}>
+    <div className={`min-h-screen ${
+      selectedTheme === 'rainbow' ? 'bg-gradient-to-r' : 
+      selectedTheme === 'space' ? 'bg-gradient-to-br' :
+      selectedTheme === 'ocean' ? 'bg-gradient-to-tr' :
+      selectedTheme === 'nature' ? 'bg-gradient-to-bl' :
+      'bg-gradient-to-r'
+    } ${currentTheme.preview.background}`}>
       <div className="container mx-auto p-4 max-w-4xl">
         <header className="mb-8 flex justify-between items-center bg-white/90 backdrop-blur-md rounded-xl p-4 shadow-lg border border-white/30">
           <div>

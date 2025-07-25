@@ -251,7 +251,13 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     const currentTheme = themes.find(t => t.id === theme) || themes[3];
     
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${currentTheme.preview.background} flex items-center justify-center`}>
+      <div className={`min-h-screen ${
+        theme === 'rainbow' ? 'bg-gradient-to-r' : 
+        theme === 'space' ? 'bg-gradient-to-br' :
+        theme === 'ocean' ? 'bg-gradient-to-tr' :
+        theme === 'nature' ? 'bg-gradient-to-bl' :
+        'bg-gradient-to-r'
+      } ${currentTheme.preview.background} flex items-center justify-center`}>
         <div className="text-center">
           <h1 className="text-6xl font-bold text-white drop-shadow-lg mb-8">
             {countdown > 0 ? countdown : 'INIZIA!'}
@@ -267,7 +273,13 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   const currentTheme = themes.find(t => t.id === theme) || themes[3]; // Default rainbow
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${currentTheme.preview.background} flex flex-col relative overflow-hidden`}>
+    <div className={`min-h-screen ${
+      theme === 'rainbow' ? 'bg-gradient-to-r' : 
+      theme === 'space' ? 'bg-gradient-to-br' :
+      theme === 'ocean' ? 'bg-gradient-to-tr' :
+      theme === 'nature' ? 'bg-gradient-to-bl' :
+      'bg-gradient-to-r'
+    } ${currentTheme.preview.background} flex flex-col relative overflow-hidden`}>
       {/* Forme decorative di sfondo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-20 -left-20 w-40 h-40 bg-gradient-to-br from-white/10 to-white/5 rounded-full blur-3xl"></div>
