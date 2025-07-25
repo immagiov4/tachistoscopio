@@ -548,7 +548,7 @@ export const PatientDashboard: React.FC = () => {
           </Card>
 
           {/* Debug Panel - Solo in preview/development */}
-          <DebugPanel />
+          <DebugPanel onRevealTutorial={() => {}} />
         </div>
       </div>
     </div>

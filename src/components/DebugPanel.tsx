@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, RefreshCw, Database, User, Shuffle } from 'lucide-react';
+import { Trash2, RefreshCw, Database, User, Shuffle, GraduationCap, Trash } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-export const DebugPanel: React.FC = () => {
+interface DebugPanelProps {
+  onRevealTutorial: () => void;
+}
+
+export const DebugPanel: React.FC<DebugPanelProps> = ({ onRevealTutorial }) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -285,6 +289,40 @@ export const DebugPanel: React.FC = () => {
     }
   };
 
+  const clearAllData = async () => {
+    if (!confirm("Sei sicuro di voler cancellare TUTTI i dati del database? Questa azione eliminerà:\n- Tutti i pazienti\n- Tutte le sessioni di esercizio\n- Tutti gli esercizi\n- Tutte le liste di parole\n\nQuesta operazione NON può essere annullata!")) {
+      return;
+    }
+    
+    if (!confirm("ULTIMA CONFERMA: Stai per eliminare TUTTO il contenuto del database. Sei ASSOLUTAMENTE sicuro?")) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Elimina in ordine per rispettare le foreign key
+      await supabase.from('exercise_sessions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('exercises').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('word_lists').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('profiles').delete().eq('role', 'patient');
+
+      toast({
+        title: "Database Pulito",
+        description: "Tutti i dati sono stati eliminati dal database",
+      });
+
+      window.location.reload();
+    } catch (error) {
+      toast({
+        title: "Errore",
+        description: "Errore durante la pulizia del database: " + (error as Error).message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Card className="border-2 border-yellow-400 bg-yellow-50">
       <CardHeader>
@@ -338,10 +376,20 @@ export const DebugPanel: React.FC = () => {
           </Button>
 
           <Button
+            onClick={onRevealTutorial}
+            disabled={loading}
+            variant="outline"
+            className="border-purple-300 text-purple-700 hover:bg-purple-50"
+          >
+            <GraduationCap className="h-4 w-4 mr-2" />
+            Rivedi Tutorial
+          </Button>
+
+          <Button
             onClick={resetAllSessions}
             disabled={loading}
             variant="outline"
-            className="border-red-500 text-red-800 hover:bg-red-100 md:col-span-3"
+            className="border-red-500 text-red-800 hover:bg-red-100"
           >
             {loading ? (
               <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -349,6 +397,20 @@ export const DebugPanel: React.FC = () => {
               <Trash2 className="h-4 w-4 mr-2" />
             )}
             ⚠️ Reset TUTTE le Sessioni
+          </Button>
+
+          <Button
+            onClick={clearAllData}
+            disabled={loading}
+            variant="outline"
+            className="border-red-700 text-red-900 hover:bg-red-200 md:col-span-2"
+          >
+            {loading ? (
+              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Trash className="h-4 w-4 mr-2" />
+            )}
+            🔥 CANCELLA TUTTO IL DATABASE
           </Button>
         </div>
 
@@ -358,7 +420,9 @@ export const DebugPanel: React.FC = () => {
             <li><strong>Reset Sessioni Mario:</strong> Elimina tutte le sessioni di esercizio di Mario Rossi</li>
             <li><strong>Crea Sessione Test:</strong> Aggiunge una sessione di esempio per Mario</li>
             <li><strong>Crea 15 Sessioni Random:</strong> Genera 15 sessioni con dati casuali negli ultimi 30 giorni</li>
+            <li><strong>Rivedi Tutorial:</strong> Mostra di nuovo il tutorial guidato</li>
             <li><strong>Reset TUTTE le Sessioni:</strong> Elimina tutte le sessioni di tutti i pazienti</li>
+            <li><strong>CANCELLA TUTTO IL DATABASE:</strong> ⚠️ Elimina tutti i dati (pazienti, liste, esercizi, sessioni)</li>
           </ul>
         </div>
       </CardContent>

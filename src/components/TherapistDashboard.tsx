@@ -366,18 +366,10 @@ export const TherapistDashboard: React.FC = () => {
 
         {/* Debug Panel - Solo durante sviluppo */}
         <div className="mb-6">
-          <DebugPanel />
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => {
-              localStorage.removeItem('tachistoscope_tutorial_completed');
-              setShowTutorial(true);
-            }}
-            className="ml-2"
-          >
-            Rivedi Tutorial
-          </Button>
+          <DebugPanel onRevealTutorial={() => {
+            localStorage.removeItem('tachistoscope_tutorial_completed');
+            setShowTutorial(true);
+          }} />
         </div>
 
         <Tabs defaultValue="patients" className="w-full">
