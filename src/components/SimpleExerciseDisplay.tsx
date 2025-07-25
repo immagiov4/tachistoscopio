@@ -46,6 +46,29 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   const [isCountingDown, setIsCountingDown] = useState(true);
   const [stimulusVisible, setStimulusVisible] = useState(false);
 
+  // Funzione per ottenere l'ombra appropriata per ogni tema
+  const getThemeShadow = (themeId: ThemeType) => {
+    switch(themeId) {
+      case 'space': return 'drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]'; // Ombra bianca per temi scuri
+      case 'nature': return 'drop-shadow-[0_0_8px_rgba(0,0,0,0.4)]'; // Ombra scura per temi chiari
+      case 'ocean': return 'drop-shadow-[0_0_8px_rgba(0,0,0,0.3)]'; // Ombra scura per temi medi
+      case 'rainbow': return 'drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]'; // Ombra scura per temi colorati
+      case 'clouds': return 'drop-shadow-[0_0_8px_rgba(0,0,0,0.4)]'; // Ombra scura per temi chiari
+      default: return 'drop-shadow-lg';
+    }
+  };
+
+  const getTextShadow = (themeId: ThemeType) => {
+    switch(themeId) {
+      case 'space': return 'text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]'; // Testo bianco con ombra bianca
+      case 'nature': return 'text-gray-800 drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]'; // Testo scuro con ombra bianca
+      case 'ocean': return 'text-white drop-shadow-[0_0_10px_rgba(0,0,0,0.6)]'; // Testo bianco con ombra scura
+      case 'rainbow': return 'text-white drop-shadow-[0_0_12px_rgba(0,0,0,0.7)]'; // Testo bianco con ombra scura forte
+      case 'clouds': return 'text-gray-800 drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]'; // Testo scuro con ombra bianca
+      default: return 'text-white drop-shadow-lg';
+    }
+  };
+
   const getFontSize = (size: string): string => {
     switch (size) {
       case 'small': return 'text-4xl';
@@ -259,10 +282,14 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         'bg-gradient-to-r'
       } ${currentTheme.preview.background} flex items-center justify-center`}>
         <div className="text-center">
-          <h1 className="text-6xl font-bold text-white drop-shadow-lg mb-8">
+          <h1 className={`text-6xl font-bold mb-8 ${getTextShadow(theme)}`}>
             {countdown > 0 ? countdown : 'INIZIA!'}
           </h1>
-          <p className="text-xl text-white/80">
+          <p className={`text-xl ${
+            theme === 'space' ? 'text-white/90' :
+            theme === 'nature' || theme === 'clouds' ? 'text-gray-700' :
+            'text-white/80'
+          }`}>
             Preparati a leggere le parole...
           </p>
         </div>
@@ -293,16 +320,16 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
             {/* Sfondo decorativo giocoso con elementi del tema */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-3xl rotate-12 opacity-30 flex items-center justify-center text-2xl">
-                {currentTheme.preview.shapes[0]}
+                {currentTheme.icon}
               </div>
               <div className="absolute top-32 right-16 w-16 h-16 bg-white/10 rounded-full opacity-30 flex items-center justify-center text-xl">
-                {currentTheme.preview.shapes[1]}
+                {currentTheme.icon}
               </div>
               <div className="absolute bottom-20 left-20 w-24 h-12 bg-white/10 rounded-full rotate-45 opacity-30 flex items-center justify-center text-lg">
-                {currentTheme.preview.shapes[2]}
+                {currentTheme.icon}
               </div>
               <div className="absolute bottom-32 right-12 w-14 h-20 bg-white/10 rounded-3xl -rotate-12 opacity-30 flex items-center justify-center text-lg">
-                {currentTheme.preview.shapes[3] || currentTheme.preview.shapes[0]}
+                {currentTheme.icon}
               </div>
               <div className="absolute top-1/2 left-8 w-8 h-8 bg-white/20 rounded-lg rotate-45 opacity-40"></div>
               <div className="absolute top-3/4 right-8 w-12 h-6 bg-white/10 rounded-full opacity-30"></div>
@@ -315,11 +342,11 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
                     stimulusVisible ? 'scale-100 opacity-100' : 'scale-75 opacity-0'
                   }`}>
                     <div className="relative">
-                      <div className="text-8xl filter drop-shadow-lg">
-                        {currentTheme.preview.shapes[session.currentWordIndex % currentTheme.preview.shapes.length]}
+                      <div className={`text-8xl filter ${getThemeShadow(theme)}`}>
+                        {currentTheme.preview.shapes[0]}
                       </div>
-                      <div className="absolute inset-0 animate-ping text-8xl opacity-20">
-                        {currentTheme.preview.shapes[session.currentWordIndex % currentTheme.preview.shapes.length]}
+                      <div className={`absolute inset-0 animate-ping text-8xl opacity-20`}>
+                        {currentTheme.preview.shapes[0]}
                       </div>
                     </div>
                   </div>

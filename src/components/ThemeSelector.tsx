@@ -24,7 +24,7 @@ const themes: Theme[] = [
     description: 'Stelle, pianeti e galassie',
     preview: {
       background: 'from-indigo-900 via-purple-800 via-blue-900 to-violet-800',
-      shapes: ['⭐', '🌙', '🌟', '✨']
+      shapes: ['🌟'] // Emoji principale per lo stimolo
     }
   },
   {
@@ -34,7 +34,7 @@ const themes: Theme[] = [
     description: 'Foreste, fiori e animali',
     preview: {
       background: 'from-emerald-400 via-teal-300 via-green-300 to-lime-400',
-      shapes: ['🌸', '🦋', '🌿', '🐛']
+      shapes: ['🦋'] // Emoji principale per lo stimolo
     }
   },
   {
@@ -44,7 +44,7 @@ const themes: Theme[] = [
     description: 'Mare, pesci e coralli',
     preview: {
       background: 'from-cyan-400 via-blue-500 via-indigo-400 to-teal-500',
-      shapes: ['🐠', '🐙', '🌊', '⭐']
+      shapes: ['🐠'] // Emoji principale per lo stimolo
     }
   },
   {
@@ -54,7 +54,7 @@ const themes: Theme[] = [
     description: 'Colori vivaci e gioia',
     preview: {
       background: 'from-pink-400 via-rose-300 via-orange-300 via-yellow-300 via-green-300 via-blue-300 to-purple-400',
-      shapes: ['🌈', '☀️', '🎈', '🎨']
+      shapes: ['🌈'] // Emoji principale per lo stimolo
     }
   },
   {
@@ -64,7 +64,7 @@ const themes: Theme[] = [
     description: 'Cielo sereno e dolcezza',
     preview: {
       background: 'from-sky-300 via-blue-200 via-indigo-200 to-purple-200',
-      shapes: ['☁️', '🌤️', '🕊️', '🎈']
+      shapes: ['☁️'] // Emoji principale per lo stimolo
     }
   }
 ];
