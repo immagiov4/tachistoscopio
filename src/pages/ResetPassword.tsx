@@ -19,10 +19,10 @@ export const ResetPassword: React.FC = () => {
 
   useEffect(() => {
     // Verificiamo se abbiamo i parametri necessari per il reset
-    const token = searchParams.get('token');
+    const tokenHash = searchParams.get('token_hash');
     const type = searchParams.get('type');
     
-    if (!token || type !== 'recovery') {
+    if (!tokenHash || type !== 'recovery') {
       setError('Link di reset password non valido o scaduto.');
     }
   }, [searchParams]);
