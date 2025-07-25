@@ -207,9 +207,10 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       setStimulusVisible(true);
       
       const stimulusTimer = setTimeout(() => {
+        // Nascondi lo stimolo con animazione fluida
         setStimulusVisible(false);
         
-        // Poi mostra la parola
+        // Aspetta che l'animazione finisca prima di mostrare la parola
         setTimeout(() => {
           console.log('Showing word:', currentWordToShow);
           setDisplayState('word');
@@ -229,8 +230,8 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
           }, session.settings.exposureDuration);
 
           return () => clearTimeout(wordTimer);
-        }, 200); // Breve pausa tra stimolo e parola
-      }, 500); // Durata dello stimolo
+        }, 600); // Aspetta che l'animazione di uscita finisca
+      }, 800); // Durata dello stimolo più lunga
 
       return () => clearTimeout(stimulusTimer);
     }
@@ -256,21 +257,57 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <div className="flex-1 flex items-center justify-center relative">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex flex-col relative overflow-hidden">
+      {/* Forme decorative di sfondo */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -left-20 w-40 h-40 bg-gradient-to-br from-yellow-300/20 to-orange-300/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 -right-20 w-60 h-60 bg-gradient-to-br from-purple-300/20 to-pink-300/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-20 left-1/4 w-80 h-80 bg-gradient-to-br from-blue-300/20 to-cyan-300/20 rounded-full blur-3xl"></div>
+      </div>
+      
+      <div className="flex-1 flex items-center justify-center relative z-10">
         {!session.isPaused ? (
-          <div className="text-center">
-            <div className={`font-bold text-foreground ${getFontSize(session.settings.fontSize)} min-h-[200px] flex items-center justify-center`}>
-              {displayState === 'stimulus' && (
-                <div className={`animate-bounce ${stimulusVisible ? 'animate-scale-in' : 'animate-scale-out'}`}>
-                  <div className="text-6xl animate-pulse">⭐</div>
-                </div>
-              )}
-              {displayState === 'word' && currentWord}
-              {displayState === 'mask' && '####'}
-              {displayState === 'interval' && ' '}
+          <>
+            {/* Sfondo decorativo giocoso */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute top-10 left-10 w-20 h-20 bg-gradient-to-br from-pink-200 to-purple-200 rounded-3xl rotate-12 opacity-30"></div>
+              <div className="absolute top-32 right-16 w-16 h-16 bg-gradient-to-br from-blue-200 to-cyan-200 rounded-full opacity-30"></div>
+              <div className="absolute bottom-20 left-20 w-24 h-12 bg-gradient-to-br from-yellow-200 to-orange-200 rounded-full rotate-45 opacity-30"></div>
+              <div className="absolute bottom-32 right-12 w-14 h-20 bg-gradient-to-br from-green-200 to-emerald-200 rounded-3xl -rotate-12 opacity-30"></div>
+              <div className="absolute top-1/2 left-8 w-8 h-8 bg-gradient-to-br from-indigo-200 to-blue-200 rounded-lg rotate-45 opacity-40"></div>
+              <div className="absolute top-3/4 right-8 w-12 h-6 bg-gradient-to-br from-red-200 to-pink-200 rounded-full opacity-30"></div>
             </div>
-          </div>
+            
+            <div className="relative z-10 text-center">
+              <div className={`font-bold text-foreground ${getFontSize(session.settings.fontSize)} min-h-[200px] flex items-center justify-center`}>
+                {displayState === 'stimulus' && (
+                  <div className={`transition-all duration-500 ease-out transform ${
+                    stimulusVisible ? 'scale-100 opacity-100' : 'scale-75 opacity-0'
+                  }`}>
+                    <div className="relative">
+                      <div className="text-8xl filter drop-shadow-lg">
+                        {['🌟', '✨', '🎈', '🎁', '🌈', '🦋'][session.currentWordIndex % 6]}
+                      </div>
+                      <div className="absolute inset-0 animate-ping text-8xl opacity-20">
+                        {['🌟', '✨', '🎈', '🎁', '🌈', '🦋'][session.currentWordIndex % 6]}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {displayState === 'word' && (
+                  <div className="animate-fade-in">
+                    {currentWord}
+                  </div>
+                )}
+                {displayState === 'mask' && (
+                  <div className="animate-fade-in text-muted-foreground">
+                    ####
+                  </div>
+                )}
+                {displayState === 'interval' && ' '}
+              </div>
+            </div>
+          </>
         ) : (
           <div className="text-center space-y-6">
             <p className="text-2xl font-bold text-primary">ESERCIZIO IN PAUSA</p>
