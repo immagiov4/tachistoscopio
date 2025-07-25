@@ -69,6 +69,18 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     }
   };
 
+  // Ombra invisibile per le parole - grande raggio, bassa opacità per aumentare contrasto senza essere vista
+  const getWordShadow = (themeId: ThemeType) => {
+    switch(themeId) {
+      case 'space': return 'drop-shadow-[0_0_40px_rgba(255,255,255,0.15)] drop-shadow-[0_0_80px_rgba(255,255,255,0.1)]';
+      case 'nature': return 'drop-shadow-[0_0_40px_rgba(0,0,0,0.2)] drop-shadow-[0_0_80px_rgba(0,0,0,0.15)]';
+      case 'ocean': return 'drop-shadow-[0_0_40px_rgba(0,0,0,0.25)] drop-shadow-[0_0_80px_rgba(0,0,0,0.15)]';
+      case 'rainbow': return 'drop-shadow-[0_0_40px_rgba(0,0,0,0.3)] drop-shadow-[0_0_80px_rgba(0,0,0,0.2)]';
+      case 'clouds': return 'drop-shadow-[0_0_40px_rgba(0,0,0,0.2)] drop-shadow-[0_0_80px_rgba(0,0,0,0.15)]';
+      default: return 'drop-shadow-[0_0_40px_rgba(0,0,0,0.2)]';
+    }
+  };
+
   const getFontSize = (size: string): string => {
     switch (size) {
       case 'small': return 'text-4xl';
@@ -352,12 +364,12 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
                   </div>
                 )}
                 {displayState === 'word' && (
-                  <div className="animate-fade-in">
+                  <div className={`animate-fade-in filter ${getWordShadow(theme)}`}>
                     {currentWord}
                   </div>
                 )}
                 {displayState === 'mask' && (
-                  <div className="animate-fade-in text-muted-foreground">
+                  <div className={`animate-fade-in text-muted-foreground filter ${getWordShadow(theme)}`}>
                     ####
                   </div>
                 )}
@@ -375,7 +387,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
           </div>
         )}
 
-        <div className="absolute top-4 left-4 right-4 bg-white/85 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/30">
+        <div className="absolute top-4 left-4 right-4 bg-white/20 backdrop-blur-xl border border-white/30 p-4 rounded-2xl shadow-2xl">
           <div className="text-center space-y-2 mb-4">
             <p className="text-sm text-gray-700 font-medium">
               Progresso: {session.currentWordIndex}/{session.words.length}
@@ -397,12 +409,12 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         </div>
 
         <div className="absolute bottom-4 left-4 right-4 text-center">
-          <div className="bg-white/85 backdrop-blur-md rounded-xl p-3 border border-white/30 shadow-lg">
+          <div className="bg-white/20 backdrop-blur-xl rounded-2xl p-3 border border-white/30 shadow-2xl">
             <p className="text-sm font-medium text-gray-800 mb-1">
               💭 Tocca lo schermo per segnare un errore
             </p>
             <p className="text-xs text-gray-600">
-              Comandi: <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">X</kbd> = Marca errore
+              Comandi: <kbd className="px-2 py-1 bg-white/30 rounded text-xs">X</kbd> = Marca errore
             </p>
           </div>
         </div>

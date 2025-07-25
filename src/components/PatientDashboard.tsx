@@ -224,7 +224,7 @@ export const PatientDashboard: React.FC = () => {
       'bg-gradient-to-r'
     } ${currentTheme.preview.background}`}>
       <div className="container mx-auto p-4 max-w-4xl">
-        <header className="mb-8 flex justify-between items-center bg-white/90 backdrop-blur-md rounded-xl p-4 shadow-lg border border-white/30">
+        <header className="mb-8 flex justify-between items-center bg-white/15 backdrop-blur-xl rounded-2xl p-4 shadow-2xl border border-white/20">
           <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
               La Mia Area
@@ -233,14 +233,14 @@ export const PatientDashboard: React.FC = () => {
               Benvenuto, {profile?.full_name}
             </p>
           </div>
-          <Button onClick={handleSignOut} variant="outline" className="bg-white/80 border-gray-300 text-gray-700 hover:bg-white">
+          <Button onClick={handleSignOut} variant="outline" className="bg-white/20 border-white/30 text-gray-800 hover:bg-white/30 backdrop-blur-sm">
             <LogOut className="h-4 w-4 mr-2" />
             Esci
           </Button>
         </header>
 
         <div className="grid gap-4">
-          <Card className="bg-white/90 backdrop-blur-md border-white/30 shadow-lg">
+          <Card className="bg-white/15 backdrop-blur-xl border-white/20 shadow-2xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-gray-800">
                 <Calendar className="h-5 w-5" />
@@ -382,7 +382,7 @@ export const PatientDashboard: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/90 backdrop-blur-md border-white/30 shadow-lg">
+          <Card className="bg-white/15 backdrop-blur-xl border-white/20 shadow-2xl">
             <CardHeader>
               <CardTitle className="text-gray-800">I Tuoi Progressi</CardTitle>
               <CardDescription className="text-gray-600">
