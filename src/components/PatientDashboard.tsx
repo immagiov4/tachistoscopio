@@ -224,7 +224,7 @@ export const PatientDashboard: React.FC = () => {
       'bg-gradient-to-r'
     } ${currentTheme.preview.background}`}>
       <div className="container mx-auto p-4 max-w-4xl">
-        <header className="mb-8 flex justify-between items-center bg-white/15 backdrop-blur-xl rounded-2xl p-4 shadow-2xl border border-white/20">
+        <header className="mb-8 flex justify-between items-center bg-white/5 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border border-white/10">
           <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
               La Mia Area
@@ -240,7 +240,7 @@ export const PatientDashboard: React.FC = () => {
         </header>
 
         <div className="grid gap-4">
-          <Card className="bg-white/15 backdrop-blur-xl border-white/20 shadow-2xl">
+          <Card className="bg-white/5 backdrop-blur-sm border-white/10 shadow-2xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-gray-800">
                 <Calendar className="h-5 w-5" />
@@ -382,7 +382,7 @@ export const PatientDashboard: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/15 backdrop-blur-xl border-white/20 shadow-2xl">
+          <Card className="bg-white/5 backdrop-blur-sm border-white/10 shadow-2xl">
             <CardHeader>
               <CardTitle className="text-gray-800">I Tuoi Progressi</CardTitle>
               <CardDescription className="text-gray-600">
