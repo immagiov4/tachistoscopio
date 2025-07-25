@@ -233,6 +233,36 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
     }
   };
 
+  const deletePatient = async (patientId: string) => {
+    try {
+      // Delete the patient profile
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', patientId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Successo',
+        description: 'Paziente eliminato con successo',
+      });
+
+      // Refresh data and clear selection if it was the deleted patient
+      if (selectedPatient?.id === patientId) {
+        setSelectedPatient(null);
+      }
+      await fetchInitialData();
+    } catch (error) {
+      console.error('Error deleting patient:', error);
+      toast({
+        title: 'Errore',
+        description: 'Errore durante l\'eliminazione del paziente',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const copyExerciseToDay = (fromDay: number, toDay: number) => {
     const sourceExercise = weeklyExercises[fromDay];
     if (!sourceExercise) return;
@@ -355,7 +385,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Add delete functionality here
+                        deletePatient(patient.id);
                       }}
                       className="h-8 w-8 p-0"
                     >
