@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const webhookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") || "your-webhook-secret";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,6 +29,8 @@ interface WebhookPayload {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  console.log("Webhook received:", req.method);
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -35,6 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const payload: WebhookPayload = await req.json();
+    console.log("Payload received:", JSON.stringify(payload, null, 2));
     const { user, email_data } = payload;
 
     let subject = "";
