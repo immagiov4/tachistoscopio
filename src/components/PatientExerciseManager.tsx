@@ -16,6 +16,7 @@ interface PatientExerciseManagerProps {
 
 export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ therapistId }) => {
   const [patients, setPatients] = useState<Profile[]>([]);
+  const [patientsWithExercises, setPatientsWithExercises] = useState<Array<Profile & {exerciseCount: number}>>([]);
   const [selectedPatient, setSelectedPatient] = useState<Profile | null>(null);
   const [wordLists, setWordLists] = useState<WordList[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -23,6 +24,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
   const [patientSessions, setPatientSessions] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const patientsPerPage = 15;
 
   // Exercise settings for each day
   const [weeklyExercises, setWeeklyExercises] = useState<{[key: number]: Partial<Exercise>}>({});
@@ -39,7 +42,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
 
   const fetchInitialData = async () => {
     try {
-      const [patientsData, wordListsData] = await Promise.all([
+      const [patientsData, wordListsData, exercisesData] = await Promise.all([
         supabase
           .from('profiles')
           .select('*')
@@ -48,10 +51,29 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
         supabase
           .from('word_lists')
           .select('*')
-          .eq('created_by', therapistId)
+          .eq('created_by', therapistId),
+        supabase
+          .from('exercises')
+          .select('patient_id')
+          .eq('therapist_id', therapistId)
       ]);
 
-      setPatients(patientsData.data || []);
+      const patients = patientsData.data || [];
+      const exercises = exercisesData.data || [];
+      
+      // Count exercises per patient
+      const exerciseCounts = exercises.reduce((acc: {[key: string]: number}, exercise) => {
+        acc[exercise.patient_id] = (acc[exercise.patient_id] || 0) + 1;
+        return acc;
+      }, {});
+
+      const patientsWithCounts = patients.map(patient => ({
+        ...patient,
+        exerciseCount: exerciseCounts[patient.id] || 0
+      }));
+
+      setPatients(patients);
+      setPatientsWithExercises(patientsWithCounts);
       setWordLists(wordListsData.data || []);
     } catch (error) {
       console.error('Error fetching initial data:', error);
@@ -167,9 +189,14 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
     }));
   };
 
-  const filteredPatients = patients.filter(patient =>
+  const filteredPatients = patientsWithExercises.filter(patient =>
     patient.full_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Paginazione
+  const totalPages = Math.ceil(filteredPatients.length / patientsPerPage);
+  const startIndex = (currentPage - 1) * patientsPerPage;
+  const paginatedPatients = filteredPatients.slice(startIndex, startIndex + patientsPerPage);
 
   if (loading) {
     return <div className="p-4">Caricamento...</div>;
@@ -214,8 +241,11 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
-            Gestione Pazienti
+            Elenco Pazienti ({filteredPatients.length})
           </CardTitle>
+          <CardDescription>
+            Clicca su un paziente per modificare il suo piano settimanale e visualizzare le statistiche
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-4">
@@ -231,44 +261,65 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
           </div>
           
           <div className="grid gap-2 max-h-60 overflow-y-auto">
-            {filteredPatients.map((patient) => {
-              const exerciseCount = patientExercises.filter(ex => ex.patient_id === patient.id).length;
-              return (
-                <div
-                  key={patient.id}
-                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                    selectedPatient?.id === patient.id
-                      ? 'bg-primary/10 border-primary'
-                      : 'hover:bg-muted'
-                  }`}
-                  onClick={() => setSelectedPatient(patient)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">{patient.full_name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Creato il {new Date(patient.created_at).toLocaleDateString('it-IT')} • {exerciseCount} esercizi
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary">{exerciseCount} esercizi</Badge>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // Add delete functionality here
-                        }}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+            {paginatedPatients.map((patient) => (
+              <div
+                key={patient.id}
+                className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                  selectedPatient?.id === patient.id
+                    ? 'bg-primary/10 border-primary shadow-md'
+                    : 'hover:bg-muted border-dashed'
+                }`}
+                onClick={() => setSelectedPatient(patient)}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium">{patient.full_name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Creato il {new Date(patient.created_at).toLocaleDateString('it-IT')} • {patient.exerciseCount} esercizi
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">{patient.exerciseCount} esercizi</Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Add delete functionality here
+                      }}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
+          
+          {totalPages > 1 && (
+            <div className="flex justify-center gap-2 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+              >
+                Precedente
+              </Button>
+              <span className="flex items-center px-3 text-sm text-muted-foreground">
+                Pagina {currentPage} di {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Successiva
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -286,16 +337,44 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4">
+            <div className="grid gap-2">
                 {DAYS_OF_WEEK.slice(1, 6).map((day, index) => {
                   const dayOfWeek = index + 1; // Monday = 1, Friday = 5
                   const exercise = weeklyExercises[dayOfWeek];
                   
                   return (
-                    <div key={dayOfWeek} className="border rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium">{day}</h4>
-                        {exercise && (
+                    <div key={dayOfWeek} className="flex items-center gap-3 p-2 border rounded">
+                      <div className="w-16 text-sm font-medium text-center">
+                        {day.slice(0, 3)}
+                      </div>
+                      
+                      {exercise ? (
+                        <div className="flex-1 flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {exercise.word_list?.name}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {exercise.word_list?.words?.length} parole • {exercise.settings?.exposureDuration}ms • {exercise.settings?.intervalDuration}ms
+                          </span>
+                          
+                          <Select
+                            value={exercise.word_list_id}
+                            onValueChange={(value) => {
+                              updateExercise(dayOfWeek, value, exercise.settings as ExerciseSettings);
+                            }}
+                          >
+                            <SelectTrigger className="h-6 w-32 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {wordLists.map((list) => (
+                                <SelectItem key={list.id} value={list.id}>
+                                  {list.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          
                           <Button
                             variant="ghost"
                             size="sm"
@@ -304,28 +383,24 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
-                        )}
-                      </div>
-
-                      {exercise ? (
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Badge variant="outline" className="text-xs">
-                              {exercise.word_list?.name}
-                            </Badge>
-                            <span className="text-muted-foreground">
-                              {exercise.word_list?.words?.length} parole • {exercise.settings?.exposureDuration}ms
-                            </span>
-                          </div>
-                          
+                        </div>
+                      ) : (
+                        <div className="flex-1">
                           <Select
-                            value={exercise.word_list_id}
                             onValueChange={(value) => {
-                              updateExercise(dayOfWeek, value, exercise.settings as ExerciseSettings);
+                              const defaultSettings: ExerciseSettings = {
+                                exposureDuration: 500,
+                                intervalDuration: 200,
+                                fontSize: 'large',
+                                textCase: 'original',
+                                useMask: false,
+                                maskDuration: 200,
+                              };
+                              updateExercise(dayOfWeek, value, defaultSettings);
                             }}
                           >
-                            <SelectTrigger className="h-8 text-sm">
-                              <SelectValue />
+                            <SelectTrigger className="h-6 text-xs">
+                              <SelectValue placeholder="Nessun esercizio" />
                             </SelectTrigger>
                             <SelectContent>
                               {wordLists.map((list) => (
@@ -336,31 +411,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                             </SelectContent>
                           </Select>
                         </div>
-                      ) : (
-                        <Select
-                          onValueChange={(value) => {
-                            const defaultSettings: ExerciseSettings = {
-                              exposureDuration: 500,
-                              intervalDuration: 200,
-                              fontSize: 'large',
-                              textCase: 'original',
-                              useMask: false,
-                              maskDuration: 200,
-                            };
-                            updateExercise(dayOfWeek, value, defaultSettings);
-                          }}
-                        >
-                          <SelectTrigger className="h-8 text-sm">
-                            <SelectValue placeholder="Aggiungi..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {wordLists.map((list) => (
-                              <SelectItem key={list.id} value={list.id}>
-                                {list.name} ({list.words.length})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
                       )}
                     </div>
                   );

@@ -374,7 +374,7 @@ export const TherapistDashboard: React.FC = () => {
         </div>
 
         <Tabs defaultValue="patients" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="patients" className="flex items-center gap-2">
               <UserCog className="h-4 w-4" />
               Gestione Pazienti
@@ -386,10 +386,6 @@ export const TherapistDashboard: React.FC = () => {
             <TabsTrigger value="exercises" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               Crea Esercizio
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Statistiche
             </TabsTrigger>
           </TabsList>
 
