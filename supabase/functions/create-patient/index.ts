@@ -104,11 +104,98 @@ serve(async (req) => {
       console.error('Error generating magic link:', magicLinkError);
     }
 
-    // Note: Email non configurata in Supabase, quindi non inviamo email
-    // Il terapista riceverà sempre la password da fornire manualmente al paziente
+    // Send welcome email using Brevo
+    let emailSent = false;
+    let emailError = null;
     
-    const message = `Paziente ${fullName} creato con successo. Password: ${password}`;
-    const warning = `IMPORTANTE: Fornisci al paziente la password: ${password} e l'email ${email} per accedere.`;
+    try {
+      const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'api-key': Deno.env.get('BREVO_API_KEY') || ''
+        },
+        body: JSON.stringify({
+          sender: {
+            name: 'Tachistoscopio',
+            email: 'noreply@tachistoscopio.app'
+          },
+          to: [
+            {
+              email: email,
+              name: fullName
+            }
+          ],
+          subject: 'Benvenuto su Tachistoscopio - Credenziali di accesso',
+          htmlContent: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+              <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h1 style="color: #2563eb; margin-bottom: 20px; text-align: center;">
+                  🎯 Benvenuto su Tachistoscopio
+                </h1>
+                
+                <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+                  Ciao <strong>${fullName}</strong>,
+                </p>
+                
+                <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+                  Il tuo terapista ha creato un account per te sulla piattaforma Tachistoscopio. 
+                  Questa piattaforma ti aiuterà a migliorare le tue capacità di lettura attraverso esercizi mirati.
+                </p>
+                
+                <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                  <h3 style="color: #1d4ed8; margin-top: 0;">📋 Le tue credenziali di accesso:</h3>
+                  <p style="margin: 10px 0;"><strong>Email:</strong> ${email}</p>
+                  <p style="margin: 10px 0;"><strong>Password:</strong> <code style="background-color: #dbeafe; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${password}</code></p>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${magicLinkData?.properties?.action_link || `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/`}" 
+                     style="background-color: #2563eb; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                    🚀 Accedi alla Piattaforma
+                  </a>
+                </div>
+                
+                <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                  <p style="margin: 0; font-size: 14px; color: #92400e;">
+                    <strong>💡 Suggerimento:</strong> Dopo il primo accesso, potrai cambiare la password dalle impostazioni del tuo profilo.
+                  </p>
+                </div>
+                
+                <p style="font-size: 14px; color: #6b7280; margin-top: 30px; text-align: center;">
+                  Se hai problemi con l'accesso, contatta il tuo terapista.<br>
+                  Buon allenamento! 📚
+                </p>
+              </div>
+            </div>
+          `
+        })
+      });
+
+      if (brevoResponse.ok) {
+        emailSent = true;
+        console.log(`Welcome email sent successfully to ${email} via Brevo`);
+      } else {
+        const errorData = await brevoResponse.json();
+        emailError = `Brevo error: ${errorData.message || 'Unknown error'}`;
+        console.error('Brevo error:', errorData);
+      }
+    } catch (emailException) {
+      console.error('Failed to send email via Brevo:', emailException);
+      emailError = emailException.message;
+    }
+
+    // Prepare response message
+    let message = `Paziente ${fullName} creato con successo.`;
+    let warning = null;
+    
+    if (emailSent) {
+      message += ` Email di benvenuto inviata a ${email} con credenziali di accesso.`;
+    } else {
+      warning = `ATTENZIONE: Il paziente è stato creato ma l'email non è stata inviata. Errore: ${emailError}. Fornisci manualmente le credenziali al paziente.`;
+      message += ` IMPORTANTE: Fornisci al paziente la password: ${password}`;
+    }
 
     return new Response(
       JSON.stringify({ 
@@ -117,8 +204,8 @@ serve(async (req) => {
         magic_link: magicLinkData?.properties?.action_link,
         message: message,
         warning: warning,
-        emailSent: false,
-        emailError: "Email non configurata in Supabase"
+        emailSent: emailSent,
+        emailError: emailError
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
