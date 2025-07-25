@@ -9,11 +9,6 @@ export const DebugPanel: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Solo mostra in development/preview
-  if (process.env.NODE_ENV === 'production') {
-    return null;
-  }
-
   const resetMarioSessions = async () => {
     setLoading(true);
     try {
