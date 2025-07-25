@@ -77,7 +77,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ onRevealTutorial }) => {
       const { error } = await supabase
         .from('exercise_sessions')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Elimina tutto
+        .gte('created_at', '1970-01-01'); // Matcha tutti i record
 
       if (error) {
         toast({
@@ -301,10 +301,34 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ onRevealTutorial }) => {
     setLoading(true);
     try {
       // Elimina in ordine per rispettare le foreign key
-      await supabase.from('exercise_sessions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('exercises').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('word_lists').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('profiles').delete().eq('role', 'patient');
+      // Usa una condizione che matcha tutti i record
+      const { error: sessionsError } = await supabase
+        .from('exercise_sessions')
+        .delete()
+        .gte('created_at', '1970-01-01');
+      
+      if (sessionsError) throw sessionsError;
+
+      const { error: exercisesError } = await supabase
+        .from('exercises')
+        .delete()
+        .gte('created_at', '1970-01-01');
+      
+      if (exercisesError) throw exercisesError;
+
+      const { error: wordListsError } = await supabase
+        .from('word_lists')
+        .delete()
+        .gte('created_at', '1970-01-01');
+      
+      if (wordListsError) throw wordListsError;
+
+      const { error: patientsError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('role', 'patient');
+      
+      if (patientsError) throw patientsError;
 
       toast({
         title: "Database Pulito",
