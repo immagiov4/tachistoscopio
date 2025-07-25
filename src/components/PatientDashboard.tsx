@@ -432,20 +432,20 @@ export const PatientDashboard: React.FC = () => {
                 <div className="space-y-4">
                   {/* Statistiche generali */}
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">
+                    <div className="text-center p-3 bg-blue-100/90 backdrop-blur-sm rounded-lg shadow-lg border border-blue-200">
+                      <div className="text-2xl font-bold text-blue-800">
                         {recentSessions.length}
                       </div>
                       <div className="text-xs text-blue-700">Sessioni</div>
                     </div>
-                    <div className="text-center p-3 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">
+                    <div className="text-center p-3 bg-green-100/90 backdrop-blur-sm rounded-lg shadow-lg border border-green-200">
+                      <div className="text-2xl font-bold text-green-800">
                         {Math.round(recentSessions.reduce((acc, s) => acc + s.accuracy, 0) / recentSessions.length)}%
                       </div>
                       <div className="text-xs text-green-700">Precisione Media</div>
                     </div>
-                    <div className="text-center p-3 bg-orange-50 rounded-lg">
-                      <div className="text-2xl font-bold text-orange-600">
+                    <div className="text-center p-3 bg-orange-100/90 backdrop-blur-sm rounded-lg shadow-lg border border-orange-200">
+                      <div className="text-2xl font-bold text-orange-800">
                         {recentSessions.reduce((acc, s) => acc + s.total_words, 0)}
                       </div>
                       <div className="text-xs text-orange-700">Parole Totali</div>
