@@ -300,60 +300,26 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ onRevealTutorial }) => {
 
     setLoading(true);
     try {
-      // Prima elimina tutte le sessioni esistenti (di tutti i pazienti)
-      const { error: allSessionsError } = await supabase
-        .from('exercise_sessions')
-        .delete()
-        .gte('completed_at', '1900-01-01');
+      console.log('🧹 Calling admin cleanup function...');
       
-      console.log('Sessions deletion result:', allSessionsError);
-
-      // Poi elimina tutti gli esercizi
-      const { error: exercisesError } = await supabase
-        .from('exercises')
-        .delete()
-        .gte('created_at', '1900-01-01');
+      const { data, error } = await supabase.functions.invoke('debug-clear-database');
       
-      console.log('Exercises deletion result:', exercisesError);
+      if (error) throw error;
 
-      // Poi elimina tutte le liste di parole
-      const { error: wordListsError } = await supabase
-        .from('word_lists')
-        .delete()
-        .gte('created_at', '1900-01-01');
-      
-      console.log('Word lists deletion result:', wordListsError);
-
-      // Infine elimina tutti i pazienti
-      const { error: patientsError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('role', 'patient');
-      
-      console.log('Patients deletion result:', patientsError);
-
-      // Mostra eventuali errori specifici
-      if (allSessionsError) {
-        console.error('Errore eliminazione sessioni:', allSessionsError);
-      }
-      if (exercisesError) {
-        console.error('Errore eliminazione esercizi:', exercisesError);
-      }
-      if (wordListsError) {
-        console.error('Errore eliminazione liste:', wordListsError);
-      }
-      if (patientsError) {
-        console.error('Errore eliminazione pazienti:', patientsError);
-      }
+      console.log('🎯 Cleanup completed:', data);
 
       toast({
         title: "Database Pulito",
-        description: "Operazione completata. Controlla la console per dettagli.",
+        description: `Eliminati: ${data.deletedCounts.sessions} sessioni, ${data.deletedCounts.exercises} esercizi, ${data.deletedCounts.wordLists} liste, ${data.deletedCounts.patients} pazienti`,
       });
 
-      window.location.reload();
+      // Wait a bit then reload
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+      
     } catch (error) {
-      console.error('Errore generale:', error);
+      console.error('❌ Database cleanup failed:', error);
       toast({
         title: "Errore",
         description: "Errore durante la pulizia del database: " + (error as Error).message,
