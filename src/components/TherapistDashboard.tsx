@@ -128,7 +128,7 @@ export const TherapistDashboard: React.FC = () => {
     setCreatePatientLoading(true);
     try {
       // Create user via edge function since admin SDK is not available in browser
-      const { error } = await supabase.functions.invoke('create-patient', {
+      const { data, error } = await supabase.functions.invoke('create-patient', {
         body: {
           email: newPatientEmail,
           fullName: newPatientName,
@@ -138,19 +138,28 @@ export const TherapistDashboard: React.FC = () => {
 
       if (error) throw error;
 
-      toast({
-        title: 'Successo',
-        description: 'Paziente creato con successo. Email inviata con credenziali di accesso.',
-      });
+      // Mostra il risultato con eventuali warning
+      if (data.warning) {
+        toast({
+          title: 'Paziente creato con warning',
+          description: data.warning,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Successo',
+          description: data.message,
+        });
+      }
 
       setNewPatientEmail('');
       setNewPatientName('');
       await fetchPatients();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating patient:', error);
       toast({
         title: 'Errore',
-        description: 'Errore durante la creazione del paziente',
+        description: error.message || 'Errore durante la creazione del paziente',
         variant: 'destructive',
       });
     } finally {

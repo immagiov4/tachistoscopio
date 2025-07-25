@@ -193,7 +193,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
 
     setCreatePatientLoading(true);
     try {
-      const { error } = await supabase.functions.invoke('create-patient', {
+      const { data, error } = await supabase.functions.invoke('create-patient', {
         body: {
           email: newPatientEmail,
           fullName: newPatientName,
@@ -203,19 +203,29 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
 
       if (error) throw error;
 
-      toast({
-        title: 'Successo',
-        description: 'Paziente creato con successo. Email inviata al genitore/tutore con link di accesso rapido e password temporanea.',
-      });
+      // Mostra il risultato con eventuali warning
+      if (data.warning) {
+        toast({
+          title: 'Paziente creato con warning',
+          description: data.warning,
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Successo',
+          description: data.message,
+        });
+      }
 
+      // Reset form and refresh data
       setNewPatientEmail('');
       setNewPatientName('');
       await fetchInitialData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating patient:', error);
       toast({
         title: 'Errore',
-        description: 'Errore durante la creazione del paziente',
+        description: error.message || 'Errore durante la creazione del paziente',
         variant: 'destructive',
       });
     } finally {

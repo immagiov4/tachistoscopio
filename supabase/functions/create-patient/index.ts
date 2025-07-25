@@ -105,6 +105,9 @@ serve(async (req) => {
     }
 
     // Send welcome email using admin generateLink
+    let emailSent = false;
+    let emailError = null;
+    
     try {
       const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.generateLink({
         type: 'invite',
@@ -121,12 +124,25 @@ serve(async (req) => {
 
       if (inviteError) {
         console.error('Error sending email:', inviteError);
+        emailError = inviteError.message;
       } else {
         console.log(`Welcome email sent successfully to ${email}`);
+        emailSent = true;
       }
-    } catch (emailError) {
-      console.error('Failed to send email:', emailError);
-      // Don't fail the request if email fails
+    } catch (emailException) {
+      console.error('Failed to send email:', emailException);
+      emailError = emailException.message;
+    }
+
+    // Prepare response message
+    let message = `Paziente ${fullName} creato con successo.`;
+    let warning = null;
+    
+    if (emailSent) {
+      message += ` Email inviata a ${email} con credenziali di accesso.`;
+    } else {
+      warning = `ATTENZIONE: Il paziente è stato creato ma l'email non è stata inviata. Errore: ${emailError}. Fornisci manualmente le credenziali al paziente.`;
+      message += ` IMPORTANTE: Fornisci al paziente la password: ${password}`;
     }
 
     return new Response(
@@ -134,15 +150,21 @@ serve(async (req) => {
         success: true, 
         password: password,
         magic_link: magicLinkData?.properties?.action_link,
-        message: `Paziente ${fullName} creato con successo. Email inviata a ${email} con credenziali di accesso.`
+        message: message,
+        warning: warning,
+        emailSent: emailSent,
+        emailError: emailError
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error creating patient:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: `Errore durante la creazione del paziente: ${error.message}`,
+        details: error.message
+      }),
       { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
