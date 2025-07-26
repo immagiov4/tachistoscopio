@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -155,27 +155,13 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   };
 
-  // Load saved word lists from database
-  useEffect(() => {
-    if (therapistId) {
-      loadSavedWordLists();
-    }
-  }, [therapistId]);
-
-  // Effect automatico per tutte le modifiche del form generatore, ma non per cambio sezione
-  useEffect(() => {
-    if (activeTab !== 'generator') return;
-    
-    // Generazione immediata senza debounce per migliori performance
-    generateWords();
-  }, [generatorParams]); // Tutti i parametri del generatore
 
   // Load dataset on component mount
   useEffect(() => {
     loadWordsDataset();
   }, []);
 
-  const generateWords = async () => {
+  const generateWords = useCallback(async () => {
     setIsGenerating(true);
     
     // Load dataset if not already loaded and we're generating real words
@@ -203,7 +189,22 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     
     setGeneratedWords(words);
     setIsGenerating(false);
-  };
+  }, [generatorParams, allWords]);
+
+  // Load saved word lists from database
+  useEffect(() => {
+    if (therapistId) {
+      loadSavedWordLists();
+    }
+  }, [therapistId]);
+
+  // Effect automatico per tutte le modifiche del form generatore  
+  useEffect(() => {
+    if (activeTab !== 'generator') return;
+    
+    // Generazione automatica ogni volta che cambiano i parametri
+    generateWords();
+  }, [activeTab, generateWords]);
 
   // Function to count syllables in Italian words (improved)
   const countSyllables = (word: string): number => {
