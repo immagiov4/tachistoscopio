@@ -218,6 +218,19 @@ export type Database = {
           role: string
         }[]
       }
+      get_patients_with_emails: {
+        Args: { therapist_profile_id: string }
+        Returns: {
+          id: string
+          user_id: string
+          role: string
+          full_name: string
+          created_at: string
+          updated_at: string
+          created_by: string
+          email: string
+        }[]
+      }
       is_therapist: {
         Args: Record<PropertyKey, never>
         Returns: boolean

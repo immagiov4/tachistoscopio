@@ -17,9 +17,10 @@ interface PatientExerciseManagerProps {
 }
 
 export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ therapistId }) => {
-  const [patients, setPatients] = useState<Profile[]>([]);
-  const [patientsWithExercises, setPatientsWithExercises] = useState<Array<Profile & {exerciseCount: number}>>([]);
-  const [selectedPatient, setSelectedPatient] = useState<Profile | null>(null);
+  type PatientWithEmail = Profile & { email?: string };
+  const [patients, setPatients] = useState<PatientWithEmail[]>([]);
+  const [patientsWithExercises, setPatientsWithExercises] = useState<Array<PatientWithEmail & {exerciseCount: number}>>([]);
+  const [selectedPatient, setSelectedPatient] = useState<PatientWithEmail | null>(null);
   const [wordLists, setWordLists] = useState<WordList[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [patientExercises, setPatientExercises] = useState<Exercise[]>([]);
@@ -54,11 +55,9 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
     setSelectedPatient(null); // Reset selection on data fetch
     try {
       const [patientsData, wordListsData, exercisesData] = await Promise.all([
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('role', 'patient')
-          .eq('created_by', therapistId),
+        supabase.rpc('get_patients_with_emails', { 
+          therapist_profile_id: therapistId 
+        }),
         supabase
           .from('word_lists')
           .select('*')
@@ -69,7 +68,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
           .eq('therapist_id', therapistId)
       ]);
 
-      const patients = patientsData.data || [];
+      const patients = (patientsData.data || []) as PatientWithEmail[];
       const exercises = exercisesData.data || [];
       
       // Count exercises per patient
@@ -357,7 +356,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
   };
 
   const filteredPatients = patientsWithExercises.filter(patient =>
-    patient.full_name.toLowerCase().includes(searchTerm.toLowerCase())
+    patient.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (patient.email && patient.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   // Paginazione
