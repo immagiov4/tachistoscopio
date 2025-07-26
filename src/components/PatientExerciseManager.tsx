@@ -631,15 +631,15 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  <div>
-                    <CardTitle>Piano Settimanale</CardTitle>
-                    <CardDescription>
-                      Gestisci gli esercizi per ogni giorno della settimana
-                    </CardDescription>
-                  </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                <div>
+                  <CardTitle>Piano Settimanale</CardTitle>
+                  <CardDescription className="mt-2">
+                    Gestisci gli esercizi per ogni giorno della settimana
+                  </CardDescription>
                 </div>
+              </div>
                 <Button
                   variant="outline"
                   size="sm"
