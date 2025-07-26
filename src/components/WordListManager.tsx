@@ -642,7 +642,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
             <CardTitle className="text-lg">Esercizi salvati</CardTitle>
             <CardDescription>Clicca su un esercizio per modificarlo</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 flex-1 flex flex-col min-h-0">
+          <CardContent className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto">
             {savedWordLists.length === 0 ? <div className="text-center py-6 text-gray-500">
                 <BookOpen className="h-10 w-10 mx-auto mb-2 opacity-50" />
                 <p className="text-sm font-medium">Nessun esercizio</p>
