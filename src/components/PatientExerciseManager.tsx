@@ -67,11 +67,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         const rect = patientListCard.getBoundingClientRect();
         const shouldShow = rect.bottom < window.innerHeight * 0.5;
         
-        if (shouldShow && !showFloatingActions) {
-          setShowFloatingActions(true);
-        } else if (!shouldShow && showFloatingActions) {
-          setShowFloatingActions(false);
-        }
+        setShowFloatingActions(shouldShow);
       }
     };
 
@@ -81,7 +77,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [showFloatingActions]);
+  }, []); // Rimosso showFloatingActions dalle dipendenze
   
   const scrollToPatientList = () => {
     const patientListCard = document.querySelector('[data-patient-list]');
