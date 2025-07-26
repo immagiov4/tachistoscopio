@@ -368,7 +368,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   };
   const handleCreateCustomList = async () => {
-    const wordsToSave = activeTab === 'generator' ? generatedWords : customWords.split(/[,\n\s]+/).map(word => word.trim()).filter(word => word.length > 0);
+    const wordsToSave = activeTab === 'generator' ? generatedWords : customWords.split(/[,\n]+/).map(word => word.trim()).filter(word => word.length > 0);
     if (!therapistId) {
       // For non-therapists, just create temporary list
       const tempList: WordList = {
@@ -520,7 +520,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   };
   const handleUpdateWordList = async () => {
     if (!therapistId || !editingList) return;
-    const words = customWords.split(/[,\n\s]+/).map(word => word.trim()).filter(word => word.length > 0);
+    const words = customWords.split(/[,\n]+/).map(word => word.trim()).filter(word => word.length > 0);
     if (words.length === 0) {
       toast({
         title: "Nessuna parola valida",
@@ -814,10 +814,10 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
             {/* Contenuto Manual */}
             {(activeTab === 'manual' || editingList) && <div className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium">Parole (separate da virgola o a capo)</Label>
-                  <Textarea placeholder="aprile, piccolo, dove, palazzo&#10;maggio, verde, collina&#10;regalo, pianura, marzo" value={customWords} onChange={e => setCustomWords(e.target.value)} rows={6} className="mt-1 font-mono text-sm" />
+                  <Label className="text-sm font-medium">Parole o frasi (separate da virgola o a capo)</Label>
+                  <Textarea placeholder="aprile, piccolo, dove, palazzo&#10;maggio verde collina&#10;la casa è bella&#10;regalo, pianura, marzo" value={customWords} onChange={e => setCustomWords(e.target.value)} rows={6} className="mt-1 font-mono text-sm" />
                   <p className="text-xs text-gray-500 mt-1">
-                    {customWords.split(/[,\n\s]+/).filter(w => w.trim()).length} parole
+                    {customWords.split(/[,\n]+/).filter(w => w.trim()).length} elementi
                   </p>
                 </div>
                 
