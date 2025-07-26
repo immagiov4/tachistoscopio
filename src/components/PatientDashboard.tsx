@@ -275,8 +275,8 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
           </Button>
         </header>
 
-        <div className="grid gap-4">
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-2xl">
+        <div className="grid gap-6">
+          <Card className="bg-white/90 backdrop-blur-sm border-white/30 shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-gray-800">
                 <Calendar className="h-5 w-5" />
@@ -311,29 +311,35 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                     </div>
                   )}
 
-                  {/* Info della lista in alto */}
-                  <div className="bg-white/70 backdrop-blur-sm border border-white/30 rounded-lg p-3 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0"></div>
-                      <div>
-                        <h4 className="font-semibold text-gray-800 text-sm">{todayExercise.word_list?.name}</h4>
+                  {/* Info della lista con design migliorato */}
+                  <div className="bg-gradient-to-r from-primary/5 to-primary/10 backdrop-blur-sm border border-primary/20 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <div className="flex items-start gap-3">
+                      <div className="w-3 h-3 rounded-full bg-primary mt-1 flex-shrink-0 animate-pulse"></div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-800 mb-1">{todayExercise.word_list?.name}</h4>
                         {todayExercise.word_list?.description && (
-                          <p className="text-xs text-gray-600">
+                          <p className="text-sm text-gray-600 mb-2">
                             {todayExercise.word_list.description}
                           </p>
                         )}
-                        <p className="text-xs font-medium text-primary">
-                          {todayExercise.word_list?.words.length} parole da leggere
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-primary/20 text-primary">
+                            {todayExercise.word_list?.words.length} parole
+                          </span>
+                          <span className="text-xs text-gray-500">da leggere</span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Controlli compatti */}
-                  <div className="border rounded-lg p-3 bg-white">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-medium text-gray-700">Dimensione Testo</p>
-                      <div className="flex items-center gap-2">
+                  {/* Controlli eleganti per dimensione testo */}
+                  <div className="border-2 border-gray-100 rounded-xl p-4 bg-white/80 backdrop-blur-sm hover:border-primary/30 transition-colors duration-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        <span className="w-2 h-2 bg-primary rounded-full"></span>
+                        Dimensione Testo
+                      </p>
+                      <div className="flex items-center gap-3">
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -345,11 +351,11 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                             }
                           }}
                           disabled={accessibilitySettings.fontSize === 'small'}
-                          className="w-7 h-7 p-0"
+                          className="w-8 h-8 p-0 border-2 hover:scale-110 transition-transform duration-200"
                         >
                           -
                         </Button>
-                        <span className="text-sm font-bold text-primary min-w-[60px] text-center">
+                        <span className="text-sm font-bold text-primary min-w-[70px] text-center px-3 py-1 bg-primary/10 rounded-lg border border-primary/20">
                           {accessibilitySettings.fontSize === 'small' ? 'Piccolo' :
                            accessibilitySettings.fontSize === 'medium' ? 'Medio' :
                            accessibilitySettings.fontSize === 'large' ? 'Grande' : 'XL'}
@@ -365,20 +371,21 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                             }
                           }}
                           disabled={accessibilitySettings.fontSize === 'extra-large'}
-                          className="w-7 h-7 p-0"
+                          className="w-8 h-8 p-0 border-2 hover:scale-110 transition-transform duration-200"
                         >
                           +
                         </Button>
                       </div>
                     </div>
-                    <div className="text-center">
-                      <div className={`font-bold ${
-                        accessibilitySettings.fontSize === 'small' ? 'text-lg' :
-                        accessibilitySettings.fontSize === 'medium' ? 'text-xl' :
-                        accessibilitySettings.fontSize === 'large' ? 'text-2xl' : 'text-3xl'
+                    <div className="text-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
+                      <div className={`font-bold text-gray-700 transition-all duration-300 ${
+                        accessibilitySettings.fontSize === 'small' ? 'text-xl' :
+                        accessibilitySettings.fontSize === 'medium' ? 'text-2xl' :
+                        accessibilitySettings.fontSize === 'large' ? 'text-3xl' : 'text-4xl'
                       }`}>
                         Aa
                       </div>
+                      <p className="text-xs text-gray-500 mt-1">Anteprima dimensione</p>
                     </div>
                   </div>
 
@@ -391,9 +398,9 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                   <Button
                     onClick={startExercise} 
                     size="lg" 
-                    className="w-full min-h-[50px] text-lg touch-manipulation bg-blue-600 hover:bg-blue-700 text-white"
+                    className="w-full min-h-[56px] text-lg font-semibold touch-manipulation bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 border-0"
                   >
-                    <Play className="h-5 w-5 mr-2" />
+                    <Play className="h-6 w-6 mr-3" />
                     {completedToday ? "Ripeti Esercizio" : "Inizia Esercizio"}
                   </Button>
 
