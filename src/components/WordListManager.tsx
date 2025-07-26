@@ -40,7 +40,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   // Generator state
   const [generatorParams, setGeneratorParams] = useState({
     type: 'words' as 'words' | 'syllables' | 'nonwords' | 'minimal-pairs',
-    syllableCount: '2-3',
+    syllableCount: '2',
     startsWith: '',
     contains: '',
     count: 10
@@ -266,7 +266,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   const generateRealWords = (): string[] => {
     // Use complete dataset
     const wordsToUse = allWords.length > 0 ? allWords : ITALIAN_WORDS;
-    const [minSyl, maxSyl] = generatorParams.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
+    const targetSyllables = parseInt(generatorParams.syllableCount) || 2;
     
     // Filter words based on criteria
     const filteredWords = wordsToUse.filter(word => {
@@ -276,7 +276,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       
       // Count syllables accurately
       const syllableCount = countSyllables(word);
-      if (syllableCount < minSyl || syllableCount > maxSyl) return false;
+      if (syllableCount !== targetSyllables) return false;
       
       return true;
     });
@@ -315,8 +315,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     
     while (nonWords.length < generatorParams.count) {
       let word = '';
-      const [minSyl, maxSyl] = generatorParams.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
-      const syllables = Math.floor(Math.random() * (maxSyl - minSyl + 1)) + minSyl;
+      const syllables = parseInt(generatorParams.syllableCount) || 2;
       
       for (let i = 0; i < syllables; i++) {
         const consonant = consonants[Math.floor(Math.random() * consonants.length)];
@@ -337,7 +336,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
   const generateMinimalPairs = (): string[] => {
     const pairs: string[] = [];
-    const [minSyl, maxSyl] = generatorParams.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
+    const targetSyllables = parseInt(generatorParams.syllableCount) || 2;
     
     // Algoritmo efficiente per trovare coppie minime dal dizionario interno
     const findMinimalPairsFromDictionary = (): string[] => {
@@ -387,7 +386,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
         // Controlla se la parola soddisfa i criteri
         const syllables = countSyllables(word);
-        const validSyllables = syllables >= minSyl && syllables <= maxSyl;
+        const validSyllables = syllables === targetSyllables;
         const validFilters = (!generatorParams.startsWith || word.startsWith(generatorParams.startsWith.toLowerCase())) &&
                            (!generatorParams.contains || word.includes(generatorParams.contains.toLowerCase()));
         
@@ -414,7 +413,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                 
                 // Aggiungi entrambe le parole se non ci sono già e soddisfano i criteri
                 const variantSyllables = countSyllables(variant);
-                const variantValidSyllables = variantSyllables >= minSyl && variantSyllables <= maxSyl;
+                const variantValidSyllables = variantSyllables === targetSyllables;
                 const variantValidFilters = (!generatorParams.startsWith || variant.startsWith(generatorParams.startsWith.toLowerCase())) &&
                                           (!generatorParams.contains || variant.includes(generatorParams.contains.toLowerCase()));
                 
@@ -743,7 +742,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     setGeneratedWords([]);
     setGeneratorParams({
       type: 'words',
-      syllableCount: '2-3',
+                    syllableCount: '2',
       startsWith: '',
       contains: '',
       count: 10
@@ -963,10 +962,11 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1-2">1-2</SelectItem>
-                      <SelectItem value="2-3">2-3</SelectItem>
-                      <SelectItem value="3-4">3-4</SelectItem>
-                      <SelectItem value="4-5">4-5</SelectItem>
+                      <SelectItem value="1">1 sillaba</SelectItem>
+                      <SelectItem value="2">2 sillabe</SelectItem>
+                      <SelectItem value="3">3 sillabe</SelectItem>
+                      <SelectItem value="4">4 sillabe</SelectItem>
+                      <SelectItem value="5">5 sillabe</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

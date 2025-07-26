@@ -52,6 +52,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
   const [selectedTheme, setSelectedTheme] = useState<ThemeType>('rainbow');
   const [recentSessions, setRecentSessions] = useState<DBExerciseSession[]>([]);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [studioPatientProfile, setStudioPatientProfile] = useState<any>(null);
 
   // Usa il patientId dalla modalità studio o dal profilo corrente
   const effectivePatientId = studioPatientId || profile?.id;
@@ -84,8 +85,31 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
     if (effectivePatientId) {
       fetchTodayExercise();
       fetchRecentSessions();
+      
+      // Se in modalità studio, carica il profilo del paziente
+      if (studioPatientId) {
+        fetchStudioPatientProfile();
+      }
     }
-  }, [effectivePatientId]);
+  }, [effectivePatientId, studioPatientId]);
+  
+  const fetchStudioPatientProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', studioPatientId)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching studio patient profile:', error);
+      } else {
+        setStudioPatientProfile(data);
+      }
+    } catch (error) {
+      console.error('Error fetching studio patient profile:', error);
+    }
+  };
   const fetchTodayExercise = async () => {
     try {
       const today = new Date().getDay(); // 0 = Sunday, 6 = Saturday
@@ -275,7 +299,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
               La Mia Area
             </h1>
             <p className="text-lg text-gray-600">
-              Benvenuto, {profile?.full_name}
+              Benvenuto, {studioPatientId ? studioPatientProfile?.full_name : profile?.full_name}
             </p>
           </div>
           {!studioPatientId && (

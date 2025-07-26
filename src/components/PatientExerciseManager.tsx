@@ -470,8 +470,10 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
             </Button>
           </div>
           
-          {/* Importa e usa il PatientDashboard */}
-          <PatientDashboard studioPatientId={studioMode} />
+          {/* Importa e usa il PatientDashboard con iframe stondato */}
+          <div className="rounded-2xl overflow-hidden border-2 border-gray-200 shadow-lg">
+            <PatientDashboard studioPatientId={studioMode} />
+          </div>
         </div>;
     }
   }

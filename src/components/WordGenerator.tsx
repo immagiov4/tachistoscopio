@@ -55,7 +55,7 @@ const WORD_ENDINGS = ['a', 'e', 'i', 'o', 'u', 'are', 'ere', 'ire', 'ato', 'uto'
 export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSave }) => {
   const [params, setParams] = useState<GenerationParams>({
     type: 'words',
-    syllableCount: '2-3',
+    syllableCount: '2',
     startsWith: '',
     contains: '',
     count: 10
@@ -106,7 +106,7 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
   const generateRealWords = (): string[] => {
     if (italianWords.length === 0) return [];
     
-    const [minSyl, maxSyl] = params.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
+    const syllables = parseInt(params.syllableCount) || 2;
     
     // Filtra le parole del dizionario
     let filteredWords = italianWords.filter(word => {
@@ -116,7 +116,7 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
       
       // Controlla numero di sillabe (conta le vocali come approssimazione)
       const syllableCount = word.match(/[aeiou]/g)?.length || 1;
-      if (syllableCount < minSyl || syllableCount > maxSyl) return false;
+      if (syllableCount !== syllables) return false;
       
       return true;
     });
@@ -164,10 +164,9 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
     
     while (nonWords.length < params.count) {
       let word = '';
-      const [minSyl, maxSyl] = params.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
-      const syllables = Math.floor(Math.random() * (maxSyl - minSyl + 1)) + minSyl;
+      const targetSyllables = parseInt(params.syllableCount) || 2;
       
-      for (let i = 0; i < syllables; i++) {
+      for (let i = 0; i < targetSyllables; i++) {
         const consonant = consonants[Math.floor(Math.random() * consonants.length)];
         const vowel = vowels[Math.floor(Math.random() * vowels.length)];
         word += consonant + vowel;
@@ -330,10 +329,11 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-background border z-50">
-                    <SelectItem value="1-2">Da 1 a 2</SelectItem>
-                    <SelectItem value="2-3">Da 2 a 3</SelectItem>
-                    <SelectItem value="3-4">Da 3 a 4</SelectItem>
-                    <SelectItem value="4-5">Da 4 a 5</SelectItem>
+                    <SelectItem value="1">1 sillaba</SelectItem>
+                    <SelectItem value="2">2 sillabe</SelectItem>
+                    <SelectItem value="3">3 sillabe</SelectItem>
+                    <SelectItem value="4">4 sillabe</SelectItem>
+                    <SelectItem value="5">5 sillabe</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
