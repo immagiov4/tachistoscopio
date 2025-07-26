@@ -287,7 +287,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
         }}
       ></div>
       <div className="container mx-auto p-4 max-w-4xl">
-        <header className="mb-8 flex justify-between items-center bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/20">
+        <header className="mb-8 flex justify-between items-center bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-md border border-white/20">
           <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
               La Mia Area
@@ -303,7 +303,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
         </header>
 
         <div className="grid gap-6">
-          <Card className="bg-white/90 backdrop-blur-sm border-white/30 shadow-md hover:shadow-lg transition-shadow duration-300">
+          <Card className="bg-white/90 backdrop-blur-sm border-white/30 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-gray-800">
                 <Calendar className="h-5 w-5" />
@@ -425,7 +425,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                   <Button
                     onClick={startExercise} 
                     size="lg" 
-                    className="w-full min-h-[56px] text-lg font-semibold touch-manipulation bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 border-0"
+                    className="w-full min-h-[56px] text-lg font-semibold touch-manipulation bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 border-0"
                   >
                     <Play className="h-6 w-6 mr-3" />
                     {completedToday ? "Ripeti Esercizio" : "Inizia Esercizio"}
@@ -450,7 +450,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-2xl">
+          <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-sm">
             <CardHeader>
               <CardTitle className="text-gray-800">I Tuoi Progressi</CardTitle>
               <CardDescription className="text-gray-600">
