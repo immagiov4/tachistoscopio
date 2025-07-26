@@ -547,7 +547,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
                       <UserCheck className="h-4 w-4 mr-1" />
                       Modalità Studio
                     </Button>
-                    <Button variant="outline" size="sm" onClick={e => {
+                    <Button variant="delete" size="sm" onClick={e => {
                   e.stopPropagation();
                   deletePatient(patient.id);
                 }} className="h-8 w-8 p-0">
@@ -606,7 +606,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
                       </div>
                       
                       {exercise ? <div className="flex-1 flex items-center gap-2">
-                          <Button variant="ghost-destructive" size="sm" onClick={() => removeExercise(dayOfWeek)} className="h-6 w-6 p-0">
+                          <Button variant="delete" size="sm" onClick={() => removeExercise(dayOfWeek)} className="h-6 w-6 p-0">
                             <Trash2 className="h-3 w-3" />
                           </Button>
                           

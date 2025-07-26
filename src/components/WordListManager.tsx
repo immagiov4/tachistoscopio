@@ -669,10 +669,10 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                   }} className="h-6 w-6 p-0">
                           <Download className="h-3 w-3" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={e => {
+                        <Button variant="delete" size="sm" onClick={e => {
                     e.stopPropagation();
                     handleDeleteWordList(list.id);
-                  }} className="h-6 w-6 p-0 text-red-500 hover:text-red-700">
+                  }} className="h-6 w-6 p-0">
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
