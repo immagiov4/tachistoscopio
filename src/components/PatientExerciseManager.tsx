@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, BookOpen, BarChart3, Search, Copy, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -394,21 +393,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="exercises" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="exercises" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Esercizi
-          </TabsTrigger>
-          <TabsTrigger value="statistics" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Statistiche
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="exercises" className="mt-6 space-y-6">
-          {/* Create new patient */}
-          <Card>
+      {/* Create new patient */}
+      <Card>
         <CardHeader>
           <CardTitle>Crea Nuovo Paziente</CardTitle>
           <CardDescription>
@@ -701,24 +687,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
           </Card>
         </>
       )}
-        </TabsContent>
-
-        <TabsContent value="statistics" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Statistiche</CardTitle>
-              <CardDescription>
-                Le statistiche saranno disponibili quando i pazienti completeranno gli esercizi
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground text-center py-8">
-                Le statistiche saranno disponibili quando i pazienti completeranno gli esercizi
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };
