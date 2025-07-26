@@ -315,66 +315,12 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     try {
       console.log(`Tentativo di rimozione esercizio per giorno ${dayOfWeek}, paziente ${selectedPatient.id}`);
       
-      // Prima trova l'esercizio da eliminare
-      const { data: exerciseToDelete, error: findError } = await supabase
-        .from('exercises')
-        .select('id')
-        .eq('patient_id', selectedPatient.id)
-        .eq('day_of_week', dayOfWeek)
-        .maybeSingle();
-
-      if (findError) {
-        console.error('Errore nella ricerca dell\'esercizio:', findError);
-        throw findError;
-      }
-
-      if (!exerciseToDelete) {
-        console.log('Nessun esercizio trovato per questo giorno');
-        toast({
-          title: 'Nessun esercizio',
-          description: `Non c'è nessun esercizio per ${DAYS_OF_WEEK[dayOfWeek === 0 ? 6 : dayOfWeek - 1]}`,
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      console.log(`Esercizio trovato con ID: ${exerciseToDelete.id}`);
-
-      // Prima controlla se esistono sessioni per questo esercizio
-      const { data: existingSessions, error: checkError } = await supabase
-        .from('exercise_sessions')
-        .select('*')
-        .eq('exercise_id', exerciseToDelete.id);
-
-      if (checkError) {
-        console.error('Errore nella verifica delle sessioni:', checkError);
-        throw checkError;
-      }
-
-      console.log(`Sessioni trovate da eliminare: ${existingSessions?.length || 0}`, existingSessions);
-
-      // Elimina tutte le sessioni associate se esistono
-      if (existingSessions && existingSessions.length > 0) {
-        console.log(`Tentativo di eliminazione di ${existingSessions.length} sessioni`);
-        const { error: sessionsError } = await supabase
-          .from('exercise_sessions')
-          .delete()
-          .eq('exercise_id', exerciseToDelete.id);
-
-        if (sessionsError) {
-          console.error('Errore nell\'eliminazione delle sessioni:', sessionsError);
-          throw sessionsError;
-        }
-        console.log('Sessioni eliminate con successo');
-      } else {
-        console.log('Nessuna sessione da eliminare');
-      }
-
-      // Poi elimina l'esercizio
+      // Elimina direttamente l'esercizio - le sessioni storiche verranno mantenute
       const { error: exerciseError } = await supabase
         .from('exercises')
         .delete()
-        .eq('id', exerciseToDelete.id);
+        .eq('patient_id', selectedPatient.id)
+        .eq('day_of_week', dayOfWeek);
 
       if (exerciseError) {
         console.error('Errore nell\'eliminazione dell\'esercizio:', exerciseError);
@@ -385,7 +331,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
 
       toast({
         title: 'Successo',
-        description: `Esercizio per ${DAYS_OF_WEEK[dayOfWeek === 0 ? 6 : dayOfWeek - 1]} rimosso`
+        description: `Esercizio per ${DAYS_OF_WEEK[dayOfWeek === 0 ? 6 : dayOfWeek - 1]} rimosso dalla pianificazione`
       });
       
       await fetchPatientData();
@@ -397,8 +343,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       let errorMessage = 'Errore durante la rimozione dell\'esercizio';
       if (error.code === 'PGRST116') {
         errorMessage = 'Esercizio non trovato o non hai i permessi per rimuoverlo.';
-      } else if (error.code === '23503') {
-        errorMessage = 'Impossibile eliminare: l\'esercizio ha ancora delle dipendenze nel database.';
       } else if (error.message?.includes('network')) {
         errorMessage = 'Errore di connessione. Controlla la rete e riprova.';
       } else if (error.message) {
