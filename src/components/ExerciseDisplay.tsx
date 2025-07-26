@@ -179,10 +179,11 @@ export const ExerciseDisplay: React.FC<ExerciseDisplayProps> = ({
     };
   }, [session, isCountingDown, formatWord, nextWord]);
 
-  const progress = Math.min(((session.currentWordIndex + 1) / session.wordList.words.length) * 100, 100);
+  const currentWordNumber = session.currentWordIndex + 1;
+  const progress = Math.min((currentWordNumber / session.wordList.words.length) * 100, 100);
   const errorsCount = session.errors.length;
-  const accuracy = session.currentWordIndex > 0 ? 
-    ((session.currentWordIndex + 1 - errorsCount) / (session.currentWordIndex + 1)) * 100 : 100;
+  const accuracy = currentWordNumber > 1 ? 
+    ((currentWordNumber - 1 - errorsCount) / (currentWordNumber - 1)) * 100 : 100;
 
   if (isCountingDown) {
     return (
@@ -207,7 +208,7 @@ export const ExerciseDisplay: React.FC<ExerciseDisplayProps> = ({
           <div className="flex items-center gap-4">
             <h2 className="text-lg font-semibold">{session.wordList.name}</h2>
             <div className="text-sm text-muted-foreground">
-              Word {session.currentWordIndex + 1} of {session.wordList.words.length}
+              Word {currentWordNumber} of {session.wordList.words.length}
             </div>
           </div>
 
