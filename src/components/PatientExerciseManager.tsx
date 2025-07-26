@@ -586,9 +586,14 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                       
                       {exercise ? (
                         <div className="flex-1 flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">
-                            {exercise.word_list?.words?.length} parole • {exercise.word_list?.settings?.exposureDuration || exercise.settings?.exposureDuration}ms • {exercise.word_list?.settings?.intervalDuration || exercise.settings?.intervalDuration}ms
-                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeExercise(dayOfWeek)}
+                            className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
                           
                           <Select
                             value={exercise.word_list_id}
@@ -610,14 +615,9 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                             </SelectContent>
                           </Select>
                           
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeExercise(dayOfWeek)}
-                            className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
+                          <span className="text-xs text-muted-foreground">
+                            {exercise.word_list?.words?.length} parole • {exercise.word_list?.settings?.exposureDuration || exercise.settings?.exposureDuration}ms • {exercise.word_list?.settings?.intervalDuration || exercise.settings?.intervalDuration}ms
+                          </span>
                         </div>
                       ) : (
                         <div className="flex-1">
