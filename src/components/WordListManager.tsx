@@ -637,7 +637,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         
         {/* Colonna 1: Esercizi Salvati */}
-        <Card className="lg:col-span-1 flex flex-col">
+        <Card className="lg:col-span-1 flex flex-col max-h-[700px]">
           <CardHeader>
             <CardTitle className="text-lg">Esercizi salvati</CardTitle>
             <CardDescription>Clicca su un esercizio per modificarlo</CardDescription>
@@ -693,7 +693,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         </Card>
 
         {/* Colonna 2: Creazione Nuovo Esercizio */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 max-h-[700px] overflow-y-auto">
           <CardHeader>
             <CardTitle className="text-lg">
               {editingList ? 'Modifica esercizio' : 'Crea nuovo esercizio'}
