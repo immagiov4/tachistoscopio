@@ -179,7 +179,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     };
     console.log('New errors after:', newSession.errors);
     onUpdateSession(newSession);
-  }, [session.currentWordIndex, session.errors, session.words.length, onUpdateSession]); // Dipendenze stabili
+  }, [session, onUpdateSession]);
 
   const nextWord = useCallback(() => {
     const newIndex = session.currentWordIndex + 1;
@@ -289,7 +289,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       window.removeEventListener('click', handleClick);
       window.removeEventListener('touchend', handleClick);
     };
-  }, [session.isRunning, session.isPaused, isCountingDown, displayState, onStop]); // Rimosso markError dalle dipendenze
+  }, [session.isRunning, session.isPaused, isCountingDown, displayState, markError, onStop]);
 
   useEffect(() => {
     const currentWordToShow = session.words[session.currentWordIndex];
@@ -387,7 +387,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         setDisplayState('interval');
       };
     }
-  }, [session.isRunning, session.isPaused, session.currentWordIndex, isCountingDown, formatWord, nextWord]); // Rimosso session completo per evitare re-render continui
+  }, [session.isRunning, session.isPaused, session.currentWordIndex, isCountingDown, formatWord, nextWord]);
 
   const progress = (session.currentWordIndex / session.words.length) * 100;
   const accuracy = session.currentWordIndex > 0 ? 
