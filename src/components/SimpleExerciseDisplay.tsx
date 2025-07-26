@@ -419,7 +419,10 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
 
             {displayState === 'interval' && (
               <div className="text-center">
-                {/* Intervallo senza caricamento visivo */}
+                {/* Effetto di pulsazione dello sfondo durante l'intervallo */}
+                <div className="absolute inset-0 bg-black/30 animate-pulse" style={{
+                  animation: 'pulse 0.8s ease-in-out infinite alternate'
+                }}></div>
               </div>
             )}
           </div>
