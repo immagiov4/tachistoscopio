@@ -285,11 +285,8 @@ export const PatientDashboard: React.FC = () => {
             <CardContent>
               {!todayExercise ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-600 mb-4">
-                    Non c'è nessun esercizio programmato per oggi.
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Contatta il tuo terapista per programmare gli esercizi.
+                  <p className="text-gray-600">
+                    Non ci sono esercizi programmati per oggi.
                   </p>
                 </div>
               ) : (

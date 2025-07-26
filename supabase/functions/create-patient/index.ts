@@ -91,17 +91,17 @@ serve(async (req) => {
       throw profileError;
     }
 
-    // Generate magic link for immediate login
-    const { data: magicLinkData, error: magicLinkError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'magiclink',
+    // Generate password reset link that works properly
+    const { data: resetData, error: resetError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'recovery',
       email: email,
       options: {
-        redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/`
+        redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/reset-password`
       }
     });
 
-    if (magicLinkError) {
-      console.error('Error generating magic link:', magicLinkError);
+    if (resetError) {
+      console.error('Error generating reset link:', resetError);
     }
 
     // Send welcome email using Supabase invite system
@@ -145,7 +145,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         password: password,
-        magic_link: magicLinkData?.properties?.action_link,
+        magic_link: resetData?.properties?.action_link,
         message: message,
         warning: warning,
         emailSent: emailSent,
