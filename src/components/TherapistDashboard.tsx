@@ -276,7 +276,7 @@ export const TherapistDashboard: React.FC = () => {
 
 
         <Tabs defaultValue="patients" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="patients" className="flex items-center gap-2">
               <UserCog className="h-4 w-4" />
               Gestione Pazienti
@@ -284,10 +284,6 @@ export const TherapistDashboard: React.FC = () => {
             <TabsTrigger value="wordlists" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               Liste Parole
-            </TabsTrigger>
-            <TabsTrigger value="generator" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              Generatore
             </TabsTrigger>
             <TabsTrigger value="statistics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
@@ -305,10 +301,6 @@ export const TherapistDashboard: React.FC = () => {
               onWordListChange={setCurrentWordList}
               therapistId={profile?.id}
             />
-          </TabsContent>
-
-          <TabsContent value="generator" className="mt-6">
-            <WordGenerator therapistId={profile?.id} />
           </TabsContent>
 
           <TabsContent value="statistics" className="mt-6">
