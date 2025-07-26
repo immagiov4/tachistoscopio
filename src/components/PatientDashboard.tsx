@@ -352,77 +352,93 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                     </div>
                   </div>
 
-                  {/* Controlli eleganti per dimensione testo */}
-                  <div className="border-2 border-gray-100 rounded-xl p-4 bg-white/80 backdrop-blur-sm hover:border-primary/30 transition-colors duration-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <p className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                        <span className="w-2 h-2 bg-primary rounded-full"></span>
-                        Dimensione Testo
-                      </p>
-                      <div className="flex items-center gap-3">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => {
-                            const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
-                            const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
-                            if (currentIndex > 0) {
-                              setAccessibilitySettings({fontSize: sizes[currentIndex - 1]});
-                            }
-                          }}
-                          disabled={accessibilitySettings.fontSize === 'small'}
-                          className="w-8 h-8 p-0 border-2 hover:scale-110 transition-transform duration-200"
-                        >
-                          -
-                        </Button>
-                        <span className="text-sm font-bold text-primary min-w-[70px] text-center px-3 py-1 bg-primary/10 rounded-lg border border-primary/20">
-                          {accessibilitySettings.fontSize === 'small' ? 'Piccolo' :
-                           accessibilitySettings.fontSize === 'medium' ? 'Medio' :
-                           accessibilitySettings.fontSize === 'large' ? 'Grande' : 'XL'}
-                        </span>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => {
-                            const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
-                            const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
-                            if (currentIndex < sizes.length - 1) {
-                              setAccessibilitySettings({fontSize: sizes[currentIndex + 1]});
-                            }
-                          }}
-                          disabled={accessibilitySettings.fontSize === 'extra-large'}
-                          className="w-8 h-8 p-0 border-2 hover:scale-110 transition-transform duration-200"
-                        >
-                          +
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="text-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
-                      <div className={`font-bold text-gray-700 transition-all duration-300 ${
-                        accessibilitySettings.fontSize === 'small' ? 'text-xl' :
-                        accessibilitySettings.fontSize === 'medium' ? 'text-2xl' :
-                        accessibilitySettings.fontSize === 'large' ? 'text-3xl' : 'text-4xl'
-                      }`}>
-                        Aa
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">Anteprima dimensione</p>
-                    </div>
-                  </div>
-
-                  {/* Tema compatto */}
-                  <ThemeSelector 
-                    selectedTheme={selectedTheme}
-                    onThemeChange={setSelectedTheme}
-                  />
-
+                  {/* CTA Principal - Pulsante di avvio/ripeti */}
                   <Button
                     onClick={startExercise} 
                     size="lg" 
-                    className="w-full min-h-[56px] text-lg font-semibold touch-manipulation bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 border-0"
+                    className="w-full min-h-[64px] text-xl font-semibold touch-manipulation bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 border-0 mb-6"
                   >
-                    <Play className="h-6 w-6 mr-3" />
+                    <Play className="h-7 w-7 mr-3" />
                     {completedToday ? "Ripeti Esercizio" : "Inizia Esercizio"}
                   </Button>
+
+                  {/* Card Impostazioni */}
+                  <Card className="border-2 border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base text-gray-800 flex items-center gap-2">
+                        <span className="w-2 h-2 bg-primary rounded-full"></span>
+                        Impostazioni Esercizio
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 pt-0">
+                      {/* Controlli eleganti per dimensione testo */}
+                      <div className="border border-gray-200 rounded-lg p-3 bg-gray-50/50">
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-sm font-medium text-gray-700">
+                            Dimensione Testo
+                          </p>
+                          <div className="flex items-center gap-3">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
+                                const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
+                                if (currentIndex > 0) {
+                                  setAccessibilitySettings({fontSize: sizes[currentIndex - 1]});
+                                }
+                              }}
+                              disabled={accessibilitySettings.fontSize === 'small'}
+                              className="w-8 h-8 p-0 border-2 hover:scale-110 transition-transform duration-200"
+                            >
+                              -
+                            </Button>
+                            <span className="text-sm font-bold text-primary min-w-[70px] text-center px-3 py-1 bg-primary/10 rounded-lg border border-primary/20">
+                              {accessibilitySettings.fontSize === 'small' ? 'Piccolo' :
+                               accessibilitySettings.fontSize === 'medium' ? 'Medio' :
+                               accessibilitySettings.fontSize === 'large' ? 'Grande' : 'XL'}
+                            </span>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
+                                const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
+                                if (currentIndex < sizes.length - 1) {
+                                  setAccessibilitySettings({fontSize: sizes[currentIndex + 1]});
+                                }
+                              }}
+                              disabled={accessibilitySettings.fontSize === 'extra-large'}
+                              className="w-8 h-8 p-0 border-2 hover:scale-110 transition-transform duration-200"
+                            >
+                              +
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="text-center bg-white rounded-lg p-3 border border-gray-200">
+                          <div className={`font-bold text-gray-700 transition-all duration-300 ${
+                            accessibilitySettings.fontSize === 'small' ? 'text-xl' :
+                            accessibilitySettings.fontSize === 'medium' ? 'text-2xl' :
+                            accessibilitySettings.fontSize === 'large' ? 'text-3xl' : 'text-4xl'
+                          }`}>
+                            Aa
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">Anteprima</p>
+                        </div>
+                      </div>
+
+                      {/* Selezione Tema */}
+                      <div className="border border-gray-200 rounded-lg p-3 bg-gray-50/50">
+                        <p className="text-sm font-medium text-gray-700 mb-3">
+                          Tema Esercizio
+                        </p>
+                        <ThemeSelector 
+                          selectedTheme={selectedTheme}
+                          onThemeChange={setSelectedTheme}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
 
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                     <div className="flex items-start gap-2">
