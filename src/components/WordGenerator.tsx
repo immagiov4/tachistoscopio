@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { RefreshCw, Save, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import paroleItalianeText from '@/data/parole_italiane_complete.txt?raw';
 
 interface WordGeneratorProps {
   therapistId?: string;
@@ -64,7 +65,17 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
   const [listName, setListName] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [italianWords, setItalianWords] = useState<string[]>([]);
   const { toast } = useToast();
+
+  // Carica il dizionario italiano
+  useEffect(() => {
+    const words = paroleItalianeText
+      .split('\n')
+      .map(word => word.trim().toLowerCase())
+      .filter(word => word.length > 0);
+    setItalianWords(words);
+  }, []);
 
   const generateWords = () => {
     setIsGenerating(true);
@@ -93,28 +104,40 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
   };
 
   const generateRealWords = (): string[] => {
-    const words: string[] = [];
+    if (italianWords.length === 0) return [];
+    
     const [minSyl, maxSyl] = params.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
     
-    while (words.length < params.count) {
-      const stem = ITALIAN_WORD_STEMS[Math.floor(Math.random() * ITALIAN_WORD_STEMS.length)];
-      const ending = WORD_ENDINGS[Math.floor(Math.random() * WORD_ENDINGS.length)];
-      let word = stem + ending;
+    // Filtra le parole del dizionario
+    let filteredWords = italianWords.filter(word => {
+      // Applica filtri di testo
+      if (params.startsWith && !word.startsWith(params.startsWith.toLowerCase())) return false;
+      if (params.contains && !word.includes(params.contains.toLowerCase())) return false;
       
-      // Applica filtri
-      if (params.startsWith && !word.startsWith(params.startsWith.toLowerCase())) continue;
-      if (params.contains && !word.includes(params.contains.toLowerCase())) continue;
-      
-      // Controlla numero di sillabe (approssimativo)
+      // Controlla numero di sillabe (conta le vocali come approssimazione)
       const syllableCount = word.match(/[aeiou]/g)?.length || 1;
-      if (syllableCount < minSyl || syllableCount > maxSyl) continue;
+      if (syllableCount < minSyl || syllableCount > maxSyl) return false;
       
-      if (!words.includes(word)) {
-        words.push(word);
+      return true;
+    });
+    
+    // Se non abbiamo abbastanza parole, ritorna quello che abbiamo
+    if (filteredWords.length === 0) return [];
+    
+    // Seleziona parole casuali dal set filtrato
+    const selectedWords: string[] = [];
+    const targetCount = Math.min(params.count, filteredWords.length);
+    
+    while (selectedWords.length < targetCount) {
+      const randomIndex = Math.floor(Math.random() * filteredWords.length);
+      const word = filteredWords[randomIndex];
+      
+      if (!selectedWords.includes(word)) {
+        selectedWords.push(word);
       }
     }
     
-    return words;
+    return selectedWords;
   };
 
   const generateSyllables = (): string[] => {
