@@ -251,7 +251,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       setDisplayState('stimulus');
       setStimulusVisible(true);
       
-      // Timer fisso per stimolo - sempre 1000ms
+      // Timer per stimolo - ridotto per essere meno invadente
       const stimulusTimer = setTimeout(() => {
         setStimulusVisible(false);
         
@@ -286,7 +286,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         }, 300); // Timing fisso per transizione
 
         return () => clearTimeout(transitionTimer);
-      }, 1000); // Timing fisso per stimolo
+      }, 500); // Timing ridotto per stimolo
 
       return () => {
         clearTimeout(stimulusTimer);
