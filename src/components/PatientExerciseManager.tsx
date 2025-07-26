@@ -13,9 +13,11 @@ import { LoadingPage } from '@/components/ui/loading';
 import { PatientDashboard } from '@/components/PatientDashboard';
 interface PatientExerciseManagerProps {
   therapistId: string;
+  onNavigateToWordLists?: () => void;
 }
 export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
-  therapistId
+  therapistId,
+  onNavigateToWordLists
 }) => {
   type PatientWithEmail = Profile & {
     email?: string;
@@ -621,13 +623,27 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
           {/* Weekly Exercise Schedule */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Piano Settimanale
-              </CardTitle>
-              <CardDescription>
-                Gestisci gli esercizi per ogni giorno della settimana
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  <div>
+                    <CardTitle>Piano Settimanale</CardTitle>
+                    <CardDescription>
+                      Gestisci gli esercizi per ogni giorno della settimana
+                    </CardDescription>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onNavigateToWordLists}
+                  className="flex items-center gap-2"
+                  disabled={!onNavigateToWordLists}
+                >
+                  <Plus className="h-4 w-4" />
+                  Aggiungi esercizi
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
             <div className="grid gap-2">

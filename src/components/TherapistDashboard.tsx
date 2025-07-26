@@ -350,7 +350,16 @@ export const TherapistDashboard: React.FC = () => {
           </TabsList>
 
           <TabsContent value="patients" className="mt-6">
-            <PatientExerciseManager therapistId={profile?.id || ''} />
+            <PatientExerciseManager 
+              therapistId={profile?.id || ''} 
+              onNavigateToWordLists={() => {
+                // Find and click the wordlists tab
+                const wordlistsTab = document.querySelector('[value="wordlists"]') as HTMLElement;
+                if (wordlistsTab) {
+                  wordlistsTab.click();
+                }
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="wordlists" className="mt-6">
