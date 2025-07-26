@@ -311,7 +311,7 @@ export const AuthPage: React.FC = () => {
                         <h4 className="text-sm font-medium text-blue-900 mb-1">Per i pazienti</h4>
                         <p className="text-sm text-blue-700">
                           I pazienti ricevono le credenziali di accesso direttamente dal loro terapista. 
-                          Non è possibile registrarsi autonomamente come paziente.
+                          Non è possibile registrarsi autonomamente.
                         </p>
                       </div>
                     </div>
