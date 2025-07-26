@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, BookOpen, BarChart3, Search, Copy, Plus, Trash2, UserCheck } from 'lucide-react';
+import { Calendar, Clock, BookOpen, BarChart3, Search, Copy, Plus, Trash2, UserCheck, ArrowUp, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, WordList, Exercise, ExerciseSettings, DAYS_OF_WEEK } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
@@ -46,6 +46,9 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
 
   // Studio mode state
   const [studioMode, setStudioMode] = useState<string | null>(null);
+  
+  // Floating button state
+  const [showFloatingActions, setShowFloatingActions] = useState(false);
   useEffect(() => {
     fetchInitialData();
   }, [therapistId]);
@@ -54,6 +57,41 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       fetchPatientData();
     }
   }, [selectedPatient]);
+  
+  // Scroll listener for floating actions
+  useEffect(() => {
+    const handleScroll = () => {
+      const patientListCard = document.querySelector('[data-patient-list]');
+      if (patientListCard) {
+        const rect = patientListCard.getBoundingClientRect();
+        const isScrolledPast = rect.bottom < window.innerHeight * 0.3;
+        setShowFloatingActions(isScrolledPast);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
+  const scrollToPatientList = () => {
+    const patientListCard = document.querySelector('[data-patient-list]');
+    if (patientListCard) {
+      patientListCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const enterStudioModeForSelected = () => {
+    if (selectedPatient) {
+      enterStudioMode(selectedPatient.id);
+    } else {
+      toast({
+        title: 'Nessun paziente selezionato',
+        description: 'Seleziona un paziente dall\'elenco prima di entrare in modalità studio',
+        variant: 'destructive'
+      });
+    }
+  };
+  
   const fetchInitialData = async () => {
     setSelectedPatient(null); // Reset selection on data fetch
     try {
@@ -408,7 +446,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       </Card>
 
       {/* Patient Search and Selection */}
-      <Card>
+      <Card data-patient-list>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 mb-4">
             <Search className="h-5 w-5" />
@@ -612,5 +650,32 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
             </CardContent>
           </Card>
         </div>}
+        
+      {/* Floating Actions */}
+      {showFloatingActions && (
+        <div className="fixed bottom-6 right-6 flex flex-col gap-2 z-50">
+          <Button
+            onClick={scrollToPatientList}
+            size="sm"
+            className="shadow-lg bg-primary hover:bg-primary/90 text-white rounded-full h-12 px-4"
+            title="Torna all'elenco pazienti"
+          >
+            <ArrowUp className="h-4 w-4 mr-2" />
+            Torna ai pazienti
+          </Button>
+          
+          {selectedPatient && (
+            <Button
+              onClick={enterStudioModeForSelected}
+              size="sm"
+              className="shadow-lg bg-blue-600 hover:bg-blue-700 text-white rounded-full h-12 px-4"
+              title="Entra in modalità studio per il paziente selezionato"
+            >
+              <UserCheck className="h-4 w-4 mr-2" />
+              Modalità Studio
+            </Button>
+          )}
+        </div>
+      )}
     </div>;
 };
