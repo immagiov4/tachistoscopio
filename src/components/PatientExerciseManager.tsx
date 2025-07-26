@@ -49,6 +49,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   
   // Floating button state
   const [showFloatingActions, setShowFloatingActions] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState(0);
   useEffect(() => {
     fetchInitialData();
   }, [therapistId]);
@@ -60,17 +61,31 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   
   // Scroll listener for floating actions
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
     const handleScroll = () => {
       const patientListCard = document.querySelector('[data-patient-list]');
       if (patientListCard) {
         const rect = patientListCard.getBoundingClientRect();
         const isScrolledPast = rect.bottom < window.innerHeight * 0.3;
-        setShowFloatingActions(isScrolledPast);
+        
+        // Delay showing floating buttons for smoother UX
+        if (isScrolledPast) {
+          timeoutId = setTimeout(() => {
+            setShowFloatingActions(true);
+          }, 300);
+        } else {
+          clearTimeout(timeoutId);
+          setShowFloatingActions(false);
+        }
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeoutId);
+    };
   }, []);
   
   const scrollToPatientList = () => {
@@ -90,6 +105,36 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         variant: 'destructive'
       });
     }
+  };
+  
+  const scrollToPatientIndicator = () => {
+    setTimeout(() => {
+      const indicator = document.querySelector('[data-patient-indicator]');
+      if (indicator) {
+        indicator.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start',
+          inline: 'nearest'
+        });
+      }
+    }, 100);
+  };
+  
+  const handlePatientSelection = (patient: PatientWithEmail) => {
+    setSelectedPatient(patient);
+    scrollToPatientIndicator();
+  };
+  
+  const enterStudioMode = (patientId: string) => {
+    setScrollPosition(window.scrollY);
+    setStudioMode(patientId);
+  };
+  
+  const exitStudioMode = () => {
+    setStudioMode(null);
+    setTimeout(() => {
+      window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+    }, 100);
   };
   
   const fetchInitialData = async () => {
@@ -372,12 +417,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   const totalPages = Math.ceil(filteredPatients.length / patientsPerPage);
   const startIndex = (currentPage - 1) * patientsPerPage;
   const paginatedPatients = filteredPatients.slice(startIndex, startIndex + patientsPerPage);
-  const enterStudioMode = (patientId: string) => {
-    setStudioMode(patientId);
-  };
-  const exitStudioMode = () => {
-    setStudioMode(null);
-  };
   if (loading) {
     return (
       <LoadingPage 
@@ -465,7 +504,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
           </div>
           
           <div className="grid gap-4 max-h-60 overflow-y-auto">
-            {paginatedPatients.map(patient => <div key={patient.id} className={`p-3 border-2 border-dashed rounded-lg cursor-pointer transition-all hover:shadow-md ${selectedPatient?.id === patient.id ? 'bg-primary/10 border-primary border-solid shadow-md' : 'hover:bg-muted border-muted-foreground/30'}`} onClick={() => setSelectedPatient(patient)}>
+            {paginatedPatients.map(patient => <div key={patient.id} className={`p-3 border-2 border-dashed rounded-lg cursor-pointer transition-all hover:shadow-md ${selectedPatient?.id === patient.id ? 'bg-primary/10 border-primary border-solid shadow-md' : 'hover:bg-muted border-muted-foreground/30'}`} onClick={() => handlePatientSelection(patient)}>
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium">{patient.full_name}</h3>
@@ -511,7 +550,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
 
       {selectedPatient && <div className="space-y-6">
           {/* Indicatore paziente selezionato */}
-          <div className="flex items-center gap-3 p-3 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+          <div data-patient-indicator className="flex items-center gap-3 p-3 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
             <UserCheck className="h-5 w-5 text-blue-600" />
             <div>
               <p className="text-sm font-medium text-blue-900">
@@ -653,28 +692,31 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         
       {/* Floating Actions */}
       {showFloatingActions && (
-        <div className="fixed bottom-6 right-6 flex flex-col gap-2 z-50">
+        <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50 animate-fade-in">
+          {selectedPatient && (
+            <Button
+              onClick={enterStudioModeForSelected}
+              size="sm"
+              className="shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full h-14 px-6 font-medium border-0 transition-all duration-300 hover:scale-105 hover:shadow-2xl animate-scale-in"
+              style={{ animationDelay: '100ms' }}
+              title="Entra in modalità studio per il paziente selezionato"
+            >
+              <UserCheck className="h-5 w-5 mr-2" />
+              Modalità Studio
+            </Button>
+          )}
+          
           <Button
             onClick={scrollToPatientList}
             size="sm"
-            className="shadow-lg bg-primary hover:bg-primary/90 text-white rounded-full h-12 px-4"
+            variant="outline"
+            className="shadow-lg bg-white/90 hover:bg-white border-gray-300 text-gray-700 hover:text-gray-900 rounded-full h-12 px-5 font-medium transition-all duration-300 hover:scale-105 hover:shadow-xl animate-scale-in backdrop-blur-sm"
+            style={{ animationDelay: '200ms' }}
             title="Torna all'elenco pazienti"
           >
             <ArrowUp className="h-4 w-4 mr-2" />
             Torna ai pazienti
           </Button>
-          
-          {selectedPatient && (
-            <Button
-              onClick={enterStudioModeForSelected}
-              size="sm"
-              className="shadow-lg bg-blue-600 hover:bg-blue-700 text-white rounded-full h-12 px-4"
-              title="Entra in modalità studio per il paziente selezionato"
-            >
-              <UserCheck className="h-4 w-4 mr-2" />
-              Modalità Studio
-            </Button>
-          )}
         </div>
       )}
     </div>;
