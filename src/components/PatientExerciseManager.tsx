@@ -59,32 +59,10 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     }
   }, [selectedPatient]);
   
-  // Simple visibility logic for floating actions
+  // Show floating buttons when patient is selected - simple and reliable
   useEffect(() => {
-    const checkVisibility = () => {
-      const patientListCard = document.querySelector('[data-patient-list]');
-      if (patientListCard) {
-        const rect = patientListCard.getBoundingClientRect();
-        // Show buttons when list is scrolled past 70% of screen height
-        setShowFloatingActions(rect.bottom < window.innerHeight * 0.7);
-      }
-    };
-
-    // Check on scroll with throttling
-    let timeout: NodeJS.Timeout;
-    const handleScroll = () => {
-      clearTimeout(timeout);
-      timeout = setTimeout(checkVisibility, 100);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    checkVisibility(); // Initial check
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      clearTimeout(timeout);
-    };
-  }, []);
+    setShowFloatingActions(!!selectedPatient);
+  }, [selectedPatient]);
   
   const scrollToPatientList = () => {
     const patientListCard = document.querySelector('[data-patient-list]');
