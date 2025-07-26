@@ -297,18 +297,22 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
   };
 
   const deletePatient = async (patientId: string) => {
+    const patient = patients.find(p => p.id === patientId);
+    if (!patient) return;
+
+    if (!confirm(`Sei sicuro di voler eliminare il paziente ${patient.full_name}? Verranno eliminati anche tutti i suoi esercizi e sessioni, e l'account verrà rimosso completamente dal sistema.`)) return;
+    
     try {
-      // Delete the patient profile
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', patientId);
+      // Use the edge function to delete patient from both database and auth
+      const { data, error } = await supabase.functions.invoke('delete-patient', {
+        body: { patientId }
+      });
 
       if (error) throw error;
 
       toast({
         title: 'Successo',
-        description: 'Paziente eliminato con successo',
+        description: data.message || 'Paziente eliminato con successo dal sistema',
       });
 
       // Refresh data and clear selection if it was the deleted patient
@@ -321,14 +325,14 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
       
       let errorMessage = 'Errore durante l\'eliminazione del paziente';
       
-      if (error.code === '23503') {
-        errorMessage = 'Impossibile eliminare il paziente perché ha esercizi o sessioni attive. Rimuovi prima tutti i suoi dati.';
-      } else if (error.code === 'PGRST116') {
-        errorMessage = 'Paziente non trovato o non hai i permessi per eliminarlo.';
-      } else if (error.message?.includes('network')) {
+      if (error.message?.includes('network')) {
         errorMessage = 'Errore di connessione. Controlla la rete e riprova.';
+      } else if (error.message?.includes('Unauthorized')) {
+        errorMessage = 'Non hai i permessi per eliminare questo paziente.';
+      } else if (error.message?.includes('not found')) {
+        errorMessage = 'Paziente non trovato.';
       } else if (error.message) {
-        errorMessage = `Errore: ${error.message}`;
+        errorMessage = error.message;
       }
       
       toast({
