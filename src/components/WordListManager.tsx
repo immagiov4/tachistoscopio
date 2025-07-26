@@ -212,54 +212,39 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }, 300);
   };
 
-  // Function to count syllables in Italian words (improved)
+  // Algoritmo migliorato per contare le sillabe in italiano
   const countSyllables = (word: string): number => {
     if (!word) return 0;
     
-    // Convert to lowercase and remove accents for better processing
-    const cleanWord = word.toLowerCase()
-      .replace(/[àáâãä]/g, 'a')
-      .replace(/[èéêë]/g, 'e')
-      .replace(/[ìíîï]/g, 'i')
-      .replace(/[òóôõö]/g, 'o')
-      .replace(/[ùúûü]/g, 'u');
+    const cleanWord = word.toLowerCase().trim();
+    if (cleanWord.length === 0) return 0;
     
-    // Remove non-alphabetic characters
-    const letters = cleanWord.replace(/[^a-z]/g, '');
+    // Vocali italiane
+    const vowels = /[aeiouàèéìíîòóù]/g;
     
-    if (letters.length === 0) return 0;
-    if (letters.length <= 2) return 1;
+    // Trova tutte le vocali
+    const vowelMatches = cleanWord.match(vowels) || [];
+    let syllables = vowelMatches.length;
     
-    // Simple vowel counting approach - more reliable for Italian
-    const vowels = letters.match(/[aeiou]/g);
-    if (!vowels) return 1;
+    // Regole specifiche per l'italiano
     
-    let syllables = vowels.length;
-    
-    // Adjust for common diphthongs that should count as one syllable
-    // But only when they are truly together in pronunciation
+    // 1. Dittonghi e trittonghi che contano come una sillaba
     const diphthongs = [
-      'ia', 'ie', 'io', 'iu',  // i + vowel
-      'ua', 'ue', 'ui', 'uo',  // u + vowel  
-      'ai', 'au', 'ei', 'eu', 'oi', 'ou'  // vowel + i/u
+      /ai/g, /au/g, /ei/g, /eu/g, /oi/g, /ou/g,  // dittonghi discendenti
+      /ia/g, /ie/g, /io/g, /iu/g,                // dittonghi ascendenti con i
+      /ua/g, /ue/g, /ui/g, /uo/g,                // dittonghi ascendenti con u
+      /iai/g, /iei/g, /uai/g, /uei/g, /uoi/g     // trittonghi
     ];
     
     for (const diphthong of diphthongs) {
-      const regex = new RegExp(diphthong, 'g');
-      const matches = letters.match(regex);
+      const matches = cleanWord.match(diphthong);
       if (matches) {
-        // Each diphthong reduces syllable count by 1 (since we counted 2 vowels but it's 1 syllable)
+        // Ogni dittongo riduce il conteggio di 1 (2 vocali = 1 sillaba)
         syllables -= matches.length;
       }
     }
     
-    // Special cases for common Italian patterns
-    // Words ending in -zione, -sione should have the correct count
-    if (letters.match(/(zione|sione)$/)) {
-      syllables += 1; // These endings add complexity
-    }
-    
-    // Minimum of 1 syllable
+    // Assicurati che ci sia almeno una sillaba
     return Math.max(1, syllables);
   };
 

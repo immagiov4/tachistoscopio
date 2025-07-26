@@ -114,8 +114,8 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
       if (params.startsWith && !word.startsWith(params.startsWith.toLowerCase())) return false;
       if (params.contains && !word.includes(params.contains.toLowerCase())) return false;
       
-      // Controlla numero di sillabe (conta le vocali come approssimazione)
-      const syllableCount = word.match(/[aeiou]/g)?.length || 1;
+      // Controlla numero di sillabe con algoritmo migliorato
+      const syllableCount = countSyllables(word);
       if (syllableCount !== syllables) return false;
       
       return true;
@@ -209,6 +209,42 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
     }
     
     return pairs.slice(0, params.count);
+  };
+
+  // Algoritmo migliorato per contare le sillabe in italiano
+  const countSyllables = (word: string): number => {
+    if (!word) return 0;
+    
+    const cleanWord = word.toLowerCase().trim();
+    if (cleanWord.length === 0) return 0;
+    
+    // Vocali italiane
+    const vowels = /[aeiouàèéìíîòóù]/g;
+    
+    // Trova tutte le vocali
+    const vowelMatches = cleanWord.match(vowels) || [];
+    let syllables = vowelMatches.length;
+    
+    // Regole specifiche per l'italiano
+    
+    // 1. Dittonghi e trittonghi che contano come una sillaba
+    const diphthongs = [
+      /ai/g, /au/g, /ei/g, /eu/g, /oi/g, /ou/g,  // dittonghi discendenti
+      /ia/g, /ie/g, /io/g, /iu/g,                // dittonghi ascendenti con i
+      /ua/g, /ue/g, /ui/g, /uo/g,                // dittonghi ascendenti con u
+      /iai/g, /iei/g, /uai/g, /uei/g, /uoi/g     // trittonghi
+    ];
+    
+    for (const diphthong of diphthongs) {
+      const matches = cleanWord.match(diphthong);
+      if (matches) {
+        // Ogni dittongo riduce il conteggio di 1 (2 vocali = 1 sillaba)
+        syllables -= matches.length;
+      }
+    }
+    
+    // Assicurati che ci sia almeno una sillaba
+    return Math.max(1, syllables);
   };
 
   const saveWordList = async () => {
