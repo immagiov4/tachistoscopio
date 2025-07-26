@@ -151,15 +151,15 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         gainNode.connect(audioContext.destination);
         
         oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.2);
+        oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.1);
         
-        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime); // Volume molto più alto per mobile
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime); // Solo volume più alto
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
         
         oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.2);
-        console.log('🎵 Sound started with higher volume');
+        oscillator.stop(audioContext.currentTime + 0.1);
+        console.log('🎵 Sound started');
       };
       
       if (audioContext.state === 'suspended') {
