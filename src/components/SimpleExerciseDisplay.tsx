@@ -263,15 +263,19 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
 
           // Timer per durata parola - basato su settings
           const wordTimer = setTimeout(() => {
+            console.log('Word timer finished. UseMask:', session.settings.useMask, 'MaskDuration:', session.settings.maskDuration);
             if (session.settings.useMask) {
+              console.log('Showing mask for', session.settings.maskDuration, 'ms');
               setDisplayState('mask');
               const maskTimer = setTimeout(() => {
+                console.log('Mask timer finished, showing interval');
                 setDisplayState('interval');
                 const intervalTimer = setTimeout(nextWord, session.settings.intervalDuration);
                 return () => clearTimeout(intervalTimer);
               }, session.settings.maskDuration);
               return () => clearTimeout(maskTimer);
             } else {
+              console.log('No mask, going directly to interval');
               setDisplayState('interval');
               const intervalTimer = setTimeout(nextWord, session.settings.intervalDuration);
               return () => clearTimeout(intervalTimer);
