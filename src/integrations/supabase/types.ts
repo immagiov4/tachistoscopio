@@ -20,7 +20,7 @@ export type Database = {
           completed_at: string
           correct_words: number
           duration: number
-          exercise_id: string
+          exercise_id: string | null
           id: string
           incorrect_words: number
           missed_words: string[] | null
@@ -32,7 +32,7 @@ export type Database = {
           completed_at?: string
           correct_words: number
           duration: number
-          exercise_id: string
+          exercise_id?: string | null
           id?: string
           incorrect_words: number
           missed_words?: string[] | null
@@ -44,7 +44,7 @@ export type Database = {
           completed_at?: string
           correct_words?: number
           duration?: number
-          exercise_id?: string
+          exercise_id?: string | null
           id?: string
           incorrect_words?: number
           missed_words?: string[] | null
