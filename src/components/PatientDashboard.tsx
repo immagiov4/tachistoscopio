@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Exercise, ExerciseSession as DBExerciseSession, DAYS_OF_WEEK } from '@/types/database';
 import { SimpleExerciseDisplay } from './SimpleExerciseDisplay';
-import { DebugPanel } from './DebugPanel';
+
 import { ThemeSelector, ThemeType, themes } from './ThemeSelector';
 import { toast } from '@/hooks/use-toast';
 
@@ -545,8 +545,6 @@ export const PatientDashboard: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Debug Panel - Solo in preview/development */}
-          <DebugPanel onRevealTutorial={() => {}} />
         </div>
       </div>
     </div>

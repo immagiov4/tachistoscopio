@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, WordList, Exercise, ExerciseSettings, DEFAULT_SETTINGS, DAYS_OF_WEEK } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
-import { DebugPanel } from '@/components/DebugPanel';
+
 import { PatientExerciseManager } from '@/components/PatientExerciseManager';
 import { TutorialModal } from '@/components/TutorialModal';
 
@@ -373,13 +373,6 @@ export const TherapistDashboard: React.FC = () => {
           </Button>
         </header>
 
-        {/* Debug Panel - Solo durante sviluppo */}
-        <div className="mb-6">
-          <DebugPanel onRevealTutorial={() => {
-            localStorage.removeItem('tachistoscope_tutorial_completed');
-            setShowTutorial(true);
-          }} />
-        </div>
 
         <Tabs defaultValue="patients" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
