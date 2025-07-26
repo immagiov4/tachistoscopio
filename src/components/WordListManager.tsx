@@ -320,6 +320,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
   const generateMinimalPairs = (): string[] => {
     const pairs: string[] = [];
+    const [minSyl, maxSyl] = generatorParams.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
     
     // Expanded database of Italian minimal pairs
     const basePairs = [
@@ -386,22 +387,40 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       ['quadro', 'quadri'], ['numero', 'numeri'], ['cambio', 'cambi'], ['studio', 'studi']
     ];
     
-    let pairIndex = 0;
-    while (pairs.length < generatorParams.count && pairIndex < basePairs.length) {
-      const [word1, word2] = basePairs[pairIndex];
+    // Filter pairs based on all criteria, including syllable count
+    const validPairs: string[] = [];
+    
+    for (const [word1, word2] of basePairs) {
+      // Check syllable count for both words in the pair
+      const word1Syllables = countSyllables(word1);
+      const word2Syllables = countSyllables(word2);
       
-      const word1Valid = (!generatorParams.startsWith || word1.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) &&
+      // Both words must be within syllable range
+      const word1ValidSyllables = word1Syllables >= minSyl && word1Syllables <= maxSyl;
+      const word2ValidSyllables = word2Syllables >= minSyl && word2Syllables <= maxSyl;
+      
+      // Check other filters
+      const word1Valid = word1ValidSyllables &&
+                        (!generatorParams.startsWith || word1.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) &&
                         (!generatorParams.contains || word1.toLowerCase().includes(generatorParams.contains.toLowerCase()));
-      const word2Valid = (!generatorParams.startsWith || word2.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) &&
+      
+      const word2Valid = word2ValidSyllables &&
+                        (!generatorParams.startsWith || word2.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) &&
                         (!generatorParams.contains || word2.toLowerCase().includes(generatorParams.contains.toLowerCase()));
       
-      if (word1Valid && pairs.length < generatorParams.count) pairs.push(word1);
-      if (word2Valid && pairs.length < generatorParams.count) pairs.push(word2);
+      // Add words that meet all criteria
+      if (word1Valid && validPairs.length < generatorParams.count) {
+        validPairs.push(word1);
+      }
+      if (word2Valid && validPairs.length < generatorParams.count) {
+        validPairs.push(word2);
+      }
       
-      pairIndex++;
+      // Stop if we have enough words
+      if (validPairs.length >= generatorParams.count) break;
     }
     
-    return pairs.slice(0, generatorParams.count);
+    return validPairs.slice(0, generatorParams.count);
   };
 
   const loadSavedWordLists = async () => {
