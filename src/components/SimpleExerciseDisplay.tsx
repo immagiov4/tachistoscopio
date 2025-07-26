@@ -307,7 +307,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
           <h1 className={`text-6xl font-bold mb-8 ${getTextShadow(theme)}`}>
             {countdown > 0 ? countdown : 'INIZIA!'}
           </h1>
-          <p className={`text-xl ${
+          <p className={`text-xl ${getTextShadow(theme)} ${
             theme === 'space' ? 'text-white/90' :
             theme === 'nature' || theme === 'clouds' ? 'text-gray-700' :
             'text-white/80'
@@ -388,9 +388,9 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
           </div>
         )}
 
-        <div className="absolute top-4 left-4 right-4 bg-white/40 backdrop-blur-md border border-white/30 p-4 rounded-2xl shadow-lg" style={{ 
+        <div className="absolute top-4 left-4 right-4 bg-white/60 backdrop-blur-md border border-white/40 p-4 rounded-2xl shadow-lg" style={{ 
           boxShadow: 'inset rgba(0, 0, 0, 0.2) 0px 2px 1px',
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.3) 100%)',
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 100%)',
           backdropFilter: 'blur(12px) saturate(1.5)'
         }}>
           <div className="text-center space-y-2 mb-4">
@@ -414,8 +414,8 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         </div>
 
         <div className="absolute bottom-4 left-4 right-4 text-center">
-          <div className="bg-white/40 backdrop-blur-md rounded-2xl p-3 border border-white/30 shadow-lg" style={{
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.3) 100%)',
+          <div className="bg-white/60 backdrop-blur-md rounded-2xl p-3 border border-white/40 shadow-lg" style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 100%)',
             backdropFilter: 'blur(12px) saturate(1.5)'
           }}>
             <p className="text-sm font-medium text-gray-700 mb-1">
