@@ -693,7 +693,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         </Card>
 
         {/* Colonna 2: Creazione Nuovo Esercizio */}
-        <Card className="lg:col-span-2 max-h-[500px] overflow-y-auto">
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-lg">
               {editingList ? 'Modifica esercizio' : 'Crea nuovo esercizio'}
