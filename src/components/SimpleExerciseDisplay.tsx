@@ -100,52 +100,59 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   }, [session.settings.textCase]);
 
   const playErrorSound = () => {
-    console.log('playErrorSound called');
-    try {
-      // Priorità alla vibrazione su mobile
-      if ('vibrate' in navigator) {
-        console.log('Attempting vibration');
-        const vibrateResult = navigator.vibrate(150); // Vibrazione più lunga
-        console.log('Vibration result:', vibrateResult);
+    console.log('🔊 playErrorSound called on mobile');
+    
+    // PRIMA: Vibrazione immediata (funziona sempre)
+    if ('vibrate' in navigator) {
+      console.log('📳 Attempting vibration...');
+      try {
+        const result = navigator.vibrate([200, 100, 200]); // Pattern più percettibile
+        console.log('📳 Vibration result:', result);
+      } catch (e) {
+        console.log('📳 Vibration failed:', e);
       }
-      
-      // Tentativo audio con gestione mobile migliorata
+    } else {
+      console.log('📳 Vibration not supported');
+    }
+    
+    // SECONDO: Tentativo audio (può fallire su mobile)
+    try {
+      console.log('🎵 Creating AudioContext...');
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      console.log('AudioContext state:', audioContext.state);
+      console.log('🎵 AudioContext state:', audioContext.state);
       
-      // Su mobile l'AudioContext potrebbe essere sospeso
-      const playAudio = () => {
+      const playSound = () => {
+        console.log('🎵 Playing sound...');
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
         
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
         
-        // Suono molto più dolce
         oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.15);
-        
-        gainNode.gain.setValueAtTime(0.03, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+        oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
         
         oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.15);
-        console.log('Audio played successfully');
+        oscillator.stop(audioContext.currentTime + 0.2);
+        console.log('🎵 Sound started');
       };
       
       if (audioContext.state === 'suspended') {
-        console.log('Resuming suspended AudioContext');
+        console.log('🎵 Resuming AudioContext...');
         audioContext.resume().then(() => {
-          console.log('AudioContext resumed');
-          playAudio();
-        }).catch(e => console.log('Failed to resume AudioContext:', e));
+          console.log('🎵 AudioContext resumed successfully');
+          playSound();
+        }).catch(e => {
+          console.log('🎵 Failed to resume AudioContext:', e);
+        });
       } else {
-        playAudio();
+        playSound();
       }
       
     } catch (error) {
-      console.log('Audio/vibration error:', error);
+      console.log('🎵 Audio completely failed:', error);
     }
   };
 
@@ -242,24 +249,45 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       if (event.key === 'Escape') onStop();
     };
 
-    const handleClick = (event: MouseEvent) => {
+    const handleClick = (event: MouseEvent | TouchEvent) => {
+      console.log('👆 Click/Touch detected:', {
+        isRunning: session.isRunning,
+        isPaused: session.isPaused,
+        isCountingDown,
+        displayState,
+        eventType: event.type
+      });
+      
       // Solo se l'esercizio è in corso e non è in pausa
-      if (!session.isRunning || session.isPaused || isCountingDown) return;
+      if (!session.isRunning || session.isPaused || isCountingDown) {
+        console.log('👆 Click ignored - exercise not active');
+        return;
+      }
       
       // Evita di triggerare su click dei pulsanti di controllo
       const target = event.target as HTMLElement;
-      if (target.closest('button') || target.closest('[role="button"]')) return;
+      if (target.closest('button') || target.closest('[role="button"]')) {
+        console.log('👆 Click ignored - button clicked');
+        return;
+      }
       
-      console.log('Screen clicked, marking error');
+      // Previeni comportamento di default su mobile per evitare interferenze
+      event.preventDefault();
+      event.stopPropagation();
+      
+      console.log('👆 Valid click/touch - marking error');
       markError();
     };
 
+    // Gestisci sia mouse che touch events
     window.addEventListener('keydown', handleKeyPress);
-    window.addEventListener('click', handleClick);
+    window.addEventListener('click', handleClick, { passive: false });
+    window.addEventListener('touchend', handleClick, { passive: false });
     
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
       window.removeEventListener('click', handleClick);
+      window.removeEventListener('touchend', handleClick);
     };
   }, [session.isRunning, session.isPaused, isCountingDown, displayState, markError, onStop]);
 
@@ -430,8 +458,8 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
             )}
 
             {displayState === 'word' && (
-              <div className="text-center animate-scale-in">
-                <div className="relative inline-block p-12 bg-white/25 backdrop-blur-lg rounded-3xl border border-white/30 shadow-2xl min-w-[400px]">
+              <div className="text-center animate-scale-in" style={{ touchAction: 'manipulation' }}>
+                <div className="relative inline-block p-8 sm:p-12 bg-white/25 backdrop-blur-lg rounded-3xl border border-white/30 shadow-2xl min-w-[300px] sm:min-w-[400px]">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 rounded-3xl"></div>
                   <p 
                     className={`relative ${getFontSize(session.settings.fontSize)} font-bold tracking-wide transition-all duration-300`}
