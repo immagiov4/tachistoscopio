@@ -131,8 +131,9 @@ export const AuthPage: React.FC = () => {
               value="signup" 
               className="text-sm font-semibold py-2 px-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border flex items-center gap-2 h-auto"
             >
-              <UserPlus className="w-4 h-4" />
-              Registrati come Terapista
+              <UserPlus className="w-4 h-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Registrati come Terapista</span>
+              <span className="sm:hidden">Registrati</span>
             </TabsTrigger>
           </TabsList>
 
