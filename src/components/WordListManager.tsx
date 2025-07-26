@@ -308,14 +308,16 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       'culone', 'straccione', 'negro'
     ]);
 
-    // LOGICA SEMPLIFICATA: filtra tutto in una passata
+    // LOGICA SEMPLIFICATA con selezione RANDOM per evitare bias alfabetico
     const filteredWords: string[] = [];
-    let examined = 0;
-    const maxExamine = Math.min(wordsToUse.length, 5000);
+    let attempts = 0;
+    const maxAttempts = generatorParams.count * 200; // Limite per evitare infinite loop
     
-    for (let i = 0; i < wordsToUse.length && filteredWords.length < generatorParams.count && examined < maxExamine; i++) {
-      const word = wordsToUse[i];
-      examined++;
+    while (filteredWords.length < generatorParams.count && attempts < maxAttempts) {
+      attempts++;
+      // SELEZIONE RANDOM invece che sequenziale per evitare bias alfabetico
+      const randomIndex = Math.floor(Math.random() * wordsToUse.length);
+      const word = wordsToUse[randomIndex];
       
       // Filtri base
       if (inappropriateWordsSet.has(word.toLowerCase())) continue;
@@ -327,7 +329,10 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       
       // Filtro sillabe
       if (countSyllables(word) === syllables) {
-        filteredWords.push(word);
+        // Evita duplicati
+        if (!filteredWords.includes(word)) {
+          filteredWords.push(word);
+        }
       }
     }
     
