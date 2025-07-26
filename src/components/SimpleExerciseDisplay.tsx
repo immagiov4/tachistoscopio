@@ -419,9 +419,9 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
 
             {displayState === 'interval' && (
               <div className="text-center">
-                {/* Effetto di pulsazione dello sfondo durante l'intervallo */}
-                <div className="absolute inset-0 bg-black/30 animate-pulse" style={{
-                  animation: 'pulse 0.8s ease-in-out infinite alternate'
+                {/* Effetto di pulsazione morbida dello sfondo durante l'intervallo */}
+                <div className="absolute inset-0 bg-black/15 animate-pulse" style={{
+                  animation: 'pulse 1.5s ease-in-out infinite alternate'
                 }}></div>
               </div>
             )}
