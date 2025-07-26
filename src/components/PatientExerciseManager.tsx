@@ -83,6 +83,23 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  // Re-check floating buttons when filtered list changes size
+  useEffect(() => {
+    const checkAfterResize = () => {
+      const patientListCard = document.querySelector('[data-patient-list]');
+      if (patientListCard) {
+        const rect = patientListCard.getBoundingClientRect();
+        const shouldShow = rect.bottom < window.innerHeight * 0.6;
+        setShowFloatingActions(shouldShow);
+      }
+    };
+
+    // Small delay to let DOM update after filtering
+    const timeoutId = setTimeout(checkAfterResize, 100);
+    return () => clearTimeout(timeoutId);
+  }, [patientsWithExercises.length, searchTerm]);
+  
   
   const scrollToPatientList = () => {
     const patientListCard = document.querySelector('[data-patient-list]');
