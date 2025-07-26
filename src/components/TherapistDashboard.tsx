@@ -303,11 +303,19 @@ export const TherapistDashboard: React.FC = () => {
 
         <Tabs defaultValue="patients" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="patients" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="patients" 
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => {}}
+            >
               <UserCog className="h-4 w-4" />
               Gestione Pazienti
             </TabsTrigger>
-            <TabsTrigger value="wordlists" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="wordlists" 
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => {}}
+            >
               <BookOpen className="h-4 w-4" />
               Liste Parole &amp; Esercizi
             </TabsTrigger>
