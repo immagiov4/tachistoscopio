@@ -647,8 +647,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                 <BookOpen className="h-10 w-10 mx-auto mb-2 opacity-50" />
                 <p className="text-sm font-medium">Nessun esercizio</p>
                 <p className="text-xs">Crea il tuo primo esercizio</p>
-              </div> : <div className="space-y-3 flex-1 overflow-y-auto">
-                 {savedWordLists.slice(0, 5).map(list => <div key={list.id} className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${editingList === list.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`} onClick={() => handleEditWordList(list)}>
+              </div> : <div className="space-y-3 flex-1 overflow-y-auto max-h-[400px]">
+                 {savedWordLists.map(list => <div key={list.id} className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${editingList === list.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`} onClick={() => handleEditWordList(list)}>
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm text-gray-900 truncate">{list.name}</h4>
