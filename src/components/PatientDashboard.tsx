@@ -206,9 +206,12 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
       } = await supabase.from('exercise_sessions').insert(sessionData);
       if (error) {
         console.error('Error saving session:', error);
+        console.error('Session data:', sessionData);
+        console.error('Patient ID:', effectivePatientId);
+        console.error('Exercise ID:', todayExercise?.id);
         toast({
-          title: 'Errore',
-          description: 'Errore nel salvare i risultati',
+          title: 'Errore nel salvare i risultati',
+          description: `Dettagli errore: ${error.message || 'Errore sconosciuto'}`,
           variant: 'destructive'
         });
       } else {
