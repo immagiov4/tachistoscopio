@@ -970,8 +970,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                     <span className="ml-2 text-sm text-gray-600">Generazione...</span>
                   </div>
                 ) : generatedWords.length > 0 ? (
-                  <div className="bg-gray-50 rounded-lg p-3 space-y-2">
-                    <div className="flex flex-wrap gap-1">
+                  <div className="bg-gray-50 rounded-lg p-3 flex items-start gap-3">
+                    <div className="flex-1 flex flex-wrap gap-1">
                       {generatedWords.map((word, index) => (
                         <Badge key={index} variant="secondary" className="text-xs">
                           {word}
@@ -982,7 +982,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={generateWords}
-                      className="h-8 text-xs"
+                      className="h-8 text-xs flex-shrink-0"
                     >
                       <RefreshCw className="h-3 w-3 mr-1" />
                       Aggiorna
