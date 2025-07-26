@@ -1051,9 +1051,15 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
                 {/* Anteprima parole generate */}
                 {isGenerating ? (
-                  <div className="flex items-center justify-center py-4">
-                    <RefreshCw className="h-4 w-4 animate-spin text-blue-500" />
-                    <span className="ml-2 text-sm text-gray-600">Generazione...</span>
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <div className="flex items-center justify-center mb-3">
+                      <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />
+                      <span className="ml-3 text-sm font-medium text-blue-700">Generazione parole in corso...</span>
+                    </div>
+                    <div className="w-full bg-blue-100 rounded-full h-2">
+                      <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{width: '100%'}}></div>
+                    </div>
+                    <p className="text-xs text-blue-600 text-center mt-2">Ricerca nel dizionario...</p>
                   </div>
                 ) : generatedWords.length > 0 ? (
                   <div className="bg-gray-50 rounded-lg p-3 flex items-start gap-3">
