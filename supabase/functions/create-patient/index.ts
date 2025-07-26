@@ -37,28 +37,79 @@ serve(async (req) => {
     
     const password = generatePassword();
 
-    // Check if user already exists
+    // Check if user already exists in auth
     const { data: existingUser, error: userLookupError } = await supabaseAdmin.auth.admin.listUsers();
     
     let user;
     let userId;
+    let userRecreated = false;
     
     const existingUserRecord = existingUser?.users?.find(u => u.email === email);
     
+    // Check if there's an existing patient profile with this email
+    const { data: existingPatientProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('id, user_id, full_name')
+      .eq('role', 'patient')
+      .eq('created_by', therapistId);
+    
+    // Find profile by matching the full name or email pattern
+    const matchingProfile = existingPatientProfile?.find(p => 
+      p.full_name.toLowerCase() === fullName.toLowerCase()
+    );
+    
     if (existingUserRecord) {
-      // User already exists, use existing user ID
+      // User exists in auth, use existing user ID
       userId = existingUserRecord.id;
       user = { user: existingUserRecord };
-    } else {
-      // Create new user with email confirmation enabled
-      // This will trigger Supabase's built-in email system
+    } else if (matchingProfile) {
+      // Profile exists but user doesn't exist in auth - cleanup and recreate
+      console.log(`Found orphaned profile for ${fullName}, cleaning up and recreating user`);
+      
+      // Delete orphaned profile and related data
+      await supabaseAdmin
+        .from('exercise_sessions')
+        .delete()
+        .eq('patient_id', matchingProfile.id);
+        
+      await supabaseAdmin
+        .from('exercises')
+        .delete()
+        .eq('patient_id', matchingProfile.id);
+        
+      await supabaseAdmin
+        .from('profiles')
+        .delete()
+        .eq('id', matchingProfile.id);
+      
+      userRecreated = true;
+      
+      // Create new user
       const { data: newUser, error: userError } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
-        email_confirm: false, // Set to false so we can send custom email
+        email_confirm: false,
         user_metadata: {
           full_name: fullName,
-          password: password // Include password in metadata for custom email
+          password: password
+        }
+      });
+
+      if (userError) {
+        throw userError;
+      }
+      
+      user = newUser;
+      userId = newUser.user.id;
+    } else {
+      // Create completely new user
+      const { data: newUser, error: userError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: false,
+        user_metadata: {
+          full_name: fullName,
+          password: password
         }
       });
 
@@ -132,7 +183,9 @@ serve(async (req) => {
     }
 
     // Prepare response message
-    let message = `Paziente ${fullName} creato con successo.`;
+    let message = userRecreated 
+      ? `Paziente ${fullName} ricreato con successo (dati precedenti eliminati).`
+      : `Paziente ${fullName} creato con successo.`;
     let warning = null;
     
     if (emailSent) {
