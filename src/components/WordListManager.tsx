@@ -161,7 +161,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     loadWordsDataset();
   }, []);
 
-  const generateWords = useCallback(async () => {
+  // Separated function without useCallback to avoid infinite loops
+  const performWordGeneration = async () => {
     if (activeTab !== 'generator') return;
     
     setIsGenerating(true);
@@ -197,15 +198,23 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  // Debounced version to prevent excessive calls
+  const generateWords = useCallback(() => {
+    const timeoutId = setTimeout(() => {
+      performWordGeneration();
+    }, 300); // Increased debounce for stability
+    
+    return () => clearTimeout(timeoutId);
   }, [
     activeTab,
     generatorParams.type, 
     generatorParams.syllableCount, 
     generatorParams.startsWith, 
     generatorParams.contains, 
-    generatorParams.count,
-    allWords
-  ]);
+    generatorParams.count
+  ]); // Removed allWords dependency to prevent infinite loops
 
   // Load saved word lists from database
   useEffect(() => {
@@ -214,14 +223,28 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   }, [therapistId]);
 
-  // Effect automatico per generazione con debounce per evitare freeze
+  // Effect automatico per generazione
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      generateWords();
-    }, 150); // Piccolo debounce per evitare chiamate eccessive
+    let timeoutId: NodeJS.Timeout;
     
-    return () => clearTimeout(timeoutId);
-  }, [generateWords]);
+    const cleanup = generateWords();
+    if (cleanup) {
+      timeoutId = cleanup as unknown as NodeJS.Timeout;
+    }
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [
+    generatorParams.type, 
+    generatorParams.syllableCount, 
+    generatorParams.startsWith, 
+    generatorParams.contains, 
+    generatorParams.count,
+    activeTab
+  ]); // Direct dependencies instead of generateWords function
 
   // Function to count syllables in Italian words (improved)
   const countSyllables = (word: string): number => {
@@ -275,8 +298,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   };
 
   const generateRealWords = (): string[] => {
-    // Use complete dataset
-    const wordsToUse = allWords.length > 0 ? allWords : ITALIAN_WORDS;
+    // Use complete dataset - safe fallback to avoid empty results
+    const wordsToUse = allWords.length > 1000 ? allWords : ITALIAN_WORDS;
     const syllables = parseInt(generatorParams.syllableCount) || 2;
     
     // Pre-filtro più efficiente delle parole inappropriate
@@ -312,23 +335,41 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     const startsWithLower = generatorParams.startsWith.toLowerCase();
     const containsLower = generatorParams.contains.toLowerCase();
     
-    // Algoritmo ottimizzato con early exit
+    // Algoritmo robusto con limite di sicurezza
     const filteredWords: string[] = [];
     let examined = 0;
-    const maxExamine = Math.min(wordsToUse.length, 1000); // Ulteriormente ridotto
+    const maxExamine = Math.min(wordsToUse.length, 3000); // Increased limit for better results
     
-    for (let i = 0; i < wordsToUse.length && filteredWords.length < generatorParams.count && examined < maxExamine; i++) {
-      const word = wordsToUse[i];
-      examined++;
-      
-      // Quick filters first (più veloci)
-      if (inappropriateWordsSet.has(word.toLowerCase())) continue;
-      if (hasStartsWith && !word.toLowerCase().startsWith(startsWithLower)) continue;
-      if (hasContains && !word.toLowerCase().includes(containsLower)) continue;
-      
-      // Syllable check last (più costoso)
-      if (countSyllables(word) === syllables) {
+    // First pass: collect potential matches without syllable counting if we have filters
+    if (hasStartsWith || hasContains) {
+      for (let i = 0; i < wordsToUse.length && filteredWords.length < generatorParams.count * 3 && examined < maxExamine; i++) {
+        const word = wordsToUse[i];
+        examined++;
+        
+        // Quick filters first
+        if (inappropriateWordsSet.has(word.toLowerCase())) continue;
+        if (hasStartsWith && !word.toLowerCase().startsWith(startsWithLower)) continue;
+        if (hasContains && !word.toLowerCase().includes(containsLower)) continue;
+        
         filteredWords.push(word);
+      }
+      
+      // Second pass: filter by syllables from the pre-filtered list
+      const syllableFiltered = filteredWords.filter(word => countSyllables(word) === syllables);
+      return syllableFiltered.slice(0, generatorParams.count);
+    } else {
+      // No text filters, proceed with normal filtering
+      for (let i = 0; i < wordsToUse.length && filteredWords.length < generatorParams.count && examined < maxExamine; i++) {
+        const word = wordsToUse[i];
+        examined++;
+        
+        // Quick filters first
+        if (inappropriateWordsSet.has(word.toLowerCase())) continue;
+        
+        // Syllable check
+        if (countSyllables(word) === syllables) {
+          filteredWords.push(word);
+        }
       }
     }
     
