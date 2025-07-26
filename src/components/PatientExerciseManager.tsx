@@ -575,7 +575,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{patient.exerciseCount} esercizi</Badge>
                     <Button variant="default" size="sm" onClick={e => {
                       e.stopPropagation();
                       handlePatientSelection(patient);
