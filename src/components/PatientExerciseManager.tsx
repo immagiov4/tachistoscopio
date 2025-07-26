@@ -100,6 +100,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
         }
       }));
 
+      setPatients(patients);
+      setPatientsWithExercises(patientsWithCounts);
       setWordLists(allWordLists as WordList[]);
     } catch (error) {
       console.error('Error fetching initial data:', error);
