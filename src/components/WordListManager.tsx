@@ -162,17 +162,17 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   }, [therapistId]);
 
-  // Effect automatico solo per il cambio quantità
+  // Effect automatico per tutte le modifiche del form generatore, ma non per cambio sezione
   useEffect(() => {
     if (activeTab !== 'generator') return;
     
-    // Debounce la generazione solo per evitare chiamate multiple rapide
+    // Debounce la generazione per evitare chiamate multiple rapide
     const timeoutId = setTimeout(() => {
       generateWords();
     }, 300);
     
     return () => clearTimeout(timeoutId);
-  }, [generatorParams.count]); // Solo quando cambia la quantità
+  }, [generatorParams]); // Tutti i parametri del generatore
 
   // Load dataset on component mount
   useEffect(() => {
@@ -341,7 +341,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     const basePairs = [
       // Consonanti occlusive (p/b, t/d, k/g)
       ['pane', 'bane'], ['palla', 'balla'], ['polo', 'bolo'],
-      ['tana', 'dana'], ['tono', 'dono'], ['torre', 'dorre'],
+      ['tana', 'dana'], ['tono', 'dono'], ['torre', 'terra'],
       ['cane', 'gane'], ['casa', 'gasa'], ['core', 'gore'],
       ['pino', 'bino'], ['porto', 'borto'], ['pasta', 'basta'],
       ['tipo', 'tibo'], ['tempo', 'dembo'], ['terra', 'dera'],
@@ -1061,7 +1061,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                   </div>
                 )}
               </div>
-            )}
 
             {/* Contenuto Manual */}
             {(activeTab === 'manual' || editingList) && (
