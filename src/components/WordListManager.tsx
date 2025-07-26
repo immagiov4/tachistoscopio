@@ -200,22 +200,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   };
 
-  // Debounced version to prevent excessive calls
-  const generateWords = useCallback(() => {
-    const timeoutId = setTimeout(() => {
-      performWordGeneration();
-    }, 300); // Increased debounce for stability
-    
-    return () => clearTimeout(timeoutId);
-  }, [
-    activeTab,
-    generatorParams.type, 
-    generatorParams.syllableCount, 
-    generatorParams.startsWith, 
-    generatorParams.contains, 
-    generatorParams.count
-  ]); // Removed allWords dependency to prevent infinite loops
-
   // Load saved word lists from database
   useEffect(() => {
     if (therapistId) {
@@ -223,20 +207,13 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   }, [therapistId]);
 
-  // Effect automatico per generazione
+  // Effect automatico per generazione con debounce appropriato
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    const timeoutId = setTimeout(() => {
+      performWordGeneration();
+    }, 300); // Debounce di 300ms per evitare chiamate eccessive
     
-    const cleanup = generateWords();
-    if (cleanup) {
-      timeoutId = cleanup as unknown as NodeJS.Timeout;
-    }
-    
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
+    return () => clearTimeout(timeoutId);
   }, [
     generatorParams.type, 
     generatorParams.syllableCount, 
@@ -244,7 +221,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     generatorParams.contains, 
     generatorParams.count,
     activeTab
-  ]); // Direct dependencies instead of generateWords function
+  ]); // Direct dependencies
 
   // Function to count syllables in Italian words (improved)
   const countSyllables = (word: string): number => {
