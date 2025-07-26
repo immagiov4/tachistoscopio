@@ -319,7 +319,7 @@ export const TherapistDashboard: React.FC = () => {
             >
               <UserCog className="h-4 w-4" />
               <span>Gestione Pazienti</span>
-              <Badge variant="secondary" className="text-xs ml-1">Pazienti & Esercizi</Badge>
+              <Badge variant="secondary" className="text-xs ml-1">Pazienti, Esercizi e Monitoraggio</Badge>
             </TabsTrigger>
             <TabsTrigger 
               value="wordlists" 
