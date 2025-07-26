@@ -156,10 +156,17 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   }, [therapistId]);
 
+  // Debounced effect for word generation to avoid lag from rapid parameter changes
   useEffect(() => {
-    if (activeTab === 'generator') {
+    if (activeTab !== 'generator') return;
+    
+    // Debounce the generation to avoid multiple rapid calls
+    const timeoutId = setTimeout(() => {
       generateWords();
-    }
+    }, 300); // Wait 300ms after last parameter change
+    
+    // Cleanup timeout if parameters change again before delay expires
+    return () => clearTimeout(timeoutId);
   }, [generatorParams, activeTab]);
 
   // Load dataset on component mount
