@@ -82,20 +82,46 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Delete patient from auth.users (this will cascade delete the profile due to foreign key)
+    // Try to delete patient from auth.users first
     const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(patient.user_id)
-
+    
+    let warningMessage = ''
+    
+    // Check if the error is because user doesn't exist (already deleted)
     if (deleteAuthError) {
       console.error('Error deleting user from auth:', deleteAuthError)
+      
+      // If user not found, it's already deleted from auth - proceed with database cleanup
+      if (deleteAuthError.message?.includes('User not found') || deleteAuthError.status === 404) {
+        console.log('User already deleted from auth, proceeding with database cleanup')
+        warningMessage = ' (User was already deleted from authentication system)'
+      } else {
+        // For other errors, still fail
+        return new Response(
+          JSON.stringify({ error: 'Failed to delete patient from authentication system' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+
+    // Delete patient profile and related data from database
+    // This ensures cleanup even if auth deletion failed due to user not found
+    const { error: deleteProfileError } = await supabaseAdmin
+      .from('profiles')
+      .delete()
+      .eq('id', patientId)
+
+    if (deleteProfileError) {
+      console.error('Error deleting patient profile:', deleteProfileError)
       return new Response(
-        JSON.stringify({ error: 'Failed to delete patient from authentication system' }),
+        JSON.stringify({ error: 'Failed to delete patient profile from database' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     return new Response(
       JSON.stringify({ 
-        message: `Patient ${patient.full_name} deleted successfully from both database and authentication system` 
+        message: `Patient ${patient.full_name} deleted successfully from database${warningMessage}` 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
