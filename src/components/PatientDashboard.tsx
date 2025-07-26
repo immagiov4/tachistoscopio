@@ -187,12 +187,12 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
 
   const handleExerciseComplete = async (result: SessionResult) => {
     try {
-      // Save session to database
+      // Save session to database - use profile.id as patient_id
       const { error } = await supabase
         .from('exercise_sessions')
         .insert({
           exercise_id: todayExercise!.id,
-          patient_id: effectivePatientId!,
+          patient_id: profile!.id, // Use profile.id instead of effectivePatientId
           total_words: result.totalWords,
           correct_words: result.correctWords,
           incorrect_words: result.incorrectWords,

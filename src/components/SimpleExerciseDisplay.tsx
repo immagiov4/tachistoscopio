@@ -345,30 +345,27 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       
       <div className="flex-1 flex items-center justify-center relative z-10">
         {!session.isPaused ? (
-          <div className="w-full">
+          <div className="w-full flex items-center justify-center min-h-[60vh]">
             {displayState === 'stimulus' && (
-              <div className="text-center animate-fade-in">
-                <div className="inline-block p-8 bg-white/20 backdrop-blur-md rounded-full border border-white/30 shadow-2xl">
-                  <div className="w-8 h-8 bg-white rounded-full animate-pulse shadow-lg"></div>
+              <div className="text-center animate-scale-in">
+                <div className="inline-block p-12 bg-white/30 backdrop-blur-lg rounded-full border-2 border-white/50 shadow-2xl">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full animate-pulse shadow-2xl relative">
+                    <div className="absolute inset-0 bg-white/30 rounded-full animate-ping"></div>
+                  </div>
                 </div>
               </div>
             )}
 
             {displayState === 'word' && (
               <div className="text-center animate-scale-in">
-                <div className="relative inline-block">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent blur-xl transform rotate-45"></div>
+                <div className="relative inline-block p-12 bg-white/25 backdrop-blur-lg rounded-3xl border border-white/30 shadow-2xl min-w-[400px]">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 rounded-3xl"></div>
                   <p 
-                    className={`relative ${getFontSize(session.settings.fontSize)} font-black tracking-wide ${getWordShadow(theme)} transition-all duration-300 hover:scale-105`}
+                    className={`relative ${getFontSize(session.settings.fontSize)} font-bold tracking-wide transition-all duration-300`}
                     style={{
-                      color: theme === 'space' ? '#ffffff' :
-                             theme === 'nature' || theme === 'clouds' ? '#1f2937' :
-                             '#ffffff',
-                      textShadow: `
-                        0 0 20px currentColor,
-                        0 0 40px currentColor,
-                        0 0 60px currentColor
-                      `
+                      color: '#2563eb',
+                      textShadow: '0 2px 10px rgba(37, 99, 235, 0.3)',
+                      fontFamily: '"Inter", system-ui, sans-serif'
                     }}
                   >
                     {formatWord(currentWord)}
@@ -379,21 +376,23 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
 
             {displayState === 'mask' && (
               <div className="text-center animate-fade-in">
-                <div className="grid grid-cols-8 gap-2 max-w-lg mx-auto">
-                  {Array.from({length: 32}).map((_, i) => (
-                    <div 
-                      key={i}
-                      className="aspect-square bg-white/30 rounded-md animate-pulse"
-                      style={{ animationDelay: `${i * 0.02}s` }}
-                    ></div>
-                  ))}
+                <div className="inline-block p-8 bg-white/25 backdrop-blur-lg rounded-2xl border border-white/30 shadow-xl">
+                  <div className="grid grid-cols-6 gap-2 max-w-xs mx-auto">
+                    {Array.from({length: 24}).map((_, i) => (
+                      <div 
+                        key={i}
+                        className="w-4 h-4 bg-gradient-to-br from-gray-400 to-gray-600 rounded animate-pulse"
+                        style={{ animationDelay: `${i * 0.05}s` }}
+                      ></div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
 
             {displayState === 'interval' && (
               <div className="text-center">
-                <div className="w-16 h-16 mx-auto border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div className="w-12 h-12 mx-auto border-4 border-white/30 border-t-blue-400 rounded-full animate-spin"></div>
               </div>
             )}
           </div>
@@ -459,28 +458,14 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         </div>
 
         <div className="absolute bottom-6 left-6 right-6 text-center z-20">
-          <div className="bg-white/80 backdrop-blur-md rounded-2xl p-4 border border-white/40 shadow-2xl animate-fade-in" style={{
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.6) 100%)',
-            backdropFilter: 'blur(20px) saturate(1.8)',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+          <div className="bg-white/70 backdrop-blur-md rounded-xl p-3 border border-white/40 shadow-lg animate-fade-in max-w-sm mx-auto" style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 100%)',
+            backdropFilter: 'blur(15px) saturate(1.5)'
           }}>
-            <div className="flex items-center justify-center gap-3 mb-2">
-              <div className="text-2xl">👆</div>
-              <p className="text-base font-semibold text-gray-700">
-                Tocca lo schermo per segnare un errore
-              </p>
-            </div>
-            <div className="flex items-center justify-center gap-4 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <div className="px-3 py-1 bg-gray-800 text-white rounded-lg font-mono font-bold shadow-md">X</div>
-                <span>Marca errore</span>
-              </div>
-              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-xs">👆</div>
-                <span>Touch per errore</span>
-              </div>
-            </div>
+            <p className="text-sm font-medium text-gray-700 flex items-center justify-center gap-2">
+              <span className="text-lg">👆</span>
+              Tocca per segnare errore
+            </p>
           </div>
         </div>
       </div>
