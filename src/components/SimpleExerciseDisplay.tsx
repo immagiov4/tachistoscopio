@@ -407,6 +407,13 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
                       );
                     })}
                   </div>
+                  
+                  {/* Pattern rotante elegante per interferenza aggiuntiva */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
+                    <div className="text-4xl font-bold text-gray-700 animate-spin" style={{ animationDuration: '0.8s', animationDirection: 'reverse' }}>
+                      ◊ ◇ ◊ ◇
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
