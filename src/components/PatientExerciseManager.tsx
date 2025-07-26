@@ -501,6 +501,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                   <div>
                     <h3 className="font-medium">{patient.full_name}</h3>
                     <p className="text-sm text-muted-foreground">
+                      {patient.email && <span className="text-blue-600">{patient.email}</span>}
+                      {patient.email && ' • '}
                       Creato il {new Date(patient.created_at).toLocaleDateString('it-IT')} • {patient.exerciseCount} esercizi
                     </p>
                   </div>
@@ -673,7 +675,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                 </p>
               ) : (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="text-center p-4 border rounded-lg">
                       <div className="text-2xl font-bold text-primary">
                         {patientSessions.length}
@@ -685,12 +687,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                         {Math.round(patientSessions.reduce((acc, session) => acc + session.accuracy, 0) / patientSessions.length)}%
                       </div>
                       <div className="text-sm text-muted-foreground">Precisione Media</div>
-                    </div>
-                    <div className="text-center p-4 border rounded-lg">
-                      <div className="text-2xl font-bold text-primary">
-                        {Math.round(patientSessions.reduce((acc, session) => acc + session.duration, 0) / patientSessions.length / 1000)}s
-                      </div>
-                      <div className="text-sm text-muted-foreground">Durata Media</div>
                     </div>
                     <div className="text-center p-4 border rounded-lg">
                       <div className="text-2xl font-bold text-primary">
