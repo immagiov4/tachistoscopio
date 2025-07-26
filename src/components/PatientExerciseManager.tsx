@@ -59,24 +59,31 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     }
   }, [selectedPatient]);
   
-  // Scroll listener for floating actions
-  const handleScroll = useCallback(() => {
-    const patientListCard = document.querySelector('[data-patient-list]');
-    if (patientListCard) {
-      const rect = patientListCard.getBoundingClientRect();
-      const shouldShow = rect.bottom < window.innerHeight * 0.5;
-      setShowFloatingActions(shouldShow);
-    }
-  }, []);
-
+  // Scroll listener for floating actions - simplified approach
   useEffect(() => {
+    let ticking = false;
+    
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const patientListCard = document.querySelector('[data-patient-list]');
+          if (patientListCard) {
+            const rect = patientListCard.getBoundingClientRect();
+            const shouldShow = rect.bottom < window.innerHeight * 0.6;
+            setShowFloatingActions(shouldShow);
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Check initial state
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [handleScroll]);
+  }, []);
   
   const scrollToPatientList = () => {
     const patientListCard = document.querySelector('[data-patient-list]');
@@ -493,7 +500,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
             </div>
           </div>
           
-          <div className="grid gap-4 max-h-60 overflow-y-auto">
+          <div className="grid gap-4 h-80 overflow-y-auto">  {/* Increased from max-h-60 to h-80 */}
             {paginatedPatients.map(patient => <div key={patient.id} className={`p-3 border-2 border-dashed rounded-lg cursor-pointer transition-all hover:shadow-md ${selectedPatient?.id === patient.id ? 'bg-primary/10 border-primary border-solid shadow-md' : 'hover:bg-muted border-muted-foreground/30'}`} onClick={() => handlePatientSelection(patient)}>
                 <div className="flex items-center justify-between">
                   <div>
