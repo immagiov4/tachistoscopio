@@ -278,15 +278,16 @@ export const PatientDashboard: React.FC = () => {
               <CardDescription className="text-gray-600">
                 {todayExercise 
                   ? `${todayExercise.word_list?.words.length} parole da leggere`
-                  : 'Nessun esercizio programmato per oggi'
+                  : 'Rilassati, oggi niente esercizi!'
                 }
               </CardDescription>
             </CardHeader>
             <CardContent>
               {!todayExercise ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-600">
-                    Non ci sono esercizi programmati per oggi.
+                  <div className="text-6xl mb-4">😎</div>
+                  <p className="text-lg font-medium text-gray-700">
+                    Giorno libero!
                   </p>
                 </div>
               ) : (
