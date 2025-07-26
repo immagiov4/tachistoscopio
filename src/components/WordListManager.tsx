@@ -679,38 +679,62 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
               ) : (
                 <div className="space-y-2 max-h-60 overflow-y-auto">
                   {savedWordLists.map((list) => (
-                    <div key={list.id} className="border rounded-lg p-3">
+                    <div 
+                      key={list.id} 
+                      className={`border rounded-lg p-3 cursor-pointer transition-all hover:bg-accent/50 ${
+                        currentWordList.id === list.id 
+                          ? 'bg-primary/10 border-primary ring-2 ring-primary/20' 
+                          : 'hover:border-primary/30'
+                      }`}
+                      onClick={() => onWordListChange(list)}
+                    >
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-sm">{list.name}</span>
-                        <div className="flex items-center gap-1">
-                          <Badge variant="secondary" className="text-xs">{list.words.length}</Badge>
-                          <Button
-                            onClick={() => onWordListChange(list)}
-                            variant={currentWordList.id === list.id ? "default" : "outline"}
-                            size="sm"
-                            className="h-6 px-2 text-xs"
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className={`w-3 h-3 rounded-full border-2 flex items-center justify-center transition-colors ${
+                              currentWordList.id === list.id 
+                                ? 'border-primary bg-primary' 
+                                : 'border-muted-foreground/30'
+                            }`}
                           >
-                            {currentWordList.id === list.id ? 'Attiva' : 'Usa'}
-                          </Button>
+                            {currentWordList.id === list.id && (
+                              <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
+                            )}
+                          </div>
+                          <span className="font-medium text-sm">{list.name}</span>
+                          <Badge variant="secondary" className="text-xs">{list.words.length} parole</Badge>
+                        </div>
+                        <div className="flex items-center gap-1">
                           <Button
-                            onClick={() => handleEditWordList(list)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditWordList(list);
+                            }}
                             variant="ghost"
                             size="sm"
-                            className="h-6 w-6 p-0"
+                            className="h-6 w-6 p-0 opacity-60 hover:opacity-100"
                           >
                             <Edit className="h-3 w-3" />
                           </Button>
                           <Button
-                            onClick={() => handleDeleteWordList(list.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteWordList(list.id);
+                            }}
                             variant="ghost"
                             size="sm"
-                            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                            className="h-6 w-6 p-0 opacity-60 hover:opacity-100 text-destructive hover:text-destructive"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground">{list.description}</p>
+                      {currentWordList.id === list.id && (
+                        <div className="text-xs text-primary font-medium mt-1">
+                          ✓ Lista attualmente selezionata
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
