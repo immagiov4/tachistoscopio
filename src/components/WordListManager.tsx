@@ -39,7 +39,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   // Generator state
   const [generatorParams, setGeneratorParams] = useState({
     type: 'words' as 'words' | 'syllables' | 'nonwords' | 'minimal-pairs',
-    syllableCount: '2-3',
+    syllableCount: '2',
     startsWith: '',
     contains: '',
     count: 10
@@ -264,18 +264,47 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   const generateRealWords = (): string[] => {
     // Use complete dataset
     const wordsToUse = allWords.length > 0 ? allWords : ITALIAN_WORDS;
-    const [minSyl, maxSyl] = generatorParams.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
+    const syllables = parseInt(generatorParams.syllableCount) || 2;
     
     // Filter words based on criteria
     const filteredWords = wordsToUse.filter(word => {
+      // Filter inappropriate words first
+      const inappropriateWords = new Set([
+        'pene', 'ano', 'culo', 'merda', 'cacca', 'pipi', 'popo',
+        'stupido', 'idiota', 'cretino', 'scemo', 'deficiente',
+        'stronzo', 'troia', 'puttana', 'figa', 'fica', 'vaffanculo',
+        'cazzo', 'fottiti', 'inculare', 'mignotta', 'bastardo',
+        'bastardissimo', 'zoccola', 'cornuto', 'coglione',
+        'stronza', 'cogliona', 'rompipalle', 'mado', 'puttanella',
+        'fichetto', 'pischello', 'pischella', 'merdoso', 'babbeo',
+        'imbecille', 'scassacazzo', 'baldracca', 'cagna', 'ficco',
+        'troione', 'bastardone', 'ficcona', 'puzzone', 'zzozzo',
+        'caccone', 'pennuto', 'pezzente', 'zingaro', 'paccottiglia',
+        'lurido', 'ciuccio', 'schifoso', 'brutto', 'schifo', 'lurida',
+        'str*nza', 'schifosa', 'cafone', 'duro', 'cretina', 'cornuta',
+        'mignotta', 'ficaginosa', 'pippone', 'pirla', 'babbuino',
+        'merdone', 'zoccola', 'frocione', 'checca', 'frocio', 'omosessuale',
+        'froci', 'patacca', 'minkia', 'minkione', 'scemoide',
+        'fesso', 'troione', 'tamarro', 'ubriacone', 'cogliona',
+        'merdaccia', 'scemi', 'scemotti', 'frocetto', 'swaghetto',
+        'sfigato', 'zigomo', 'vaffangulo', 'puttanella', 'vaffanculo',
+        'strunz', 'ricchione', 'stronza', 'piscio', 'pisciare', 'pisciatoio',
+        'ricchioni', 'schifosa', 'puzzone', 'cazzone', 'affanculo',
+        'porco', 'maiale', 'bischero', 'cafone', 'stregone', 'marcio',
+        'cornetta', 'zoccoletta', 'minkietta', 'culattone', 'frocetto',
+        'culone', 'straccione', 'negro'
+      ]);
+      
+      if (inappropriateWords.has(word.toLowerCase())) return false;
+      
       // Check basic filters
       if (generatorParams.startsWith && !word.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) return false;
       if (generatorParams.contains && !word.toLowerCase().includes(generatorParams.contains.toLowerCase())) return false;
-      
+
       // Count syllables accurately
       const syllableCount = countSyllables(word);
-      if (syllableCount < minSyl || syllableCount > maxSyl) return false;
-      
+      if (syllableCount !== syllables) return false;
+
       return true;
     });
     
@@ -313,10 +342,10 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     
     while (nonWords.length < generatorParams.count) {
       let word = '';
-      const [minSyl, maxSyl] = generatorParams.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
-      const syllables = Math.floor(Math.random() * (maxSyl - minSyl + 1)) + minSyl;
+      const syllables = parseInt(generatorParams.syllableCount) || 2;
+      const syllablesToGenerate = syllables;
       
-      for (let i = 0; i < syllables; i++) {
+      for (let i = 0; i < syllablesToGenerate; i++) {
         const consonant = consonants[Math.floor(Math.random() * consonants.length)];
         const vowel = vowels[Math.floor(Math.random() * vowels.length)];
         word += consonant + vowel;
@@ -334,8 +363,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   };
 
   const generateMinimalPairs = (): string[] => {
-    const pairs: string[] = [];
-    const [minSyl, maxSyl] = generatorParams.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
+    const syllables = parseInt(generatorParams.syllableCount) || 2;
     
     // Algoritmo efficiente per trovare coppie minime dal dizionario interno
     const findMinimalPairsFromDictionary = (): string[] => {
@@ -407,7 +435,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
         // Controlla se la parola soddisfa i criteri
         const syllables = countSyllables(word);
-        const validSyllables = syllables >= minSyl && syllables <= maxSyl;
+        const validSyllables = syllables === syllables; // Ora usiamo valore singolo
         const validFilters = (!generatorParams.startsWith || word.startsWith(generatorParams.startsWith.toLowerCase())) &&
                            (!generatorParams.contains || word.includes(generatorParams.contains.toLowerCase()));
         
@@ -434,7 +462,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                 
                 // Aggiungi entrambe le parole se non ci sono già e soddisfano i criteri
                 const variantSyllables = countSyllables(variant);
-                const variantValidSyllables = variantSyllables >= minSyl && variantSyllables <= maxSyl;
+                const variantValidSyllables = variantSyllables === syllables;
                 const variantValidFilters = (!generatorParams.startsWith || variant.startsWith(generatorParams.startsWith.toLowerCase())) &&
                                           (!generatorParams.contains || variant.includes(generatorParams.contains.toLowerCase()));
                 
@@ -754,7 +782,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     setGeneratedWords([]);
     setGeneratorParams({
       type: 'words',
-      syllableCount: '2-3',
+      syllableCount: '2',
       startsWith: '',
       contains: '',
       count: 10
@@ -981,10 +1009,10 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1-2">1-2</SelectItem>
-                      <SelectItem value="2-3">2-3</SelectItem>
-                      <SelectItem value="3-4">3-4</SelectItem>
-                      <SelectItem value="4-5">4-5</SelectItem>
+                      <SelectItem value="2">2 sillabe</SelectItem>
+                      <SelectItem value="3">3 sillabe</SelectItem>
+                      <SelectItem value="4">4 sillabe</SelectItem>
+                      <SelectItem value="5">5 sillabe</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
