@@ -634,10 +634,10 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       </Card>
 
       {/* Layout a 3 colonne per meglio bilanciare */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
         
         {/* Colonna 1: Esercizi Salvati */}
-        <Card className="lg:col-span-1 flex flex-col h-fit">
+        <Card className="lg:col-span-1 flex flex-col">
           <CardHeader>
             <CardTitle className="text-lg">Esercizi salvati</CardTitle>
             <CardDescription>Clicca su un esercizio per modificarlo</CardDescription>
