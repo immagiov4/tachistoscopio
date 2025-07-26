@@ -173,30 +173,31 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         await loadWordsDataset();
       }
       
-      // Delay minimo per mostrare la barra di caricamento
-      const [words] = await Promise.all([
-        new Promise<string[]>((resolve) => {
-          let result: string[] = [];
-          
-          switch (generatorParams.type) {
-            case 'words':
-              result = generateRealWords();
-              break;
-            case 'syllables':
-              result = generateSyllables();
-              break;
-            case 'nonwords':
-              result = generateNonWords();
-              break;
-            case 'minimal-pairs':
-              result = generateMinimalPairs();
-              break;
-          }
-          
-          resolve(result);
-        }),
-        new Promise(resolve => setTimeout(resolve, 1500))
-      ]);
+      // Delay minimo più breve per mostrare brevemente l'indicatore
+      const startTime = Date.now();
+      
+      let words: string[] = [];
+      
+      switch (generatorParams.type) {
+        case 'words':
+          words = generateRealWords();
+          break;
+        case 'syllables':
+          words = generateSyllables();
+          break;
+        case 'nonwords':
+          words = generateNonWords();
+          break;
+        case 'minimal-pairs':
+          words = generateMinimalPairs();
+          break;
+      }
+      
+      // Assicura un tempo minimo di 300ms per vedere l'indicatore
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 300) {
+        await new Promise(resolve => setTimeout(resolve, 300 - elapsed));
+      }
       
       setGeneratedWords(words);
     } catch (error) {
