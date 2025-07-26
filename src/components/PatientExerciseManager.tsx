@@ -49,6 +49,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   
   // Floating button state
   const [showFloatingActions, setShowFloatingActions] = useState(false);
+  const [isFloatingVisible, setIsFloatingVisible] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
   useEffect(() => {
     fetchInitialData();
@@ -66,7 +67,14 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       if (patientListCard) {
         const rect = patientListCard.getBoundingClientRect();
         const shouldShow = rect.bottom < window.innerHeight * 0.6;
-        setShowFloatingActions(shouldShow);
+        
+        if (shouldShow && !isFloatingVisible) {
+          setIsFloatingVisible(true);
+          setTimeout(() => setShowFloatingActions(true), 10);
+        } else if (!shouldShow && isFloatingVisible) {
+          setShowFloatingActions(false);
+          setTimeout(() => setIsFloatingVisible(false), 300);
+        }
       }
     };
 
@@ -76,7 +84,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [isFloatingVisible]);
   
   const scrollToPatientList = () => {
     const patientListCard = document.querySelector('[data-patient-list]');
@@ -690,8 +698,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         </div>}
         
       {/* Floating Actions */}
-      {showFloatingActions && (
-        <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50 animate-fade-in">
+      {isFloatingVisible && (
+        <div className={`fixed bottom-6 right-6 flex flex-col gap-3 z-50 ${showFloatingActions ? 'animate-fade-in' : 'animate-fade-out'}`}>
           <Button
             onClick={scrollToPatientList}
             size="sm"
