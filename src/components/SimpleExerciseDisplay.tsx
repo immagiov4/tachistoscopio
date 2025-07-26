@@ -100,24 +100,43 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   }, [session.settings.textCase]);
 
   const playErrorSound = () => {
-    // Suono molto dolce e delicato per bambini
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    // Suono molto più dolce - tono ancora più basso e curva più morbida
-    oscillator.type = 'sine'; // Forma d'onda più dolce
-    oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // Frequenza molto più bassa e calda
-    oscillator.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.1); // Scende a frequenza molto grave
-    
-    gainNode.gain.setValueAtTime(0.02, audioContext.currentTime); // Volume ancora più basso
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1); // Fade out più veloce
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.1); // Durata molto più breve
+    try {
+      // Su mobile richiede interazione utente - usiamo anche il fallback vibrazione
+      if ('vibrate' in navigator) {
+        navigator.vibrate(100); // Vibrazione breve come feedback
+      }
+      
+      // Suono molto dolce e delicato per bambini - ottimizzato per mobile
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Su mobile potrebbe essere sospeso, riattivalo
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Suono molto più dolce - tono ancora più basso e curva più morbida
+      oscillator.type = 'sine'; // Forma d'onda più dolce
+      oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // Frequenza molto più bassa e calda
+      oscillator.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.1); // Scende a frequenza molto grave
+      
+      gainNode.gain.setValueAtTime(0.02, audioContext.currentTime); // Volume ancora più basso
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1); // Fade out più veloce
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1); // Durata molto più breve
+    } catch (error) {
+      console.log('Audio/vibration not available:', error);
+      // Fallback solo vibrazione se disponibile
+      if ('vibrate' in navigator) {
+        navigator.vibrate(100);
+      }
+    }
   };
 
   const markError = useCallback(() => {
@@ -246,6 +265,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     
     // Se l'esercizio non è più in corso, ferma tutto
     if (!session.isRunning) {
+      console.log('Exercise stopped, clearing display state');
       setDisplayState('interval');
       return;
     }
@@ -259,29 +279,44 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       
       // Timer per stimolo - ridotto per essere meno invadente
       const stimulusTimer = setTimeout(() => {
-        if (!session.isRunning) return; // Controlla se è ancora attivo
+        if (!session.isRunning) {
+          console.log('Session stopped during stimulus timer');
+          return; // Controlla se è ancora attivo
+        }
         setStimulusVisible(false);
         
         // Timer fisso per transizione - sempre 300ms
         const transitionTimer = setTimeout(() => {
-          if (!session.isRunning) return; // Controlla se è ancora attivo
+          if (!session.isRunning) {
+            console.log('Session stopped during transition timer');
+            return; // Controlla se è ancora attivo
+          }
           console.log('Showing word:', currentWordToShow);
           setDisplayState('word');
           setCurrentWord(formatWord(currentWordToShow));
 
           // Timer per durata parola - basato su settings
           const wordTimer = setTimeout(() => {
-            if (!session.isRunning) return; // Controlla se è ancora attivo
+            if (!session.isRunning) {
+              console.log('Session stopped during word timer');
+              return; // Controlla se è ancora attivo
+            }
             console.log('Word timer finished. UseMask:', session.settings.useMask, 'MaskDuration:', session.settings.maskDuration);
             if (session.settings.useMask) {
               console.log('Showing mask for', session.settings.maskDuration, 'ms');
               setDisplayState('mask');
               const maskTimer = setTimeout(() => {
-                if (!session.isRunning) return; // Controlla se è ancora attivo
+                if (!session.isRunning) {
+                  console.log('Session stopped during mask timer');
+                  return; // Controlla se è ancora attivo
+                }
                 console.log('Mask timer finished, showing interval');
                 setDisplayState('interval');
                 const intervalTimer = setTimeout(() => {
-                  if (!session.isRunning) return; // Controlla se è ancora attivo
+                  if (!session.isRunning) {
+                    console.log('Session stopped during interval timer');
+                    return; // Controlla se è ancora attivo
+                  }
                   nextWord();
                 }, session.settings.intervalDuration);
                 return () => clearTimeout(intervalTimer);
@@ -291,7 +326,10 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
               console.log('No mask, going directly to interval');
               setDisplayState('interval');
               const intervalTimer = setTimeout(() => {
-                if (!session.isRunning) return; // Controlla se è ancora attivo
+                if (!session.isRunning) {
+                  console.log('Session stopped during interval timer (no mask)');
+                  return; // Controlla se è ancora attivo
+                }
                 nextWord();
               }, session.settings.intervalDuration);
               return () => clearTimeout(intervalTimer);
@@ -305,6 +343,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       }, 500); // Timing ridotto per stimolo
 
       return () => {
+        console.log('Cleaning up timers');
         clearTimeout(stimulusTimer);
         // Cleanup di eventuali timer annidati
         setDisplayState('interval');
@@ -460,15 +499,18 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
                 onClick={pauseResume} 
                 variant="outline" 
                 size="lg" 
-                className="flex items-center gap-2 min-w-[140px] bg-white/70 border-2 border-gray-300 hover:bg-white/90 hover:border-blue-400 hover:scale-105 transition-all duration-200 shadow-lg font-semibold"
+                className="flex items-center gap-2 min-w-[140px] bg-white/70 border-2 border-gray-300 hover:bg-white/90 hover:border-blue-400 hover:scale-105 transition-all duration-150 shadow-lg font-semibold touch-manipulation"
               >
                 {session.isPaused ? <><Play className="h-5 w-5" />Riprendi</> : <><Pause className="h-5 w-5" />Pausa</>}
               </Button>
               <Button 
-                onClick={onStop} 
+                onClick={() => {
+                  console.log('Stop button clicked');
+                  onStop();
+                }} 
                 variant="outline" 
                 size="lg" 
-                className="flex items-center gap-2 min-w-[120px] bg-red-50 border-2 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-400 hover:scale-105 transition-all duration-200 shadow-lg font-semibold"
+                className="flex items-center gap-2 min-w-[120px] bg-red-50 border-2 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-400 hover:scale-105 transition-all duration-150 shadow-lg font-semibold touch-manipulation"
               >
                 <Square className="h-5 w-5" />Stop
               </Button>
