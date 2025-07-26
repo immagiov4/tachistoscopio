@@ -712,412 +712,399 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   };
 
   return (
-    <div className="w-full space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+    <div className="space-y-6">
+      {/* Header Card - Compatto */}
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-xl">
             <BookOpen className="h-5 w-5" />
-            Crea nuovo esercizio
+            Liste Parole & Esercizi
           </CardTitle>
           <CardDescription>
-            Crea esercizi personalizzati con parole e impostazioni integrate
+            Gestisci i tuoi esercizi salvati o creane di nuovi
           </CardDescription>
         </CardHeader>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
+      {/* Layout a 3 colonne per meglio bilanciare */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Colonna 1: Esercizi Salvati */}
+        <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle>Esercizi salvati</CardTitle>
+            <CardTitle className="text-lg">Esercizi salvati</CardTitle>
             <CardDescription>
-              Seleziona esercizi esistenti o creane di nuovi
+              I tuoi esercizi personalizzati
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Lista attuale */}
-            {currentWordList && (
-              <div className="border rounded-lg p-4 bg-muted/30">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium">{currentWordList.name}</h4>
-                  <Badge variant="outline">{currentWordList.words.length} parole</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground mb-3">{currentWordList.description}</p>
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {currentWordList.words.slice(0, 10).map((word, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {word}
-                    </Badge>
-                  ))}
-                  {currentWordList.words.length > 10 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{currentWordList.words.length - 10} altre
-                    </Badge>
-                  )}
-                </div>
-                <Button onClick={handleExportList} variant="outline" size="sm" className="w-full">
-                  <Download className="mr-2 h-4 w-4" />
-                  Esporta lista
-                </Button>
+            {savedWordLists.length === 0 ? (
+              <div className="text-center py-6 text-gray-500">
+                <BookOpen className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                <p className="text-sm font-medium">Nessun esercizio</p>
+                <p className="text-xs">Crea il tuo primo esercizio</p>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {savedWordLists.map((list) => (
+                  <div
+                    key={list.id}
+                    className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                      currentWordList.id === list.id 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => onWordListChange(list)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm text-gray-900 truncate">{list.name}</h4>
+                        <p className="text-xs text-gray-500">{list.words.length} parole</p>
+                        {list.description && (
+                          <p className="text-xs text-gray-400 mt-1 line-clamp-2">{list.description}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditWordList(list);
+                          }}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteWordList(list.id);
+                          }}
+                          className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
-
-            <Separator />
-
-            {/* Liste salvate */}
-            <div className="space-y-2">
-              <h4 className="font-medium text-sm">I tuoi esercizi salvati</h4>
-              {savedWordLists.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Nessun esercizio salvato. Crea il tuo primo esercizio usando il generatore o inserendo parole manualmente.
-                </p>
-              ) : (
-                <div className="space-y-2">{/* Rimossa limitazione altezza max-h-60 overflow-y-auto */}
-                  {savedWordLists.map((list) => (
-                    <div 
-                      key={list.id} 
-                      className={`border rounded-lg p-3 cursor-pointer transition-all hover:bg-accent/50 ${
-                        currentWordList.id === list.id 
-                          ? 'bg-primary/10 border-primary ring-2 ring-primary/20' 
-                          : 'hover:border-primary/30'
-                      }`}
-                      onClick={() => onWordListChange(list)}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className={`w-3 h-3 rounded-full border-2 flex items-center justify-center transition-colors ${
-                              currentWordList.id === list.id 
-                                ? 'border-primary bg-primary' 
-                                : 'border-muted-foreground/30'
-                            }`}
-                          >
-                            {currentWordList.id === list.id && (
-                              <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
-                            )}
-                          </div>
-                          <span className="font-medium text-sm">{list.name}</span>
-                          <Badge variant="secondary" className="text-xs">{list.words.length} parole</Badge>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditWordList(list);
-                            }}
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0 opacity-60 hover:opacity-100"
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteWordList(list.id);
-                            }}
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0 opacity-60 hover:opacity-100 text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{list.description}</p>
-                      {currentWordList.id === list.id && (
-                        <div className="text-xs text-primary font-medium mt-1">
-                          ✓ Lista attualmente selezionata
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="w-full"
+              onClick={handleExportList}
+              disabled={savedWordLists.length === 0}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Esporta
+            </Button>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Colonna 2: Creazione Nuovo Esercizio */}
+        <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>
+            <CardTitle className="text-lg">
               {editingList ? 'Modifica esercizio' : 'Crea nuovo esercizio'}
             </CardTitle>
             <CardDescription>
-              {editingList ? 'Modifica l\'esercizio esistente' : 'Genera parole automaticamente o inseriscile manualmente'}
+              {editingList ? 'Modifica l\'esercizio esistente' : 'Genera automaticamente o inserisci manualmente'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {editingList && (
-              <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-md">
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Stai modificando un esercizio esistente. Le modifiche saranno salvate automaticamente.
-                </p>
-              </div>
-            )}
-
-            {!editingList && (
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => setActiveTab('generator')}
-                  variant={activeTab === 'generator' ? 'default' : 'outline'}
-                  size="sm"
-                  className="flex-1"
-                >
-                  <Wand2 className="mr-2 h-4 w-4" />
-                  Generatore
-                </Button>
-                <Button
-                  onClick={() => setActiveTab('manual')}
-                  variant={activeTab === 'manual' ? 'default' : 'outline'}
-                  size="sm"
-                  className="flex-1"
-                >
-                  <Edit className="mr-2 h-4 w-4" />
-                  Manuale
-                </Button>
-              </div>
-            )}
-
+            
+            {/* Nome esercizio sempre visibile */}
             <div className="space-y-2">
-              <Label htmlFor="list-name">Nome esercizio</Label>
+              <Label className="text-sm font-medium">Nome esercizio</Label>
               <Input
-                id="list-name"
-                type="text"
+                placeholder="Nuovo esercizio"
                 value={customListName}
                 onChange={(e) => setCustomListName(e.target.value)}
-                placeholder="Inserisci nome esercizio"
+                className="h-9"
               />
             </div>
 
+            {/* Tabs compatte per Generator vs Manual (solo se non in editing) */}
+            {!editingList && (
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setActiveTab('generator')}
+                  className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === 'generator'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <Wand2 className="h-4 w-4 inline mr-2" />
+                  Generatore
+                </button>
+                <button
+                  onClick={() => setActiveTab('manual')}
+                  className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === 'manual'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <Edit className="h-4 w-4 inline mr-2" />
+                  Manuale
+                </button>
+              </div>
+            )}
+
+            {/* Contenuto Generator */}
             {(activeTab === 'generator' && !editingList) && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Tipo di esercizio</Label>
-                    <Select 
-                      value={generatorParams.type} 
-                      onValueChange={(value: any) => setGeneratorParams(prev => ({ ...prev, type: value }))}
+                {/* Controlli compatti in griglia */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs font-medium text-gray-700">Tipo</Label>
+                    <Select
+                      value={generatorParams.type}
+                      onValueChange={(value) => setGeneratorParams({...generatorParams, type: value as any})}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="h-9">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-background border z-50">
+                      <SelectContent>
                         <SelectItem value="words">Parole</SelectItem>
                         <SelectItem value="syllables">Sillabe</SelectItem>
-                        <SelectItem value="nonwords">Non parole</SelectItem>
+                        <SelectItem value="nonwords">Non-parole</SelectItem>
                         <SelectItem value="minimal-pairs">Coppie minime</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label>Numero di elementi</Label>
+                  
+                  <div>
+                    <Label className="text-xs font-medium text-gray-700">Quantità</Label>
                     <Input
                       type="number"
                       min="5"
                       max="50"
                       value={generatorParams.count}
-                      onChange={(e) => setGeneratorParams(prev => ({ ...prev, count: parseInt(e.target.value) || 10 }))}
+                      onChange={(e) => setGeneratorParams({...generatorParams, count: parseInt(e.target.value) || 10})}
+                      className="h-9"
                     />
                   </div>
                 </div>
 
-                {generatorParams.type !== 'syllables' && (
-                  <div className="space-y-2">
-                    <Label>Numero di sillabe</Label>
-                    <Select 
-                      value={generatorParams.syllableCount} 
-                      onValueChange={(value) => setGeneratorParams(prev => ({ ...prev, syllableCount: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background border z-50">
-                        <SelectItem value="1-2">Da 1 a 2</SelectItem>
-                        <SelectItem value="2-3">Da 2 a 3</SelectItem>
-                        <SelectItem value="3-4">Da 3 a 4</SelectItem>
-                        <SelectItem value="4-5">Da 4 a 5</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Inizia con...</Label>
-                    <Input
-                      value={generatorParams.startsWith}
-                      onChange={(e) => setGeneratorParams(prev => ({ ...prev, startsWith: e.target.value }))}
-                      placeholder="es. ca"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Contiene</Label>
-                    <Input
-                      value={generatorParams.contains}
-                      onChange={(e) => setGeneratorParams(prev => ({ ...prev, contains: e.target.value }))}
-                      placeholder="es. ar"
-                    />
-                  </div>
-                </div>
-
-                <Button 
-                  onClick={generateWords} 
-                  disabled={isGenerating}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <RefreshCw className={`mr-2 h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
-                  {isGenerating ? 'Generazione...' : 'Rigenera Parole'}
-                </Button>
-
-                {generatedWords.length > 0 && (
-                  <div className="border rounded-lg p-4 max-h-40 overflow-y-auto">
-                    <div className="flex flex-wrap gap-2">
-                      {generatedWords.map((word, index) => (
-                        <Badge key={index} variant="outline" className="text-sm">
-                          {word}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {(activeTab === 'manual' || editingList) && (
-              <div className="space-y-2">
-                <Label htmlFor="custom-words">Parole</Label>
-                <Textarea
-                  id="custom-words"
-                  value={customWords}
-                  onChange={(e) => setCustomWords(e.target.value)}
-                  placeholder="Inserisci parole separate da virgole, spazi o a capo.&#10;&#10;Esempio:&#10;gatto, cane, correre&#10;grande rosso sole&#10;cappello&#10;penna"
-                  className="min-h-[200px] font-mono text-sm"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Separa le parole con virgole, spazi o a capo. 
-                  Conteggio attuale: {customWords.split(/[,\n\s]+/).filter(w => w.trim()).length} parole
-                </p>
-
-                <div className="space-y-2">
-                  <Label>Importa da file</Label>
-                  <div className="flex gap-2">
-                    <input
-                      type="file"
-                      accept=".txt,.csv"
-                      onChange={handleImportFile}
-                      className="hidden"
-                      id="file-import"
-                    />
-                    <Button 
-                      onClick={() => document.getElementById('file-import')?.click()}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <Upload className="mr-2 h-4 w-4" />
-                      Importa file
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Supporta file .txt e .csv con parole separate da virgole o a capo
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Exercise Settings Section */}
-            <div className="space-y-4 border-t pt-4">
-              <h3 className="font-medium text-sm">Impostazioni Esercizio</h3>
-              <p className="text-xs text-muted-foreground">
-                Configura le impostazioni predefinite per questa lista
-              </p>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="exposureDuration">Durata Esposizione (ms)</Label>
-                  <Input
-                    id="exposureDuration"
-                    type="number"
-                    min="100"
-                    max="5000"
-                    value={exerciseSettings.exposureDuration}
-                    onChange={(e) => setExerciseSettings({
-                      ...exerciseSettings,
-                      exposureDuration: parseInt(e.target.value) || 500
-                    })}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="intervalDuration">Durata Intervallo (ms)</Label>
-                  <Input
-                    id="intervalDuration"
-                    type="number"
-                    min="50"
-                    max="2000"
-                    value={exerciseSettings.intervalDuration}
-                    onChange={(e) => setExerciseSettings({
-                      ...exerciseSettings,
-                      intervalDuration: parseInt(e.target.value) || 200
-                    })}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="textCase">Formato Testo</Label>
-                  <Select 
-                    value={exerciseSettings.textCase} 
-                    onValueChange={(value) => setExerciseSettings({
-                      ...exerciseSettings,
-                      textCase: value as any
-                    })}
+                <div>
+                  <Label className="text-xs font-medium text-gray-700">Sillabe</Label>
+                  <Select
+                    value={generatorParams.syllableCount}
+                    onValueChange={(value) => setGeneratorParams({...generatorParams, syllableCount: value})}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-9">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-background border z-50">
-                      <SelectItem value="original">Originale</SelectItem>
-                      <SelectItem value="uppercase">MAIUSCOLO</SelectItem>
-                      <SelectItem value="lowercase">minuscolo</SelectItem>
+                    <SelectContent>
+                      <SelectItem value="1-2">1-2</SelectItem>
+                      <SelectItem value="2-3">2-3</SelectItem>
+                      <SelectItem value="3-4">3-4</SelectItem>
+                      <SelectItem value="4-5">4-5</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="maskDuration">Durata Maschera (ms)</Label>
-                  <Input
-                    id="maskDuration"
-                    type="number"
-                    min="50"
-                    max="1000"
-                    value={exerciseSettings.maskDuration}
-                    onChange={(e) => setExerciseSettings({
-                      ...exerciseSettings,
-                      maskDuration: parseInt(e.target.value) || 200
-                    })}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs font-medium text-gray-700">Inizia con</Label>
+                    <Input
+                      placeholder="es. ca"
+                      value={generatorParams.startsWith}
+                      onChange={(e) => setGeneratorParams({...generatorParams, startsWith: e.target.value})}
+                      className="h-9"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label className="text-xs font-medium text-gray-700">Contiene</Label>
+                    <Input
+                      placeholder="es. ar"
+                      value={generatorParams.contains}
+                      onChange={(e) => setGeneratorParams({...generatorParams, contains: e.target.value})}
+                      className="h-9"
+                    />
+                  </div>
+                </div>
+
+                {/* Anteprima parole generate */}
+                {isGenerating ? (
+                  <div className="flex items-center justify-center py-4">
+                    <RefreshCw className="h-4 w-4 animate-spin text-blue-500" />
+                    <span className="ml-2 text-sm text-gray-600">Generazione...</span>
+                  </div>
+                ) : generatedWords.length > 0 ? (
+                  <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                    <div className="flex flex-wrap gap-1">
+                      {generatedWords.slice(0, 12).map((word, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {word}
+                        </Badge>
+                      ))}
+                      {generatedWords.length > 12 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{generatedWords.length - 12}
+                        </Badge>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setCustomWords(generatedWords.join(', '));
+                        setActiveTab('manual');
+                      }}
+                      className="h-8 text-xs"
+                    >
+                      Usa queste parole
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center py-3 text-gray-500 text-sm">
+                    Nessuna parola trovata
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Contenuto Manual */}
+            {(activeTab === 'manual' || editingList) && (
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium">Parole (separate da virgola o a capo)</Label>
+                  <Textarea
+                    placeholder="aprile, piccolo, dove, palazzo&#10;maggio, verde, collina&#10;regalo, pianura, marzo"
+                    value={customWords}
+                    onChange={(e) => setCustomWords(e.target.value)}
+                    rows={6}
+                    className="mt-1 font-mono text-sm"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {customWords.split(/[,\n\s]+/).filter(w => w.trim()).length} parole
+                  </p>
+                </div>
+                
+                {/* Importa file - compatto */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    accept=".txt,.csv"
+                    onChange={handleImportFile}
+                    className="hidden"
+                    id="file-import"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => document.getElementById('file-import')?.click()}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Importa file
+                  </Button>
+                  <span className="text-xs text-gray-500">txt, csv</span>
                 </div>
               </div>
-            </div>
+            )}
 
-            <div className="flex gap-2">
+            {/* Impostazioni Esercizio - Ridotte e raggruppate */}
+            <details className="border rounded-lg">
+              <summary className="p-3 cursor-pointer hover:bg-gray-50 text-sm font-medium">
+                Impostazioni avanzate
+              </summary>
+              <div className="p-3 pt-0 border-t">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">Esposizione (ms)</Label>
+                    <Input
+                      type="number"
+                      min="100"
+                      max="5000"
+                      value={exerciseSettings.exposureDuration}
+                      onChange={(e) => setExerciseSettings({
+                        ...exerciseSettings,
+                        exposureDuration: parseInt(e.target.value) || 500
+                      })}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label className="text-xs">Intervallo (ms)</Label>
+                    <Input
+                      type="number"
+                      min="50"
+                      max="2000"
+                      value={exerciseSettings.intervalDuration}
+                      onChange={(e) => setExerciseSettings({
+                        ...exerciseSettings,
+                        intervalDuration: parseInt(e.target.value) || 200
+                      })}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label className="text-xs">Formato</Label>
+                    <Select
+                      value={exerciseSettings.textCase}
+                      onValueChange={(value) => setExerciseSettings({
+                        ...exerciseSettings,
+                        textCase: value as any
+                      })}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="original">Originale</SelectItem>
+                        <SelectItem value="uppercase">MAIUSCOLO</SelectItem>
+                        <SelectItem value="lowercase">minuscolo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-xs">Maschera (ms)</Label>
+                    <Input
+                      type="number"
+                      min="50"
+                      max="1000"
+                      value={exerciseSettings.maskDuration}
+                      onChange={(e) => setExerciseSettings({
+                        ...exerciseSettings,
+                        maskDuration: parseInt(e.target.value) || 200
+                      })}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            {/* Bottoni azione */}
+            <div className="flex gap-2 pt-2">
               {editingList ? (
                 <>
                   <Button 
                     onClick={handleUpdateWordList} 
-                    size="sm" 
                     disabled={!customWords.trim() || isLoading}
                     className="flex-1"
                   >
-                    <Save className="mr-2 h-4 w-4" />
+                    {isLoading ? (
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
                     {isLoading ? 'Aggiornamento...' : 'Aggiorna'}
                   </Button>
-                  <Button onClick={handleCancelEdit} variant="outline" size="sm">
-                    <X className="mr-2 h-4 w-4" />
+                  <Button onClick={handleCancelEdit} variant="outline">
                     Annulla
                   </Button>
                 </>
@@ -1125,20 +1112,21 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                 <>
                   <Button 
                     onClick={handleCreateCustomList} 
-                    size="sm" 
                     disabled={isLoading || !customListName.trim() || 
                       (activeTab === 'generator' ? generatedWords.length === 0 : !customWords.trim())}
                     className="flex-1"
                   >
-                    <Save className="mr-2 h-4 w-4" />
-                    {isLoading ? 'Salvataggio...' : therapistId ? 'Salva esercizio' : 'Usa temporaneamente'}
+                    {isLoading ? (
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    {isLoading ? 'Salvataggio...' : 'Salva esercizio'}
                   </Button>
                   <Button 
                     onClick={handleClearCustomWords} 
-                    variant="outline" 
-                    size="sm"
+                    variant="outline"
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
                     Pulisci
                   </Button>
                 </>
@@ -1146,8 +1134,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
             </div>
 
             {!therapistId && (
-              <p className="text-sm text-amber-600 dark:text-amber-400">
-                Accedi come terapeuta per salvare liste permanentemente.
+              <p className="text-sm text-amber-600 bg-amber-50 p-2 rounded">
+                Accedi come terapeuta per salvare permanentemente.
               </p>
             )}
           </CardContent>
