@@ -100,7 +100,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   }, [session.settings.textCase]);
 
   const playErrorSound = () => {
-    // Suono più dolce e delicato per bambini
+    // Suono molto dolce e delicato per bambini
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
@@ -108,15 +108,16 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
     
-    // Suono più dolce - tono più basso e meno aggressivo
-    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.15);
+    // Suono molto più dolce - tono ancora più basso e curva più morbida
+    oscillator.type = 'sine'; // Forma d'onda più dolce
+    oscillator.frequency.setValueAtTime(400, audioContext.currentTime); // Frequenza più bassa
+    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.2); // Discesa più graduale
     
-    gainNode.gain.setValueAtTime(0.05, audioContext.currentTime); // Volume molto più basso
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+    gainNode.gain.setValueAtTime(0.02, audioContext.currentTime); // Volume ancora più basso
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2); // Fade out più lungo
     
     oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.15);
+    oscillator.stop(audioContext.currentTime + 0.2); // Durata leggermente più lunga
   };
 
   const markError = useCallback(() => {
