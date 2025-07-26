@@ -641,6 +641,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     setCustomWords(list.words.join('\n'));
     setCustomListName(list.name);
     setEditingList(list.id);
+    // Evidenzia anche l'elemento come selezionato
+    onWordListChange(list);
   };
 
   const handleUpdateWordList = async () => {
@@ -796,7 +798,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                   <div
                     key={list.id}
                     className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
-                      currentWordList.id === list.id 
+                      (currentWordList.id === list.id || editingList === list.id)
                         ? 'border-blue-500 bg-blue-50' 
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
