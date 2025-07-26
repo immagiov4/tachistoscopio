@@ -62,7 +62,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   // Scroll listener for floating actions
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
-    let isVisible = false;
     
     const handleScroll = () => {
       const patientListCard = document.querySelector('[data-patient-list]');
@@ -70,19 +69,14 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         const rect = patientListCard.getBoundingClientRect();
         const shouldShow = rect.bottom < window.innerHeight * 0.3;
         
-        // Prevent flickering by only updating when state actually changes
-        if (shouldShow !== isVisible) {
-          clearTimeout(timeoutId);
-          
-          if (shouldShow) {
-            timeoutId = setTimeout(() => {
-              setShowFloatingActions(true);
-              isVisible = true;
-            }, 50);
-          } else {
-            setShowFloatingActions(false);
-            isVisible = false;
-          }
+        clearTimeout(timeoutId);
+        
+        if (shouldShow) {
+          timeoutId = setTimeout(() => {
+            setShowFloatingActions(true);
+          }, 50);
+        } else {
+          setShowFloatingActions(false);
         }
       }
     };
