@@ -434,7 +434,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                       </div>
 
                       {/* Selezione Tema */}
-                      <div className="border border-gray-200 rounded-lg p-3 bg-gray-50/50">
+                      <div>
                         <p className="text-sm font-medium text-gray-700 mb-3">
                           Tema Esercizio
                         </p>
