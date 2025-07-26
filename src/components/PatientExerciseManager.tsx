@@ -381,7 +381,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       <Card>
         <CardHeader>
           <CardTitle>Crea Nuovo Paziente</CardTitle>
-          <CardDescription className="leading-relaxed space-y-1 mb-6">
+          <CardDescription className="leading-relaxed space-y-1">
             Aggiungi un nuovo paziente al tuo gruppo. Verrà inviata automaticamente un'email al genitore/tutore con:
             <br />• <strong>Link di accesso rapido</strong> (magic link) per entrare immediatamente
             <br />• <strong>Password temporanea</strong> come alternativa per l'accesso manuale
@@ -408,13 +408,13 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       </Card>
 
       {/* Patient Search and Selection */}
-      <Card className="mt-8">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
             Elenco Pazienti ({filteredPatients.length})
           </CardTitle>
-          <CardDescription className="mb-6">
+          <CardDescription>
             Clicca su un paziente per modificare il suo piano settimanale e visualizzare le statistiche
           </CardDescription>
         </CardHeader>
