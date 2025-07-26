@@ -387,17 +387,16 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
                 <div className="relative inline-block p-8 bg-white/25 backdrop-blur-lg rounded-3xl border border-white/30 shadow-2xl min-w-[400px]">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 rounded-3xl"></div>
                   
-                  {/* Pattern di interferenza compatto ed efficace */}
-                  <div className="relative grid grid-cols-10 gap-1 max-w-sm mx-auto">
-                    {Array.from({length: 80}).map((_, i) => {
-                      const patterns = ['#', 'X', '●', '◆', '▲', '♦', '@', '%', '&', '*'];
+                  {/* Pattern di interferenza con simboli grandi e densi */}
+                  <div className="relative grid grid-cols-8 gap-0 max-w-lg mx-auto">
+                    {Array.from({length: 64}).map((_, i) => {
+                      const patterns = ['█', '▇', '▆', '▅', '▄', '▃', '▂', '▁', '●', '◆', '■', '♠'];
                       const colors = ['text-gray-800', 'text-gray-700', 'text-black', 'text-gray-900'];
-                      const sizes = ['text-lg', 'text-xl'];
                       
                       return (
                         <div 
                           key={i}
-                          className={`${colors[i % colors.length]} ${sizes[i % sizes.length]} font-bold select-none text-center leading-none`}
+                          className={`${colors[i % colors.length]} text-2xl font-bold select-none text-center leading-tight`}
                           style={{ 
                             animationDelay: `${(i * 0.02)}s`,
                           }}
