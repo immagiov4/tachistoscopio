@@ -124,6 +124,15 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     setStudioMode(null);
     setTimeout(() => {
       window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+      // Re-check floating buttons visibility after scroll
+      setTimeout(() => {
+        const patientListCard = document.querySelector('[data-patient-list]');
+        if (patientListCard) {
+          const rect = patientListCard.getBoundingClientRect();
+          const shouldShow = rect.bottom < window.innerHeight * 0.6;
+          setShowFloatingActions(shouldShow);
+        }
+      }, 500);
     }, 100);
   };
   
