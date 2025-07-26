@@ -384,35 +384,8 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
 
             {displayState === 'mask' && (
               <div className="text-center animate-scale-in">
-                <div className="relative inline-block p-8 bg-white/25 backdrop-blur-lg rounded-3xl border border-white/30 shadow-2xl min-w-[400px]">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 rounded-3xl"></div>
-                  
-                  {/* Pattern di interferenza con simboli grandi e densi */}
-                  <div className="relative grid grid-cols-8 gap-0 max-w-lg mx-auto">
-                    {Array.from({length: 64}).map((_, i) => {
-                      const patterns = ['█', '▇', '▆', '▅', '▄', '▃', '▂', '▁', '●', '◆', '■', '♠'];
-                      const colors = ['text-gray-800', 'text-gray-700', 'text-black', 'text-gray-900'];
-                      
-                      return (
-                        <div 
-                          key={i}
-                          className={`${colors[i % colors.length]} text-2xl font-bold select-none text-center leading-tight`}
-                          style={{ 
-                            animationDelay: `${(i * 0.02)}s`,
-                          }}
-                        >
-                          {patterns[i % patterns.length]}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  
-                  {/* Pattern rotante elegante per interferenza aggiuntiva */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-                    <div className="text-4xl font-bold text-gray-700 animate-spin" style={{ animationDuration: '0.8s', animationDirection: 'reverse' }}>
-                      ◊ ◇ ◊ ◇
-                    </div>
-                  </div>
+                <div className="relative inline-block p-8 bg-black rounded-3xl shadow-2xl min-w-[400px] min-h-[200px]">
+                  {/* Maschera completamente nera */}
                 </div>
               </div>
             )}
