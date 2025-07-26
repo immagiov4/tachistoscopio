@@ -340,26 +340,47 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     // Algoritmo efficiente per trovare coppie minime dal dizionario interno
     const findMinimalPairsFromDictionary = (): string[] => {
       // Parole comuni italiane verificate (subset del dizionario per prestazioni)
+      // FILTRATE per essere appropriate per bambini
       const commonWords = [
-        'casa', 'cassa', 'cane', 'canne', 'pane', 'pena', 'penna', 'male', 'mare', 'mele',
+        'casa', 'cassa', 'cane', 'canne', 'male', 'mare', 'mele',
         'sole', 'suole', 'filo', 'fino', 'vino', 'pino', 'lana', 'rana', 'mano', 'nano',
         'polo', 'bolo', 'tana', 'dana', 'pala', 'palla', 'cola', 'colla', 'gala', 'galla',
-        'caro', 'carro', 'nero', 'nero', 'loro', 'oro', 'foro', 'moro', 'coro', 'toro',
+        'caro', 'carro', 'nero', 'loro', 'oro', 'foro', 'moro', 'coro', 'toro',
         'sera', 'serra', 'terra', 'cera', 'peso', 'pezzo', 'mese', 'messe', 'base', 'basse',
         'rosa', 'rossa', 'massa', 'mazza', 'pazzo', 'passo', 'tasso', 'tazza', 'razzo',
         'note', 'notte', 'botte', 'moto', 'motto', 'foto', 'fatto', 'gatto', 'lago',
         'carta', 'casta', 'pasta', 'basta', 'vasta', 'fede', 'sede', 'vede', 'cede',
-        'bene', 'gene', 'pene', 'rene', 'meta', 'beta', 'zeta', 'seta', 'vita', 'dita',
-        'buco', 'bucco', 'eco', 'ecco', 'sano', 'sanno', 'papa', 'pappa', 'bella', 'bela',
-        'torre', 'borre', 'corre', 'forre', 'dorme', 'forme', 'norme', 'torme'
+        'bene', 'gene', 'rene', 'meta', 'beta', 'zeta', 'seta', 'vita', 'dita',
+        'buco', 'bucco', 'eco', 'ecco', 'sano', 'sanno', 'papa', 'pappa', 'bella',
+        'torre', 'borre', 'corre', 'forre', 'dorme', 'forme', 'norme', 'luce', 'duce',
+        'sale', 'tale', 'vale', 'pale', 'cale', 'male', 'dale', 'bale',
+        'lato', 'nato', 'gato', 'dato', 'rato', 'pato', 'mato',
+        'fiume', 'piume', 'muro', 'duro', 'puro', 'curo', 'euro',
+        'lago', 'rago', 'pago', 'mago', 'sago', 'vago',
+        'coda', 'soda', 'loda', 'moda', 'noda', 'roda',
+        'luna', 'runa', 'duna', 'tuna', 'puna', 'cuna',
+        'pino', 'sino', 'fino', 'lino', 'mino', 'dino', 'tino',
+        'dado', 'fado', 'nado', 'rado', 'sado', 'vado'
       ];
 
-      const dictionary = new Set(commonWords);
+      // Lista di parole inappropriate da evitare (per bambini)
+      const inappropriateWords = new Set([
+        'pene', 'ano', 'culo', 'merda', 'cacca', 'pipi', 'popo',
+        'stupido', 'idiota', 'cretino', 'scemo', 'deficiente'
+      ]);
+
+      // Filtra le parole inappropriate
+      const safeWords = commonWords.filter(word => !inappropriateWords.has(word.toLowerCase()));
+      
+      // Mescola l'array per randomicità ogni volta
+      const shuffledWords = [...safeWords].sort(() => Math.random() - 0.5);
+      
+      const dictionary = new Set(shuffledWords);
       const foundPairs: Set<string> = new Set();
       const result: string[] = [];
 
-      // Per ogni parola, genera varianti con sostituzione di un carattere
-      for (const word of commonWords) {
+      // Per ogni parola (in ordine casuale), genera varianti con sostituzione di un carattere
+      for (const word of shuffledWords) {
         if (result.length >= generatorParams.count) break;
 
         // Controlla se la parola soddisfa i criteri
@@ -370,16 +391,20 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         
         if (!validSyllables || !validFilters) continue;
 
-        for (let i = 0; i < word.length; i++) {
-          // Sostituisci carattere i con ogni lettera dell'alfabeto
-          const letters = 'abcdefghijklmnopqrstuvwxyz';
+        // Genera varianti in ordine casuale delle posizioni
+        const positions = Array.from({length: word.length}, (_, i) => i).sort(() => Math.random() - 0.5);
+        
+        for (const i of positions) {
+          // Sostituisci carattere i con ogni lettera dell'alfabeto (in ordine casuale)
+          const letters = 'abcdefghijklmnopqrstuvwxyz'.split('').sort(() => Math.random() - 0.5);
+          
           for (const letter of letters) {
             if (letter === word[i]) continue; // Salta se è lo stesso carattere
             
             const variant = word.slice(0, i) + letter + word.slice(i + 1);
             
-            // Controlla se la variante esiste nel dizionario
-            if (dictionary.has(variant)) {
+            // Controlla se la variante esiste nel dizionario ed è appropriata
+            if (dictionary.has(variant) && !inappropriateWords.has(variant.toLowerCase())) {
               const pair = [word, variant].sort().join('-');
               
               if (!foundPairs.has(pair)) {
@@ -404,7 +429,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         }
       }
 
-      return result;
+      // Mescola anche il risultato finale per maggiore varietà
+      return result.sort(() => Math.random() - 0.5);
     };
 
     return findMinimalPairsFromDictionary();
