@@ -716,6 +716,26 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     setCustomWords('');
     setCustomListName('Nuovo esercizio');
     setEditingList(null);
+    setGeneratedWords([]);
+    setGeneratorParams({
+      type: 'words',
+      syllableCount: '2-3',
+      startsWith: '',
+      contains: '',
+      count: 10
+    });
+    setExerciseSettings({
+      exposureDuration: 150,
+      intervalDuration: 800,
+      textCase: 'original' as const,
+      useMask: false,
+      maskDuration: 100,
+      fontSize: 'large' as const
+    });
+    toast({
+      title: "Form pulito",
+      description: "Il form è stato resettato.",
+    });
   };
 
   return (
