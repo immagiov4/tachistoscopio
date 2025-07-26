@@ -189,6 +189,16 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
         return;
       }
 
+      // Verifica che abbiamo un patient_id valido
+      if (!effectivePatientId) {
+        toast({
+          title: 'Errore',
+          description: 'ID paziente non trovato',
+          variant: 'destructive'
+        });
+        return;
+      }
+
       // Save session to database - use effectivePatientId (the actual patient)
       const sessionData = {
         exercise_id: todayExercise.id,
@@ -201,6 +211,15 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
         duration: result.duration,
         missed_words: result.missedWords
       };
+      
+      console.log('Attempting to save session:', {
+        sessionData,
+        userProfile: profile,
+        isPatient: profile?.role === 'patient',
+        isTherapist: profile?.role === 'therapist',
+        studioMode: !!studioPatientId
+      });
+      
       const {
         error
       } = await supabase.from('exercise_sessions').insert(sessionData);
