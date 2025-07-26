@@ -104,21 +104,18 @@ serve(async (req) => {
       console.error('Error generating magic link:', magicLinkError);
     }
 
-    // Send welcome email using Supabase built-in email system
+    // Send welcome email using Supabase invite system
     let emailSent = false;
     let emailError = null;
     
     try {
-      const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.generateLink({
-        type: 'invite',
-        email: email,
-        options: {
-          redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/`,
-          data: {
-            full_name: fullName,
-            password: password,
-            welcome_message: `Ciao ${fullName}! Le tue credenziali: Email: ${email}, Password: ${password}`
-          }
+      // Use the same invite system that works from Supabase dashboard
+      const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+        redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/`,
+        data: {
+          full_name: fullName,
+          password: password,
+          welcome_message: `Ciao ${fullName}! Le tue credenziali: Email: ${email}, Password: ${password}`
         }
       });
 
