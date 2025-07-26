@@ -11,8 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import {
   WordList,
-  ExerciseSettings,
-  PREDEFINED_WORD_LISTS
+  ExerciseSettings
 } from '@/types/tachistoscope';
 
 interface SettingsPanelProps {
@@ -119,33 +118,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <CardHeader>
           <CardTitle>Word List</CardTitle>
           <CardDescription>
-            Choose from predefined lists or create your own
+            Use the word list manager to create custom lists
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Select Word List</Label>
-            <Select
-              value={currentWordList.id}
-              onValueChange={(value) => {
-                const wordList = PREDEFINED_WORD_LISTS.find(list => list.id === value);
-                if (wordList) {
-                  onWordListChange(wordList);
-                }
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PREDEFINED_WORD_LISTS.map((list) => (
-                  <SelectItem key={list.id} value={list.id}>
-                    {list.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">

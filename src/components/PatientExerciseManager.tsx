@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, BookOpen, BarChart3, Search, Copy, Plus, Trash2, UserCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, WordList, Exercise, ExerciseSettings, DAYS_OF_WEEK } from '@/types/database';
-import { PREDEFINED_WORD_LISTS } from '@/types/tachistoscope';
+
 import { toast } from '@/hooks/use-toast';
 import { PatientDashboard } from '@/components/PatientDashboard';
 
@@ -82,20 +82,9 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
         exerciseCount: exerciseCounts[patient.id] || 0
       }));
 
-      // Combine predefined lists with custom lists
-      const predefinedAsWordList: WordList[] = PREDEFINED_WORD_LISTS.map(list => ({
-        id: list.id,
-        name: list.name,
-        description: list.description || '',
-        words: list.words,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        created_by: 'system'
-      }));
-
-      const allWordLists = [...predefinedAsWordList, ...(wordListsData.data || [])].map(list => ({
+      const allWordLists = (wordListsData.data || []).map(list => ({
         ...list,
-        settings: list.settings || {
+        settings: (typeof list.settings === 'object' && list.settings !== null && !Array.isArray(list.settings)) ? list.settings as any : {
           exposureDuration: 500,
           intervalDuration: 200,
           textCase: 'original' as const,
@@ -106,7 +95,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
 
       setPatients(patients);
       setPatientsWithExercises(patientsWithCounts);
-      setWordLists(allWordLists as WordList[]);
+      setWordLists(allWordLists as unknown as WordList[]);
     } catch (error) {
       console.error('Error fetching initial data:', error);
     } finally {
@@ -154,41 +143,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
     try {
       let finalWordListId = wordListId;
       
-      // Check if this is a predefined word list (non-UUID string)
-      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(wordListId);
-      
-      if (!isUUID) {
-        // This is a predefined word list, we need to create it in the database first
-        const predefinedList = PREDEFINED_WORD_LISTS.find(list => list.id === wordListId);
-        if (predefinedList) {
-          // Check if it already exists in database
-          const { data: existingList } = await supabase
-            .from('word_lists')
-            .select('id')
-            .eq('name', predefinedList.name)
-            .eq('created_by', therapistId)
-            .single();
-          
-          if (existingList) {
-            finalWordListId = existingList.id;
-          } else {
-            // Create the predefined list in the database
-            const { data: newList, error: createError } = await supabase
-              .from('word_lists')
-              .insert({
-                name: predefinedList.name,
-                description: predefinedList.description || '',
-                words: predefinedList.words,
-                created_by: therapistId
-              })
-              .select('id')
-              .single();
-            
-            if (createError) throw createError;
-            finalWordListId = newList.id;
-          }
-        }
-      }
 
       const { error } = await supabase
         .from('exercises')

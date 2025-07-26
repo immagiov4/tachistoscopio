@@ -18,7 +18,7 @@ import { PatientExerciseManager } from '@/components/PatientExerciseManager';
 import { TutorialModal } from '@/components/TutorialModal';
 import { WordListManager } from '@/components/WordListManager';
 import { WordGenerator } from '@/components/WordGenerator';
-import { WordList as TachistoscopeWordList, PREDEFINED_WORD_LISTS } from '@/types/tachistoscope';
+import { WordList as TachistoscopeWordList } from '@/types/tachistoscope';
 
 export const TherapistDashboard: React.FC = () => {
   const { profile, signOut } = useAuth();
@@ -28,7 +28,7 @@ export const TherapistDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   // Word list manager state
-  const [currentWordList, setCurrentWordList] = useState<TachistoscopeWordList>(PREDEFINED_WORD_LISTS[0]);
+  const [currentWordList, setCurrentWordList] = useState<TachistoscopeWordList>({ id: 'empty', name: 'Nessuna lista', words: [], description: '' });
 
   // Patient creation state
   const [newPatientEmail, setNewPatientEmail] = useState('');
@@ -75,20 +75,9 @@ export const TherapistDashboard: React.FC = () => {
 
       if (error) throw error;
 
-      // Combine predefined lists with custom lists
-      const predefinedAsWordList: WordList[] = PREDEFINED_WORD_LISTS.map(list => ({
-        id: list.id,
-        name: list.name,
-        description: list.description || '',
-        words: list.words,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        created_by: 'system'
-      }));
-
-      const allWordLists = [...predefinedAsWordList, ...(data || [])].map(list => ({
+      const allWordLists = (data || []).map(list => ({
         ...list,
-        settings: list.settings || {
+        settings: (typeof list.settings === 'object' && list.settings !== null && !Array.isArray(list.settings)) ? list.settings as any : {
           exposureDuration: 500,
           intervalDuration: 200,
           textCase: 'original' as const,
@@ -96,7 +85,7 @@ export const TherapistDashboard: React.FC = () => {
           maskDuration: 200
         }
       }));
-      setWordLists(allWordLists as WordList[]);
+      setWordLists(allWordLists as unknown as WordList[]);
     } catch (error) {
       console.error('Error fetching word lists:', error);
     }

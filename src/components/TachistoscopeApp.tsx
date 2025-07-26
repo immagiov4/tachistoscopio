@@ -11,12 +11,11 @@ import {
   ExerciseSettings,
   ExerciseSession,
   SessionResult,
-  DEFAULT_SETTINGS,
-  PREDEFINED_WORD_LISTS
+  DEFAULT_SETTINGS
 } from '@/types/tachistoscope';
 
 export const TachistoscopeApp: React.FC = () => {
-  const [currentWordList, setCurrentWordList] = useState<WordList>(PREDEFINED_WORD_LISTS[0]);
+  const [currentWordList, setCurrentWordList] = useState<WordList>({ id: 'empty', name: 'Nessuna lista', words: [], description: '' });
   const [settings, setSettings] = useState<ExerciseSettings>(DEFAULT_SETTINGS);
   const [session, setSession] = useState<ExerciseSession | null>(null);
   const [results, setResults] = useState<SessionResult | null>(null);

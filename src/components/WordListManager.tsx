@@ -10,8 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Upload, Download, Plus, Trash2, BookOpen, Edit, X, RefreshCw, Save, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
-  WordList,
-  PREDEFINED_WORD_LISTS
+  WordList
  } from '@/types/tachistoscope';
 import { supabase } from '@/integrations/supabase/client';
 import { WordList as DBWordList, ExerciseSettings, DEFAULT_SETTINGS } from '@/types/database';
@@ -257,7 +256,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   };
 
   const generateRealWords = (): string[] => {
-    // Use complete dataset if available, fallback to predefined words
+    // Use complete dataset
     const wordsToUse = allWords.length > 0 ? allWords : ITALIAN_WORDS;
     const [minSyl, maxSyl] = generatorParams.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
     
@@ -524,12 +523,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   };
 
-  const handleLoadPredefinedList = (listId: string) => {
-    const list = PREDEFINED_WORD_LISTS.find(l => l.id === listId);
-    if (list) {
-      onWordListChange(list);
-    }
-  };
 
   const handleImportFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -584,9 +577,9 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
       if (error) throw error;
 
-      // If we deleted the currently selected list, select the first predefined one
+      // If we deleted the currently selected list, reset to empty
       if (currentWordList.id === listId) {
-        onWordListChange(PREDEFINED_WORD_LISTS[0]);
+        onWordListChange({ id: 'empty', name: 'Nessuna lista', words: [], description: '' });
       }
 
       await loadSavedWordLists();
