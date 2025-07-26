@@ -257,10 +257,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         });
         if (error) throw error;
       }
-      toast({
-        title: 'Successo',
-        description: `Esercizio per ${DAYS_OF_WEEK[dayOfWeek === 0 ? 6 : dayOfWeek - 1]} aggiornato`
-      });
       await fetchPatientData();
     } catch (error: any) {
       console.error('Error updating exercise:', error);
