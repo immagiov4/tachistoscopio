@@ -322,13 +322,20 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   const currentTheme = themes.find(t => t.id === theme) || themes[3]; // Default rainbow
 
   return (
-    <div className={`min-h-screen ${
+    <div className={`min-h-screen relative ${
       theme === 'rainbow' ? 'bg-gradient-to-r' : 
       theme === 'space' ? 'bg-gradient-to-br' :
       theme === 'ocean' ? 'bg-gradient-to-tr' :
       theme === 'nature' ? 'bg-gradient-to-bl' :
       'bg-gradient-to-r'
-    } ${currentTheme.preview.background} flex flex-col relative overflow-hidden`}>
+    } ${currentTheme.preview.background} flex flex-col overflow-hidden`}>
+      <div 
+        className="absolute inset-0 opacity-8 pointer-events-none z-0"
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,1) 0.5px, transparent 0)`,
+          backgroundSize: '2px 2px'
+        }}
+      ></div>
       {/* Forme decorative di sfondo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-20 -left-20 w-40 h-40 bg-gradient-to-br from-white/10 to-white/5 rounded-full blur-3xl"></div>
