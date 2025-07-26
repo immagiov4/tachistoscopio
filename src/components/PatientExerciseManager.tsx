@@ -341,17 +341,19 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       console.log(`Esercizio trovato con ID: ${exerciseToDelete.id}`);
 
       // Elimina prima tutte le sessioni associate
-      const { error: sessionsError } = await supabase
+      console.log(`Tentativo di eliminazione sessioni per exercise_id: ${exerciseToDelete.id}`);
+      const { data: sessionsToDelete, error: sessionsError } = await supabase
         .from('exercise_sessions')
         .delete()
-        .eq('exercise_id', exerciseToDelete.id);
+        .eq('exercise_id', exerciseToDelete.id)
+        .select();
 
       if (sessionsError) {
         console.error('Errore nell\'eliminazione delle sessioni:', sessionsError);
         throw sessionsError;
       }
 
-      console.log('Sessioni eliminate con successo');
+      console.log('Sessioni eliminate:', sessionsToDelete?.length || 0);
 
       // Poi elimina l'esercizio
       const { error: exerciseError } = await supabase
