@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -156,7 +156,10 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     }
   };
 
-  const markError = useCallback(() => {
+  // Usa ref per mantenere una versione stabile di markError
+  const markErrorRef = useRef<() => void>();
+  
+  markErrorRef.current = () => {
     console.log('Marking error for word index:', session.currentWordIndex);
     console.log('Current errors before:', session.errors);
     
@@ -179,7 +182,11 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     };
     console.log('New errors after:', newSession.errors);
     onUpdateSession(newSession);
-  }, [session, onUpdateSession]);
+  };
+
+  const markError = useCallback(() => {
+    markErrorRef.current?.();
+  }, []); // Dipendenze vuote - funzione sempre stabile
 
   const nextWord = useCallback(() => {
     const newIndex = session.currentWordIndex + 1;
