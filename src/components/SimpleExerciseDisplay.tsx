@@ -83,11 +83,11 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
 
   const getFontSize = (size: string): string => {
     switch (size) {
-      case 'small': return 'text-4xl';
-      case 'medium': return 'text-6xl';
-      case 'large': return 'text-8xl';
-      case 'extra-large': return 'text-9xl';
-      default: return 'text-8xl';
+      case 'small': return 'text-2xl md:text-4xl';
+      case 'medium': return 'text-4xl md:text-6xl';
+      case 'large': return 'text-5xl md:text-8xl';
+      case 'extra-large': return 'text-6xl md:text-9xl';
+      default: return 'text-5xl md:text-8xl';
     }
   };
 
@@ -244,6 +244,12 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       isCountingDown
     });
     
+    // Se l'esercizio non è più in corso, ferma tutto
+    if (!session.isRunning) {
+      setDisplayState('interval');
+      return;
+    }
+    
     if (session.isRunning && !session.isPaused && currentWordToShow && !isCountingDown) {
       console.log('Showing stimulus before word:', currentWordToShow);
       
@@ -253,31 +259,41 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       
       // Timer per stimolo - ridotto per essere meno invadente
       const stimulusTimer = setTimeout(() => {
+        if (!session.isRunning) return; // Controlla se è ancora attivo
         setStimulusVisible(false);
         
         // Timer fisso per transizione - sempre 300ms
         const transitionTimer = setTimeout(() => {
+          if (!session.isRunning) return; // Controlla se è ancora attivo
           console.log('Showing word:', currentWordToShow);
           setDisplayState('word');
           setCurrentWord(formatWord(currentWordToShow));
 
           // Timer per durata parola - basato su settings
           const wordTimer = setTimeout(() => {
+            if (!session.isRunning) return; // Controlla se è ancora attivo
             console.log('Word timer finished. UseMask:', session.settings.useMask, 'MaskDuration:', session.settings.maskDuration);
             if (session.settings.useMask) {
               console.log('Showing mask for', session.settings.maskDuration, 'ms');
               setDisplayState('mask');
               const maskTimer = setTimeout(() => {
+                if (!session.isRunning) return; // Controlla se è ancora attivo
                 console.log('Mask timer finished, showing interval');
                 setDisplayState('interval');
-                const intervalTimer = setTimeout(nextWord, session.settings.intervalDuration);
+                const intervalTimer = setTimeout(() => {
+                  if (!session.isRunning) return; // Controlla se è ancora attivo
+                  nextWord();
+                }, session.settings.intervalDuration);
                 return () => clearTimeout(intervalTimer);
               }, session.settings.maskDuration);
               return () => clearTimeout(maskTimer);
             } else {
               console.log('No mask, going directly to interval');
               setDisplayState('interval');
-              const intervalTimer = setTimeout(nextWord, session.settings.intervalDuration);
+              const intervalTimer = setTimeout(() => {
+                if (!session.isRunning) return; // Controlla se è ancora attivo
+                nextWord();
+              }, session.settings.intervalDuration);
               return () => clearTimeout(intervalTimer);
             }
           }, session.settings.exposureDuration);
