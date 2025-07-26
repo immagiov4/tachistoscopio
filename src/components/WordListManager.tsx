@@ -1113,35 +1113,39 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-3 mt-3">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="useMask"
-                      checked={exerciseSettings.useMask}
-                      onChange={(e) => setExerciseSettings({
-                        ...exerciseSettings,
-                        useMask: e.target.checked
-                      })}
-                      className="h-4 w-4"
-                    />
-                    <Label htmlFor="useMask" className="text-xs">Usa maschera</Label>
-                  </div>
-                  
-                  <div>
-                    <Label className="text-xs">Durata maschera (ms)</Label>
-                    <Input
-                      type="number"
-                      min="50"
-                      max="1000"
-                      value={exerciseSettings.maskDuration}
-                      onChange={(e) => setExerciseSettings({
-                        ...exerciseSettings,
-                        maskDuration: parseInt(e.target.value) || 200
-                      })}
-                      className="h-8 text-sm"
-                      disabled={!exerciseSettings.useMask}
-                    />
+                <div className="mt-3">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="useMask"
+                        checked={exerciseSettings.useMask}
+                        onChange={(e) => setExerciseSettings({
+                          ...exerciseSettings,
+                          useMask: e.target.checked
+                        })}
+                        className="h-4 w-4"
+                      />
+                      <Label htmlFor="useMask" className="text-xs">Usa maschera</Label>
+                    </div>
+                    
+                    {exerciseSettings.useMask && (
+                      <div className="flex items-center gap-2">
+                        <Label className="text-xs text-gray-600">Durata:</Label>
+                        <Input
+                          type="number"
+                          min="50"
+                          max="1000"
+                          value={exerciseSettings.maskDuration}
+                          onChange={(e) => setExerciseSettings({
+                            ...exerciseSettings,
+                            maskDuration: parseInt(e.target.value) || 100
+                          })}
+                          className="h-7 w-20 text-sm"
+                        />
+                        <span className="text-xs text-gray-500">ms</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
