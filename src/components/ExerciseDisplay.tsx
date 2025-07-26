@@ -176,6 +176,13 @@ export const ExerciseDisplay: React.FC<ExerciseDisplayProps> = ({
   const accuracy = currentWordNumber > 1 ? 
     ((currentWordNumber - 1 - errorsCount) / (currentWordNumber - 1)) * 100 : 100;
 
+  // Debug logging
+  console.log('Display rendering:', { 
+    currentWordIndex: session.currentWordIndex, 
+    currentWordNumber, 
+    display: `${currentWordNumber}/${session.wordList.words.length}` 
+  });
+
   if (isCountingDown) {
     return (
       <div className="fixed inset-0 bg-exercise-bg flex items-center justify-center z-50">
