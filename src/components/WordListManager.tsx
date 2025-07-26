@@ -494,10 +494,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         });
       }
       await loadSavedWordLists();
-      toast({
-        title: "Esercizio eliminato",
-        description: "L'esercizio personalizzato è stato eliminato."
-      });
     } catch (error: any) {
       console.error('Error deleting word list:', error);
       let errorMessage = "Impossibile eliminare la lista.";
