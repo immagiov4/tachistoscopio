@@ -1,3 +1,4 @@
+// Updated to remove predefined word lists
 export interface WordList {
   id: string;
   name: string;
