@@ -68,7 +68,10 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
           .eq('therapist_id', therapistId)
       ]);
 
-      const patients = (patientsData.data || []) as PatientWithEmail[];
+      const patients = (patientsData.data || []).map(p => ({
+        ...p,
+        role: p.role as any // Force type conversion from string to UserRole
+      })) as PatientWithEmail[];
       const exercises = exercisesData.data || [];
       
       // Count exercises per patient
