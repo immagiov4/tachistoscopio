@@ -1072,7 +1072,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                   </div>
                 ) : generatedWords.length > 0 ? (
                   <div className="bg-gray-50 rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-3">
                       <span className="text-sm font-medium text-gray-700">Parole generate ({generatedWords.length})</span>
                       <Button
                         size="sm"
@@ -1085,7 +1085,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                         Aggiorna
                       </Button>
                     </div>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1 w-full">
                       {generatedWords.map((word, index) => (
                         <Badge key={index} variant="secondary" className="text-xs">
                           {word}
