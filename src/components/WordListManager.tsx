@@ -308,47 +308,26 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       'culone', 'straccione', 'negro'
     ]);
 
-    // Pre-calcola filtri per ottimizzazione
-    const hasStartsWith = generatorParams.startsWith.length > 0;
-    const hasContains = generatorParams.contains.length > 0;
-    const startsWithLower = generatorParams.startsWith.toLowerCase();
-    const containsLower = generatorParams.contains.toLowerCase();
-    
-    // Algoritmo robusto con limite di sicurezza
+    // LOGICA SEMPLIFICATA: filtra tutto in una passata
     const filteredWords: string[] = [];
     let examined = 0;
-    const maxExamine = Math.min(wordsToUse.length, 3000); // Increased limit for better results
+    const maxExamine = Math.min(wordsToUse.length, 5000);
     
-    // First pass: collect potential matches without syllable counting if we have filters
-    if (hasStartsWith || hasContains) {
-      for (let i = 0; i < wordsToUse.length && filteredWords.length < generatorParams.count * 3 && examined < maxExamine; i++) {
-        const word = wordsToUse[i];
-        examined++;
-        
-        // Quick filters first
-        if (inappropriateWordsSet.has(word.toLowerCase())) continue;
-        if (hasStartsWith && !word.toLowerCase().startsWith(startsWithLower)) continue;
-        if (hasContains && !word.toLowerCase().includes(containsLower)) continue;
-        
-        filteredWords.push(word);
-      }
+    for (let i = 0; i < wordsToUse.length && filteredWords.length < generatorParams.count && examined < maxExamine; i++) {
+      const word = wordsToUse[i];
+      examined++;
       
-      // Second pass: filter by syllables from the pre-filtered list
-      const syllableFiltered = filteredWords.filter(word => countSyllables(word) === syllables);
-      return syllableFiltered.slice(0, generatorParams.count);
-    } else {
-      // No text filters, proceed with normal filtering
-      for (let i = 0; i < wordsToUse.length && filteredWords.length < generatorParams.count && examined < maxExamine; i++) {
-        const word = wordsToUse[i];
-        examined++;
-        
-        // Quick filters first
-        if (inappropriateWordsSet.has(word.toLowerCase())) continue;
-        
-        // Syllable check
-        if (countSyllables(word) === syllables) {
-          filteredWords.push(word);
-        }
+      // Filtri base
+      if (inappropriateWordsSet.has(word.toLowerCase())) continue;
+      if (word.length < 2) continue;
+      
+      // Filtri opzionali
+      if (generatorParams.startsWith && !word.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) continue;
+      if (generatorParams.contains && !word.toLowerCase().includes(generatorParams.contains.toLowerCase())) continue;
+      
+      // Filtro sillabe
+      if (countSyllables(word) === syllables) {
+        filteredWords.push(word);
       }
     }
     
@@ -358,7 +337,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       [filteredWords[i], filteredWords[j]] = [filteredWords[j], filteredWords[i]];
     }
     
-    return filteredWords.slice(0, generatorParams.count);
+    return filteredWords;
   };
 
   const generateSyllables = (): string[] => {
