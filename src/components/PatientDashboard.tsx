@@ -37,7 +37,7 @@ interface PatientDashboardProps {
 }
 
 export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatientId }) => {
-  const { profile, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const [todayExercise, setTodayExercise] = useState<Exercise | null>(null);
   const [completedToday, setCompletedToday] = useState(false);
   const [currentSession, setCurrentSession] = useState<ExerciseSession | null>(null);
@@ -187,19 +187,39 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
 
   const handleExerciseComplete = async (result: SessionResult) => {
     try {
-      // Save session to database - use profile.id as patient_id
+      // Debug info
+      console.log('Current user:', user?.id);
+      console.log('Current profile:', profile);
+      console.log('effectivePatientId:', effectivePatientId);
+      
+      // Check if we have the required data
+      if (!profile || !todayExercise) {
+        console.error('Missing required data:', { profile, todayExercise });
+        toast({
+          title: 'Errore',
+          description: 'Dati mancanti per salvare la sessione',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Save session to database
+      const sessionData = {
+        exercise_id: todayExercise.id,
+        patient_id: profile.id,
+        total_words: result.totalWords,
+        correct_words: result.correctWords,
+        incorrect_words: result.incorrectWords,
+        accuracy: result.accuracy,
+        duration: result.duration,
+        missed_words: result.missedWords,
+      };
+      
+      console.log('Attempting to save session:', sessionData);
+      
       const { error } = await supabase
         .from('exercise_sessions')
-        .insert({
-          exercise_id: todayExercise!.id,
-          patient_id: profile!.id, // Use profile.id instead of effectivePatientId
-          total_words: result.totalWords,
-          correct_words: result.correctWords,
-          incorrect_words: result.incorrectWords,
-          accuracy: result.accuracy,
-          duration: result.duration,
-          missed_words: result.missedWords,
-        });
+        .insert(sessionData);
 
       if (error) {
         console.error('Error saving session:', error);
