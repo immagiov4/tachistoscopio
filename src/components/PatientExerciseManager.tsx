@@ -62,26 +62,34 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   // Scroll listener for floating actions
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
+    let isVisible = false;
     
     const handleScroll = () => {
       const patientListCard = document.querySelector('[data-patient-list]');
       if (patientListCard) {
         const rect = patientListCard.getBoundingClientRect();
-        const isScrolledPast = rect.bottom < window.innerHeight * 0.3;
+        const shouldShow = rect.bottom < window.innerHeight * 0.3;
         
-        // Delay showing floating buttons for smoother UX
-        if (isScrolledPast) {
-          timeoutId = setTimeout(() => {
-            setShowFloatingActions(true);
-          }, 300);
-        } else {
+        // Prevent flickering by only updating when state actually changes
+        if (shouldShow !== isVisible) {
           clearTimeout(timeoutId);
-          setShowFloatingActions(false);
+          
+          if (shouldShow) {
+            timeoutId = setTimeout(() => {
+              setShowFloatingActions(true);
+              isVisible = true;
+            }, 200);
+          } else {
+            setShowFloatingActions(false);
+            isVisible = false;
+          }
         }
       }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Check initial state
+    
     return () => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(timeoutId);
@@ -693,30 +701,30 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       {/* Floating Actions */}
       {showFloatingActions && (
         <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50 animate-fade-in">
+          <Button
+            onClick={scrollToPatientList}
+            size="sm"
+            variant="outline"
+            className="shadow-lg bg-white/90 hover:bg-white border-gray-300 text-gray-700 hover:text-gray-900 rounded-full h-12 px-5 font-medium transition-all duration-300 hover:scale-105 hover:shadow-xl animate-scale-in backdrop-blur-sm"
+            style={{ animationDelay: '100ms' }}
+            title="Torna all'elenco pazienti"
+          >
+            <ArrowUp className="h-4 w-4 mr-2" />
+            Torna ai pazienti
+          </Button>
+
           {selectedPatient && (
             <Button
               onClick={enterStudioModeForSelected}
               size="sm"
               className="shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full h-14 px-6 font-medium border-0 transition-all duration-300 hover:scale-105 hover:shadow-2xl animate-scale-in"
-              style={{ animationDelay: '100ms' }}
+              style={{ animationDelay: '200ms' }}
               title="Entra in modalità studio per il paziente selezionato"
             >
               <UserCheck className="h-5 w-5 mr-2" />
               Modalità Studio
             </Button>
           )}
-          
-          <Button
-            onClick={scrollToPatientList}
-            size="sm"
-            variant="outline"
-            className="shadow-lg bg-white/90 hover:bg-white border-gray-300 text-gray-700 hover:text-gray-900 rounded-full h-12 px-5 font-medium transition-all duration-300 hover:scale-105 hover:shadow-xl animate-scale-in backdrop-blur-sm"
-            style={{ animationDelay: '200ms' }}
-            title="Torna all'elenco pazienti"
-          >
-            <ArrowUp className="h-4 w-4 mr-2" />
-            Torna ai pazienti
-          </Button>
         </div>
       )}
     </div>;
