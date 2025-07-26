@@ -51,6 +51,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
   }, [selectedPatient]);
 
   const fetchInitialData = async () => {
+    setSelectedPatient(null); // Reset selection on data fetch
     try {
       const [patientsData, wordListsData, exercisesData] = await Promise.all([
         supabase
@@ -168,7 +169,13 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
       let errorMessage = 'Errore durante l\'aggiornamento dell\'esercizio';
       
       if (error.code === '23503') {
-        errorMessage = 'Impossibile aggiornare: la lista di parole selezionata non esiste più.';
+        if (error.message?.includes('exercises_patient_id_fkey')) {
+          errorMessage = 'Impossibile aggiornare: il paziente selezionato non esiste più. Ricarica la pagina.';
+        } else if (error.message?.includes('word_list')) {
+          errorMessage = 'Impossibile aggiornare: la lista di parole selezionata non esiste più.';
+        } else {
+          errorMessage = 'Errore di vincolo del database. Controlla che tutti i dati siano validi.';
+        }
       } else if (error.code === 'PGRST116') {
         errorMessage = 'Non hai i permessi per modificare questo esercizio.';
       } else if (error.message?.includes('network')) {
