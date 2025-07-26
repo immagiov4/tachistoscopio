@@ -59,10 +59,24 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     }
   }, [selectedPatient]);
   
-  // Show floating buttons when patient is selected - simple and reliable
+  // Show floating buttons when scrolled past patient list
   useEffect(() => {
-    setShowFloatingActions(!!selectedPatient);
-  }, [selectedPatient]);
+    const handleScroll = () => {
+      const patientListCard = document.querySelector('[data-patient-list]');
+      if (patientListCard) {
+        const rect = patientListCard.getBoundingClientRect();
+        const shouldShow = rect.bottom < window.innerHeight * 0.6;
+        setShowFloatingActions(shouldShow);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Check initial state
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
   
   const scrollToPatientList = () => {
     const patientListCard = document.querySelector('[data-patient-list]');
