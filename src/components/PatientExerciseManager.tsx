@@ -78,7 +78,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
             timeoutId = setTimeout(() => {
               setShowFloatingActions(true);
               isVisible = true;
-            }, 200);
+            }, 50);
           } else {
             setShowFloatingActions(false);
             isVisible = false;
