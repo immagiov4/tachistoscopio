@@ -308,33 +308,31 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       'culone', 'straccione', 'negro'
     ]);
 
-    // LOGICA SEMPLIFICATA con selezione RANDOM per evitare bias alfabetico
-    const filteredWords: string[] = [];
-    let attempts = 0;
-    const maxAttempts = generatorParams.count * 200; // Limite per evitare infinite loop
+    // APPROCCIO INTELLIGENTE: prima pre-filtra tutto, poi randomizza
+    // Step 1: Pre-filtra TUTTO il dataset
     
-    while (filteredWords.length < generatorParams.count && attempts < maxAttempts) {
-      attempts++;
-      // SELEZIONE RANDOM invece che sequenziale per evitare bias alfabetico
-      const randomIndex = Math.floor(Math.random() * wordsToUse.length);
-      const word = wordsToUse[randomIndex];
-      
+    // Step 1: Pre-filtra TUTTO il dataset
+    const candidateWords = wordsToUse.filter(word => {
       // Filtri base
-      if (inappropriateWordsSet.has(word.toLowerCase())) continue;
-      if (word.length < 2) continue;
+      if (inappropriateWordsSet.has(word.toLowerCase())) return false;
+      if (word.length < 2) return false;
       
       // Filtri opzionali
-      if (generatorParams.startsWith && !word.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) continue;
-      if (generatorParams.contains && !word.toLowerCase().includes(generatorParams.contains.toLowerCase())) continue;
+      if (generatorParams.startsWith && !word.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) return false;
+      if (generatorParams.contains && !word.toLowerCase().includes(generatorParams.contains.toLowerCase())) return false;
       
       // Filtro sillabe
-      if (countSyllables(word) === syllables) {
-        // Evita duplicati
-        if (!filteredWords.includes(word)) {
-          filteredWords.push(word);
-        }
-      }
+      return countSyllables(word) === syllables;
+    });
+    
+    // Step 2: Shuffle dell'intero set pre-filtrato
+    for (let i = candidateWords.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [candidateWords[i], candidateWords[j]] = [candidateWords[j], candidateWords[i]];
     }
+    
+    // Step 3: Prendi solo la quantità richiesta
+    const filteredWords = candidateWords.slice(0, generatorParams.count);
     
     // Shuffle risultati per varietà
     for (let i = filteredWords.length - 1; i > 0; i--) {
