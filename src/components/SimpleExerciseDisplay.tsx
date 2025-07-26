@@ -45,6 +45,9 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   const [countdown, setCountdown] = useState(3);
   const [isCountingDown, setIsCountingDown] = useState(true);
   const [stimulusVisible, setStimulusVisible] = useState(false);
+  
+  // Ref per controllare se l'esercizio è ancora in corso nei timer
+  const isRunningRef = useRef(session.isRunning);
 
   // Funzione per ottenere l'ombra appropriata per ogni tema
   const getThemeShadow = (themeId: ThemeType) => {
@@ -306,6 +309,9 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   }, [session.isRunning, session.isPaused, isCountingDown, displayState, markError, onStop]);
 
   useEffect(() => {
+    // Aggiorna il ref ogni volta che session.isRunning cambia
+    isRunningRef.current = session.isRunning;
+    
     const currentWordToShow = session.words[session.currentWordIndex];
     console.log('Word display effect:', { 
       isRunning: session.isRunning, 
@@ -328,10 +334,6 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       // Reset state e mostra stimolo con timing fisso
       setDisplayState('stimulus');
       setStimulusVisible(true);
-      
-      // Usa ref per session.isRunning per accedere al valore più recente nei timer
-      const isRunningRef = useRef(session.isRunning);
-      isRunningRef.current = session.isRunning;
       
       // Timer per stimolo - ridotto per essere meno invadente
       const stimulusTimer = setTimeout(() => {
