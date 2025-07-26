@@ -330,10 +330,11 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       'bg-gradient-to-r'
     } ${currentTheme.preview.background} flex flex-col overflow-hidden`}>
       <div 
-        className="absolute inset-0 opacity-8 pointer-events-none z-0"
+        className="absolute inset-0 opacity-15 pointer-events-none z-0"
         style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,1) 0.5px, transparent 0)`,
-          backgroundSize: '2px 2px'
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,1) 0.5px, transparent 0)`,
+          backgroundSize: '2px 2px',
+          mixBlendMode: 'overlay'
         }}
       ></div>
       {/* Forme decorative di sfondo */}
