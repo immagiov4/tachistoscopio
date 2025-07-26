@@ -54,13 +54,29 @@ const WORD_ENDINGS = ['a', 'e', 'i', 'o', 'u', 'are', 'ere', 'ire', 'ato', 'uto'
 
 // Lista di parole inappropriate da filtrare
 const INAPPROPRIATE_WORDS = [
-  'negro', 'negri', 'negra', 'negre',
-  'merda', 'cazzo', 'fica', 'puttana', 'troia', 'stronzo', 'stronza',
-  'coglione', 'coglioni', 'bastardo', 'bastarda', 'porco', 'porca',
-  'frocio', 'ricchione', 'culattone', 'finocchio',
-  'zoccola', 'mignotta', 'battona', 'puttaniere',
-  'cazzi', 'merdate', 'cagare', 'pisciare',
-  'aspreggiai' // parola inesistente
+  'pene', 'ano', 'culo', 'merda', 'cacca', 'pipi', 'popo',
+  'stupido', 'idiota', 'cretino', 'scemo', 'deficiente',
+  'stronzo', 'troia', 'puttana', 'figa', 'fica', 'vaffanculo',
+  'cazzo', 'fottiti', 'inculare', 'mignotta', 'bastardo',
+  'bastardissimo', 'zoccola', 'cornuto', 'coglione',
+  'stronza', 'cogliona', 'rompipalle', 'mado', 'puttanella',
+  'fichetto', 'pischello', 'pischella', 'merdoso', 'babbeo',
+  'imbecille', 'scassacazzo', 'baldracca', 'cagna', 'ficco',
+  'troione', 'bastardone', 'ficcona', 'puzzone', 'zzozzo',
+  'caccone', 'pennuto', 'pezzente', 'zingaro', 'paccottiglia',
+  'lurido', 'ciuccio', 'schifoso', 'brutto', 'schifo', 'lurida',
+  'str*nza', 'schifosa', 'cafone', 'duro', 'cretina', 'cornuta',
+  'mignotta', 'ficaginosa', 'pippone', 'pirla', 'babbuino',
+  'merdone', 'zoccola', 'frocione', 'checca', 'frocio', 'omosessuale',
+  'froci', 'patacca', 'minkia', 'minkione', 'scemoide',
+  'fesso', 'troione', 'tamarro', 'ubriacone', 'cogliona',
+  'merdaccia', 'scemi', 'scemotti', 'frocetto', 'swaghetto',
+  'sfigato', 'zigomo', 'vaffangulo', 'puttanella', 'vaffanculo',
+  'strunz', 'ricchione', 'stronza', 'piscio', 'pisciare', 'pisciatoio',
+  'ricchioni', 'schifosa', 'puzzone', 'cazzone', 'affanculo',
+  'porco', 'maiale', 'bischero', 'cafone', 'stregone', 'marcio',
+  'cornetta', 'zoccoletta', 'minkietta', 'culattone', 'frocetto',
+  'culone', 'straccione', 'negro'
 ];
 
 export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSave }) => {
