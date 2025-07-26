@@ -312,22 +312,22 @@ export const TherapistDashboard: React.FC = () => {
 
 
         <Tabs defaultValue="patients" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 p-1 bg-gradient-to-r from-primary/10 to-secondary/10 border-2 border-primary/20 rounded-lg shadow-sm">
+          <TabsList className="grid w-full grid-cols-2 mb-8 p-1 bg-gradient-to-r from-primary/10 to-secondary/10 border-2 border-primary/20 rounded-lg shadow-sm h-auto">
             <TabsTrigger 
               value="patients" 
-              className="flex items-center gap-2 text-sm font-semibold py-3 px-4 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border-2 data-[state=active]:border-primary/30 data-[state=active]:scale-[1.02] transition-all duration-200"
+              className="flex items-center gap-2 text-sm font-semibold py-2 px-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border-2 data-[state=active]:border-primary/30 transition-all duration-200 h-auto"
             >
               <UserCog className="h-4 w-4" />
               <span>Gestione Pazienti</span>
-              <Badge variant="secondary" className="text-xs">Pazienti & Esercizi</Badge>
+              <Badge variant="secondary" className="text-xs ml-1">Pazienti & Esercizi</Badge>
             </TabsTrigger>
             <TabsTrigger 
               value="wordlists" 
-              className="flex items-center gap-2 text-sm font-semibold py-3 px-4 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border-2 data-[state=active]:border-primary/30 data-[state=active]:scale-[1.02] transition-all duration-200"
+              className="flex items-center gap-2 text-sm font-semibold py-2 px-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border-2 data-[state=active]:border-primary/30 transition-all duration-200 h-auto"
             >
               <BookOpen className="h-4 w-4" />
               <span>Liste Parole</span>
-              <Badge variant="secondary" className="text-xs">Creazione & Modifica</Badge>
+              <Badge variant="secondary" className="text-xs ml-1">Creazione & Modifica</Badge>
             </TabsTrigger>
           </TabsList>
 
