@@ -111,13 +111,13 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     // Suono molto più dolce - tono ancora più basso e curva più morbida
     oscillator.type = 'sine'; // Forma d'onda più dolce
     oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // Frequenza molto più bassa e calda
-    oscillator.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.2); // Scende a frequenza molto grave
+    oscillator.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.1); // Scende a frequenza molto grave
     
     gainNode.gain.setValueAtTime(0.02, audioContext.currentTime); // Volume ancora più basso
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2); // Fade out più lungo
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1); // Fade out più veloce
     
     oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.2); // Durata leggermente più lunga
+    oscillator.stop(audioContext.currentTime + 0.1); // Durata molto più breve
   };
 
   const markError = useCallback(() => {
