@@ -329,11 +329,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
 
       console.log('Esercizio eliminato con successo');
 
-      toast({
-        title: 'Successo',
-        description: `Esercizio per ${DAYS_OF_WEEK[dayOfWeek === 0 ? 6 : dayOfWeek - 1]} rimosso dalla pianificazione`
-      });
-      
       await fetchPatientData();
       // Aggiorna dinamicamente il conteggio esercizi senza ricaricare tutta la pagina
       updatePatientExerciseCount();
