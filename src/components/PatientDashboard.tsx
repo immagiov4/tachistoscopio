@@ -8,11 +8,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Exercise, ExerciseSession as DBExerciseSession, DAYS_OF_WEEK } from '@/types/database';
 import { SimpleExerciseDisplay } from './SimpleExerciseDisplay';
-
 import { ThemeSelector, ThemeType, themes } from './ThemeSelector';
 import { toast } from '@/hooks/use-toast';
 import { LoadingPage, StatsSkeleton } from '@/components/ui/loading';
-
 interface ExerciseSession {
   words: string[];
   settings: any;
@@ -22,7 +20,6 @@ interface ExerciseSession {
   isRunning: boolean;
   isPaused: boolean;
 }
-
 interface SessionResult {
   totalWords: number;
   correctWords: number;
@@ -32,22 +29,30 @@ interface SessionResult {
   missedWords: string[];
   settings: any;
 }
-
 interface PatientDashboardProps {
   studioPatientId?: string; // Per modalità studio del terapista
 }
-
-export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatientId }) => {
-  const { user, profile, signOut } = useAuth();
+export const PatientDashboard: React.FC<PatientDashboardProps> = ({
+  studioPatientId
+}) => {
+  const {
+    user,
+    profile,
+    signOut
+  } = useAuth();
   const [todayExercise, setTodayExercise] = useState<Exercise | null>(null);
   const [completedToday, setCompletedToday] = useState(false);
   const [currentSession, setCurrentSession] = useState<ExerciseSession | null>(null);
   const [loading, setLoading] = useState(true);
-  const [accessibilitySettings, setAccessibilitySettings] = useState<{fontSize: 'small' | 'medium' | 'large' | 'extra-large'}>({ fontSize: 'large' });
+  const [accessibilitySettings, setAccessibilitySettings] = useState<{
+    fontSize: 'small' | 'medium' | 'large' | 'extra-large';
+  }>({
+    fontSize: 'large'
+  });
   const [selectedTheme, setSelectedTheme] = useState<ThemeType>('rainbow');
   const [recentSessions, setRecentSessions] = useState<DBExerciseSession[]>([]);
   const [statsLoading, setStatsLoading] = useState(true);
-  
+
   // Usa il patientId dalla modalità studio o dal profilo corrente
   const effectivePatientId = studioPatientId || profile?.id;
 
@@ -62,7 +67,6 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
         console.error('Error loading accessibility settings:', error);
       }
     }
-    
     const savedTheme = localStorage.getItem('tachistoscope-theme');
     if (savedTheme) {
       setSelectedTheme(savedTheme as ThemeType);
@@ -73,39 +77,32 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
   useEffect(() => {
     localStorage.setItem('tachistoscope-accessibility', JSON.stringify(accessibilitySettings));
   }, [accessibilitySettings]);
-
   useEffect(() => {
     localStorage.setItem('tachistoscope-theme', selectedTheme);
   }, [selectedTheme]);
-
   useEffect(() => {
     if (effectivePatientId) {
       fetchTodayExercise();
       fetchRecentSessions();
     }
   }, [effectivePatientId]);
-
   const fetchTodayExercise = async () => {
     try {
       const today = new Date().getDay(); // 0 = Sunday, 6 = Saturday
 
       // Check if exercise for today exists
-      const { data: exercise, error: exerciseError } = await supabase
-        .from('exercises')
-        .select(`
+      const {
+        data: exercise,
+        error: exerciseError
+      } = await supabase.from('exercises').select(`
           *,
           word_list:word_lists(*)
-        `)
-        .eq('patient_id', effectivePatientId)
-        .eq('day_of_week', today)
-        .single();
-
+        `).eq('patient_id', effectivePatientId).eq('day_of_week', today).single();
       if (exerciseError && exerciseError.code !== 'PGRST116') {
         console.error('Error fetching today exercise:', exerciseError);
         setLoading(false);
         return;
       }
-
       setTodayExercise(exercise as any || null);
 
       // Check if already completed today
@@ -113,15 +110,10 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
         const today = new Date();
         const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
-
-        const { data: sessions, error: sessionsError } = await supabase
-          .from('exercise_sessions')
-          .select('*')
-          .eq('exercise_id', exercise.id)
-          .eq('patient_id', effectivePatientId)
-          .gte('completed_at', startOfDay.toISOString())
-          .lte('completed_at', endOfDay.toISOString());
-
+        const {
+          data: sessions,
+          error: sessionsError
+        } = await supabase.from('exercise_sessions').select('*').eq('exercise_id', exercise.id).eq('patient_id', effectivePatientId).gte('completed_at', startOfDay.toISOString()).lte('completed_at', endOfDay.toISOString());
         if (sessionsError) {
           console.error('Error checking today sessions:', sessionsError);
         } else {
@@ -134,19 +126,17 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
       setLoading(false);
     }
   };
-
   const fetchRecentSessions = async () => {
     try {
       setStatsLoading(true);
-      
-      // Recupera le ultime 10 sessioni dell'utente
-      const { data: sessions, error } = await supabase
-        .from('exercise_sessions')
-        .select('*')
-        .eq('patient_id', effectivePatientId)
-        .order('completed_at', { ascending: false })
-        .limit(10);
 
+      // Recupera le ultime 10 sessioni dell'utente
+      const {
+        data: sessions,
+        error
+      } = await supabase.from('exercise_sessions').select('*').eq('patient_id', effectivePatientId).order('completed_at', {
+        ascending: false
+      }).limit(10);
       if (error) {
         console.error('Error fetching sessions:', error);
       } else {
@@ -158,43 +148,43 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
       setStatsLoading(false);
     }
   };
-
   const startExercise = () => {
     if (!todayExercise?.word_list) {
       toast({
         title: 'Errore',
         description: 'Esercizio non disponibile',
-        variant: 'destructive',
+        variant: 'destructive'
       });
       return;
     }
-
     const session: ExerciseSession = {
       words: todayExercise.word_list.words,
       settings: {
         ...todayExercise.settings,
-        fontSize: accessibilitySettings.fontSize, // Usa le preferenze del paziente
+        fontSize: accessibilitySettings.fontSize,
+        // Usa le preferenze del paziente
         theme: selectedTheme // Aggiungi il tema
       },
       startTime: Date.now(),
       currentWordIndex: 0,
       errors: [],
       isRunning: true,
-      isPaused: false,
+      isPaused: false
     };
-
     setCurrentSession(session);
   };
-
   const handleExerciseComplete = async (result: SessionResult) => {
     try {
       // Check if we have the required data
       if (!effectivePatientId || !todayExercise) {
-        console.error('Missing required data:', { effectivePatientId, todayExercise });
+        console.error('Missing required data:', {
+          effectivePatientId,
+          todayExercise
+        });
         toast({
           title: 'Errore',
           description: 'Dati mancanti per salvare la sessione',
-          variant: 'destructive',
+          variant: 'destructive'
         });
         return;
       }
@@ -202,30 +192,29 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
       // Save session to database - use effectivePatientId (the actual patient)
       const sessionData = {
         exercise_id: todayExercise.id,
-        patient_id: effectivePatientId, // Use the patient ID, not the therapist profile ID
+        patient_id: effectivePatientId,
+        // Use the patient ID, not the therapist profile ID
         total_words: result.totalWords,
         correct_words: result.correctWords,
         incorrect_words: result.incorrectWords,
         accuracy: result.accuracy,
         duration: result.duration,
-        missed_words: result.missedWords,
+        missed_words: result.missedWords
       };
-      
-      const { error } = await supabase
-        .from('exercise_sessions')
-        .insert(sessionData);
-
+      const {
+        error
+      } = await supabase.from('exercise_sessions').insert(sessionData);
       if (error) {
         console.error('Error saving session:', error);
         toast({
           title: 'Errore',
           description: 'Errore nel salvare i risultati',
-          variant: 'destructive',
+          variant: 'destructive'
         });
       } else {
         toast({
           title: 'Esercizio Completato!',
-          description: `Precisione: ${result.accuracy.toFixed(1)}%`,
+          description: `Precisione: ${result.accuracy.toFixed(1)}%`
         });
         setCompletedToday(true);
         await fetchRecentSessions(); // Aggiorna anche le statistiche
@@ -237,54 +226,26 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
       setCurrentSession(null);
     }
   };
-
   const handleStopExercise = () => {
     setCurrentSession(null);
   };
-
   const handleSignOut = async () => {
     await signOut();
   };
-
   if (loading) {
-    return (
-      <LoadingPage 
-        title="Caricamento Dashboard..." 
-        description="Stiamo preparando i tuoi dati personali"
-      />
-    );
+    return <LoadingPage title="Caricamento Dashboard..." description="Stiamo preparando i tuoi dati personali" />;
   }
-
   if (currentSession) {
-    return (
-      <SimpleExerciseDisplay
-        session={currentSession}
-        onComplete={handleExerciseComplete}
-        onStop={handleStopExercise}
-        onUpdateSession={setCurrentSession}
-        theme={selectedTheme}
-      />
-    );
+    return <SimpleExerciseDisplay session={currentSession} onComplete={handleExerciseComplete} onStop={handleStopExercise} onUpdateSession={setCurrentSession} theme={selectedTheme} />;
   }
 
   // Applica il tema alla dashboard
   const currentTheme = themes.find(t => t.id === selectedTheme) || themes[3];
-
-  return (
-    <div className={`min-h-screen relative ${
-      selectedTheme === 'rainbow' ? 'bg-gradient-to-r' : 
-      selectedTheme === 'space' ? 'bg-gradient-to-br' :
-      selectedTheme === 'ocean' ? 'bg-gradient-to-tr' :
-      selectedTheme === 'nature' ? 'bg-gradient-to-bl' :
-      'bg-gradient-to-r'
-    } ${currentTheme.preview.background}`}>
-      <div 
-        className="absolute inset-0 opacity-15 pointer-events-none"
-        style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(60,60,60,1) 0.5px, transparent 0)`,
-          backgroundSize: '2px 2px'
-        }}
-      ></div>
+  return <div className={`min-h-screen relative ${selectedTheme === 'rainbow' ? 'bg-gradient-to-r' : selectedTheme === 'space' ? 'bg-gradient-to-br' : selectedTheme === 'ocean' ? 'bg-gradient-to-tr' : selectedTheme === 'nature' ? 'bg-gradient-to-bl' : 'bg-gradient-to-r'} ${currentTheme.preview.background}`}>
+      <div className="absolute inset-0 opacity-15 pointer-events-none" style={{
+      backgroundImage: `radial-gradient(circle at 1px 1px, rgba(60,60,60,1) 0.5px, transparent 0)`,
+      backgroundSize: '2px 2px'
+    }}></div>
       <div className="container mx-auto p-2 sm:p-4 max-w-lg sm:max-w-4xl">{/* Larghezza limitata su mobile */}
         <header className="mb-8 flex justify-between items-center bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-md border border-white/20">
           <div>
@@ -309,24 +270,17 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                 Esercizio di Oggi
               </CardTitle>
               <CardDescription className="text-gray-600">
-                {todayExercise 
-                  ? `${todayExercise.word_list?.words.length} parole da leggere`
-                  : 'Rilassati, oggi niente esercizi!'
-                }
+                {todayExercise ? `${todayExercise.word_list?.words.length} parole da leggere` : 'Rilassati, oggi niente esercizi!'}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {!todayExercise ? (
-                <div className="text-center py-8">
+              {!todayExercise ? <div className="text-center py-8">
                   <div className="text-6xl mb-4">😎</div>
                   <p className="text-lg font-medium text-gray-700">
                     Giorno libero!
                   </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {completedToday && (
-                    <div className="text-center py-3 bg-green-50 border border-green-200 rounded-lg">
+                </div> : <div className="space-y-4">
+                  {completedToday && <div className="text-center py-3 bg-green-50 border border-green-200 rounded-lg">
                       <CheckCircle className="h-6 w-6 text-green-500 mx-auto mb-1" />
                       <p className="text-green-700 font-medium text-sm">
                         Esercizio già completato oggi!
@@ -334,8 +288,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                       <p className="text-xs text-green-600">
                         Puoi ripeterlo per migliorare
                       </p>
-                    </div>
-                  )}
+                    </div>}
 
                   {/* Info della lista con design migliorato */}
                   <div className="bg-gradient-to-r from-primary/5 to-primary/10 backdrop-blur-sm border border-primary/20 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -343,11 +296,9 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                       <div className="w-3 h-3 rounded-full bg-primary mt-1 flex-shrink-0 animate-pulse"></div>
                       <div className="flex-1">
                         <h4 className="font-semibold text-gray-800 mb-1">{todayExercise.word_list?.name}</h4>
-                        {todayExercise.word_list?.description && (
-                          <p className="text-sm text-gray-600 mb-2">
+                        {todayExercise.word_list?.description && <p className="text-sm text-gray-600 mb-2">
                             {todayExercise.word_list.description}
-                          </p>
-                        )}
+                          </p>}
                         <div className="flex items-center gap-2">
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-primary/20 text-primary">
                             {todayExercise.word_list?.words.length} parole
@@ -359,11 +310,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                   </div>
 
                   {/* CTA Principal - Pulsante di avvio/ripeti */}
-                  <Button
-                    onClick={startExercise} 
-                    size="lg" 
-                    className="w-full min-h-[64px] text-xl font-semibold touch-manipulation bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 border-0 mb-6"
-                  >
+                  <Button onClick={startExercise} size="lg" className="w-full min-h-[64px] text-xl font-semibold touch-manipulation bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 border-0 mb-6">
                     <Play className="h-7 w-7 mr-3" />
                     {completedToday ? "Ripeti Esercizio" : "Inizia Esercizio"}
                   </Button>
@@ -384,49 +331,35 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                             Dimensione Testo
                           </p>
                           <div className="flex items-center gap-2 sm:gap-3">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => {
-                                const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
-                                const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
-                                if (currentIndex > 0) {
-                                  setAccessibilitySettings({fontSize: sizes[currentIndex - 1]});
-                                }
-                              }}
-                              disabled={accessibilitySettings.fontSize === 'small'}
-                              className="w-7 h-7 sm:w-8 sm:h-8 p-0 border-2 hover:scale-110 transition-transform duration-200 text-xs"
-                            >
+                            <Button variant="outline" size="sm" onClick={() => {
+                          const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
+                          const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
+                          if (currentIndex > 0) {
+                            setAccessibilitySettings({
+                              fontSize: sizes[currentIndex - 1]
+                            });
+                          }
+                        }} disabled={accessibilitySettings.fontSize === 'small'} className="w-7 h-7 sm:w-8 sm:h-8 p-0 border-2 hover:scale-110 transition-transform duration-200 text-xs">
                               -
                             </Button>
                             <span className="text-xs sm:text-sm font-bold text-primary min-w-[60px] sm:min-w-[70px] text-center px-2 sm:px-3 py-1 bg-primary/10 rounded-lg border border-primary/20">
-                              {accessibilitySettings.fontSize === 'small' ? 'Piccolo' :
-                               accessibilitySettings.fontSize === 'medium' ? 'Medio' :
-                               accessibilitySettings.fontSize === 'large' ? 'Grande' : 'XL'}
+                              {accessibilitySettings.fontSize === 'small' ? 'Piccolo' : accessibilitySettings.fontSize === 'medium' ? 'Medio' : accessibilitySettings.fontSize === 'large' ? 'Grande' : 'XL'}
                             </span>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => {
-                                const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
-                                const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
-                                if (currentIndex < sizes.length - 1) {
-                                  setAccessibilitySettings({fontSize: sizes[currentIndex + 1]});
-                                }
-                              }}
-                              disabled={accessibilitySettings.fontSize === 'extra-large'}
-                              className="w-7 h-7 sm:w-8 sm:h-8 p-0 border-2 hover:scale-110 transition-transform duration-200 text-xs"
-                            >
+                            <Button variant="outline" size="sm" onClick={() => {
+                          const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
+                          const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
+                          if (currentIndex < sizes.length - 1) {
+                            setAccessibilitySettings({
+                              fontSize: sizes[currentIndex + 1]
+                            });
+                          }
+                        }} disabled={accessibilitySettings.fontSize === 'extra-large'} className="w-7 h-7 sm:w-8 sm:h-8 p-0 border-2 hover:scale-110 transition-transform duration-200 text-xs">
                               +
                             </Button>
                           </div>
                         </div>
                         <div className="text-center bg-white rounded-lg p-3 border border-gray-200">
-                          <div className={`font-bold text-gray-700 transition-all duration-300 ${
-                            accessibilitySettings.fontSize === 'small' ? 'text-xl' :
-                            accessibilitySettings.fontSize === 'medium' ? 'text-2xl' :
-                            accessibilitySettings.fontSize === 'large' ? 'text-3xl' : 'text-4xl'
-                          }`}>
+                          <div className={`font-bold text-gray-700 transition-all duration-300 ${accessibilitySettings.fontSize === 'small' ? 'text-xl' : accessibilitySettings.fontSize === 'medium' ? 'text-2xl' : accessibilitySettings.fontSize === 'large' ? 'text-3xl' : 'text-4xl'}`}>
                             Aa
                           </div>
                           <p className="text-xs text-gray-500 mt-1">Anteprima</p>
@@ -435,13 +368,8 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
 
                       {/* Selezione Tema */}
                       <div>
-                        <p className="text-sm font-medium text-gray-700 mb-3">
-                          Tema Esercizio
-                        </p>
-                        <ThemeSelector 
-                          selectedTheme={selectedTheme}
-                          onThemeChange={setSelectedTheme}
-                        />
+                        
+                        <ThemeSelector selectedTheme={selectedTheme} onThemeChange={setSelectedTheme} />
                       </div>
                     </CardContent>
                   </Card>
@@ -460,8 +388,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                </div>}
             </CardContent>
           </Card>
 
@@ -473,43 +400,38 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {statsLoading ? (
-                <StatsSkeleton />
-              ) : recentSessions.length === 0 ? (
-                <div className="text-center py-8">
+              {statsLoading ? <StatsSkeleton /> : recentSessions.length === 0 ? <div className="text-center py-8">
                   <p className="text-gray-600">
                     Completa il tuo primo esercizio per vedere le statistiche
                   </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
+                </div> : <div className="space-y-4">
                   {/* Statistiche generali */}
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center p-3 rounded-lg border-l-4 border-blue-500" style={{
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
-                      backdropFilter: 'blur(8px) saturate(1.2)',
-                      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px, inset rgba(255, 255, 255, 0.5) 0px 1px 0px'
-                    }}>
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+                  backdropFilter: 'blur(8px) saturate(1.2)',
+                  boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px, inset rgba(255, 255, 255, 0.5) 0px 1px 0px'
+                }}>
                       <div className="text-2xl font-bold text-blue-700">
                         {recentSessions.length}
                       </div>
                       <div className="text-xs text-blue-600">Sessioni</div>
                     </div>
                     <div className="text-center p-3 rounded-lg border-l-4 border-green-500" style={{
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
-                      backdropFilter: 'blur(8px) saturate(1.2)',
-                      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px, inset rgba(255, 255, 255, 0.5) 0px 1px 0px'
-                    }}>
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+                  backdropFilter: 'blur(8px) saturate(1.2)',
+                  boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px, inset rgba(255, 255, 255, 0.5) 0px 1px 0px'
+                }}>
                       <div className="text-2xl font-bold text-green-700">
                         {Math.round(recentSessions.reduce((acc, s) => acc + s.accuracy, 0) / recentSessions.length)}%
                       </div>
                       <div className="text-xs text-green-600">Precisione Media</div>
                     </div>
                     <div className="text-center p-3 rounded-lg border-l-4 border-orange-500" style={{
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
-                      backdropFilter: 'blur(8px) saturate(1.2)',
-                      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px, inset rgba(255, 255, 255, 0.5) 0px 1px 0px'
-                    }}>
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+                  backdropFilter: 'blur(8px) saturate(1.2)',
+                  boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px, inset rgba(255, 255, 255, 0.5) 0px 1px 0px'
+                }}>
                       <div className="text-2xl font-bold text-orange-700">
                         {recentSessions.reduce((acc, s) => acc + s.total_words, 0)}
                       </div>
@@ -522,31 +444,31 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                     <h4 className="font-medium text-gray-800 mb-3">Ultime Sessioni</h4>
                     <div className="space-y-2 max-h-48 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                       {recentSessions.slice(0, 5).map((session, index) => {
-                        const date = new Date(session.completed_at);
-                        const isToday = date.toDateString() === new Date().toDateString();
-                        const isYesterday = date.toDateString() === new Date(Date.now() - 86400000).toDateString();
-                        
-                        let dateLabel;
-                        if (isToday) {
-                          dateLabel = `Oggi ${date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`;
-                        } else if (isYesterday) {
-                          dateLabel = `Ieri ${date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`;
-                        } else {
-                          dateLabel = date.toLocaleDateString('it-IT', { 
-                            day: 'numeric', 
-                            month: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          });
-                        }
-
-                        return (
-                          <div key={session.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    const date = new Date(session.completed_at);
+                    const isToday = date.toDateString() === new Date().toDateString();
+                    const isYesterday = date.toDateString() === new Date(Date.now() - 86400000).toDateString();
+                    let dateLabel;
+                    if (isToday) {
+                      dateLabel = `Oggi ${date.toLocaleTimeString('it-IT', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}`;
+                    } else if (isYesterday) {
+                      dateLabel = `Ieri ${date.toLocaleTimeString('it-IT', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}`;
+                    } else {
+                      dateLabel = date.toLocaleDateString('it-IT', {
+                        day: 'numeric',
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      });
+                    }
+                    return <div key={session.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                             <div className="flex items-center gap-3">
-                              <div className={`w-2 h-2 rounded-full ${
-                                session.accuracy >= 90 ? 'bg-green-500' :
-                                session.accuracy >= 70 ? 'bg-yellow-500' : 'bg-red-500'
-                              }`}></div>
+                              <div className={`w-2 h-2 rounded-full ${session.accuracy >= 90 ? 'bg-green-500' : session.accuracy >= 70 ? 'bg-yellow-500' : 'bg-red-500'}`}></div>
                               <div>
                                 <div className="text-sm font-medium text-gray-800">
                                   {session.correct_words}/{session.total_words} parole ({Math.round(session.accuracy)}%)
@@ -557,50 +479,38 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                             <div className="text-xs text-gray-500">
                               {Math.round(session.duration / 1000)}s
                             </div>
-                          </div>
-                        );
-                      })}
+                          </div>;
+                  })}
                     </div>
                   </div>
 
                   {/* Progressi nel tempo */}
-                  {recentSessions.length >= 3 && (
-                    <div>
+                  {recentSessions.length >= 3 && <div>
                       <h4 className="font-medium text-gray-800 mb-3">Andamento Precisione</h4>
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex items-end justify-between gap-1 h-24">
                           {recentSessions.slice(0, 7).reverse().map((session, index) => {
-                            const height = Math.max((session.accuracy / 100) * 80, 8); // Minimo 8px di altezza
-                            return (
-                              <div key={index} className="flex-1 flex flex-col items-center gap-1">
+                      const height = Math.max(session.accuracy / 100 * 80, 8); // Minimo 8px di altezza
+                      return <div key={index} className="flex-1 flex flex-col items-center gap-1">
                                 <div className="text-xs text-gray-600 font-medium">
                                   {Math.round(session.accuracy)}%
                                 </div>
-                                <div 
-                                  className={`w-full rounded transition-all duration-300 ${
-                                    session.accuracy >= 90 ? 'bg-green-500' :
-                                    session.accuracy >= 70 ? 'bg-yellow-500' : 'bg-red-500'
-                                  }`}
-                                  style={{ height: `${height}px` }}
-                                  title={`Precisione: ${Math.round(session.accuracy)}%`}
-                                ></div>
-                              </div>
-                            );
-                          })}
+                                <div className={`w-full rounded transition-all duration-300 ${session.accuracy >= 90 ? 'bg-green-500' : session.accuracy >= 70 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{
+                          height: `${height}px`
+                        }} title={`Precisione: ${Math.round(session.accuracy)}%`}></div>
+                              </div>;
+                    })}
                         </div>
                         <div className="text-xs text-gray-500 text-center mt-2">
                           Ultime {Math.min(recentSessions.length, 7)} sessioni
                         </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                    </div>}
+                </div>}
             </CardContent>
           </Card>
 
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
