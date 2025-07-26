@@ -34,8 +34,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   const handlePreview = () => {
     if (currentWordList.words.length === 0) {
       toast({
-        title: "No words available",
-        description: "Please select a word list or add custom words first.",
+        title: "Nessuna parola disponibile",
+        description: "Seleziona una lista di parole o aggiungi parole personalizzate prima.",
         variant: "destructive",
       });
       return;
@@ -85,8 +85,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     }, settings.exposureDuration);
 
     toast({
-      title: "Preview shown",
-      description: `Word "${previewWord}" displayed for ${settings.exposureDuration}ms`,
+      title: "Anteprima mostrata",
+      description: `Parola "${previewWord}" mostrata per ${settings.exposureDuration}ms`,
     });
   };
 
@@ -103,8 +103,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   const handleStartClick = () => {
     if (currentWordList.words.length === 0) {
       toast({
-        title: "Cannot start exercise",
-        description: "Please select a word list or add custom words first.",
+        title: "Impossibile iniziare l'esercizio",
+        description: "Seleziona una lista di parole o aggiungi parole personalizzate prima.",
         variant: "destructive",
       });
       return;
@@ -116,18 +116,18 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     <div className="grid gap-6 md:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle>Word List</CardTitle>
+          <CardTitle>Lista Parole</CardTitle>
           <CardDescription>
-            Use the word list manager to create custom lists
+            Usa il gestore liste per creare liste personalizzate
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Current List</Label>
+              <Label>Lista Attuale</Label>
               <Badge variant="secondary">
-                {currentWordList.words.length} words
+                {currentWordList.words.length} parole
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -139,14 +139,14 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
       <Card>
         <CardHeader>
-          <CardTitle>Display Settings</CardTitle>
+          <CardTitle>Impostazioni Visualizzazione</CardTitle>
           <CardDescription>
-            Configure how words are displayed during exercises
+            Configura come vengono mostrate le parole durante gli esercizi
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label>Exposure Duration: {settings.exposureDuration}ms</Label>
+            <Label>Durata Esposizione: {settings.exposureDuration}ms</Label>
             <Slider
               value={[settings.exposureDuration]}
               onValueChange={([value]) => 
@@ -158,12 +158,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              How long each word is visible (50-2000ms)
+              Quanto tempo ogni parola è visibile (50-2000ms)
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label>Interval Duration: {settings.intervalDuration}ms</Label>
+            <Label>Durata Intervallo: {settings.intervalDuration}ms</Label>
             <Slider
               value={[settings.intervalDuration]}
               onValueChange={([value]) => 
@@ -175,13 +175,13 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              Pause between words (0-1000ms)
+              Pausa tra le parole (0-1000ms)
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Font Size</Label>
+              <Label>Dimensione Font</Label>
               <Select
                 value={settings.fontSize}
                 onValueChange={(value: any) => 
@@ -192,16 +192,16 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="small">Small</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="large">Large</SelectItem>
-                  <SelectItem value="extra-large">Extra Large</SelectItem>
+                  <SelectItem value="small">Piccolo</SelectItem>
+                  <SelectItem value="medium">Medio</SelectItem>
+                  <SelectItem value="large">Grande</SelectItem>
+                  <SelectItem value="extra-large">Extra Grande</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>Text Case</Label>
+              <Label>Formato Testo</Label>
               <Select
                 value={settings.textCase}
                 onValueChange={(value: any) => 
@@ -212,9 +212,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="original">Original</SelectItem>
-                  <SelectItem value="uppercase">UPPERCASE</SelectItem>
-                  <SelectItem value="lowercase">lowercase</SelectItem>
+                  <SelectItem value="original">Originale</SelectItem>
+                  <SelectItem value="uppercase">MAIUSCOLO</SelectItem>
+                  <SelectItem value="lowercase">minuscolo</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -223,9 +223,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>Use Masking</Label>
+                <Label>Usa Mascheratura</Label>
                 <p className="text-xs text-muted-foreground">
-                  Show pattern after each word
+                  Mostra pattern dopo ogni parola
                 </p>
               </div>
               <Switch
@@ -238,7 +238,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
             {settings.useMask && (
               <div className="space-y-2">
-                <Label>Mask Duration: {settings.maskDuration}ms</Label>
+                <Label>Durata Maschera: {settings.maskDuration}ms</Label>
                 <Slider
                   value={[settings.maskDuration]}
                   onValueChange={([value]) => 
@@ -265,7 +265,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               disabled={currentWordList.words.length === 0}
             >
               <Eye className="mr-2 h-4 w-4" />
-              Preview
+              Anteprima
             </Button>
             <Button
               onClick={handleStartClick}
@@ -273,12 +273,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               disabled={currentWordList.words.length === 0}
             >
               <Play className="mr-2 h-4 w-4" />
-              Start Exercise
+              Inizia Esercizio
             </Button>
           </div>
           <div className="flex items-center justify-center mt-4 text-sm text-muted-foreground">
             <Info className="mr-2 h-4 w-4" />
-            Press X during exercise to mark incorrect words
+            Premi X durante l'esercizio per segnare parole scorrette
           </div>
         </CardContent>
       </Card>
