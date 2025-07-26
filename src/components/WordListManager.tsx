@@ -972,16 +972,11 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                 ) : generatedWords.length > 0 ? (
                   <div className="bg-gray-50 rounded-lg p-3 space-y-2">
                     <div className="flex flex-wrap gap-1">
-                      {generatedWords.slice(0, 12).map((word, index) => (
+                      {generatedWords.map((word, index) => (
                         <Badge key={index} variant="secondary" className="text-xs">
                           {word}
                         </Badge>
                       ))}
-                      {generatedWords.length > 12 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{generatedWords.length - 12}
-                        </Badge>
-                      )}
                     </div>
                     <Button
                       variant="outline"
