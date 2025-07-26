@@ -260,11 +260,10 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
       'bg-gradient-to-r'
     } ${currentTheme.preview.background}`}>
       <div 
-        className="absolute inset-0 opacity-20 pointer-events-none"
+        className="absolute inset-0 opacity-15 pointer-events-none"
         style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,1) 0.5px, transparent 0)`,
-          backgroundSize: '2px 2px',
-          mixBlendMode: 'overlay'
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(60,60,60,1) 0.5px, transparent 0)`,
+          backgroundSize: '2px 2px'
         }}
       ></div>
       <div className="container mx-auto p-4 max-w-4xl">
