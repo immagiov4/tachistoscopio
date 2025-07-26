@@ -110,8 +110,8 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     
     // Suono molto più dolce - tono ancora più basso e curva più morbida
     oscillator.type = 'sine'; // Forma d'onda più dolce
-    oscillator.frequency.setValueAtTime(400, audioContext.currentTime); // Frequenza più bassa
-    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.2); // Discesa più graduale
+    oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // Frequenza molto più bassa e calda
+    oscillator.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.2); // Scende a frequenza molto grave
     
     gainNode.gain.setValueAtTime(0.02, audioContext.currentTime); // Volume ancora più basso
     gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2); // Fade out più lungo
