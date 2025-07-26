@@ -1061,6 +1061,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                   </div>
                 )}
               </div>
+            )}
 
             {/* Contenuto Manual */}
             {(activeTab === 'manual' || editingList) && (
