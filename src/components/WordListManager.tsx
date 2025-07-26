@@ -31,7 +31,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   therapistId
 }) => {
   const [customWords, setCustomWords] = useState('');
-  const [customListName, setCustomListName] = useState('Lista personalizzata');
+  const [customListName, setCustomListName] = useState('Nuovo esercizio');
   const [savedWordLists, setSavedWordLists] = useState<WordList[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [editingList, setEditingList] = useState<string | null>(null);
@@ -484,7 +484,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       const { data, error } = await supabase
         .from('word_lists')
         .insert({
-          name: customListName || 'Lista personalizzata',
+          name: customListName || 'Nuovo esercizio',
           description: `Lista ${activeTab === 'generator' ? 'generata' : 'personalizzata'} con ${wordsToSave.length} parole`,
           words: wordsToSave,
           settings: exerciseSettings as any,
@@ -509,11 +509,11 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       if (activeTab === 'manual') {
         setCustomWords('');
       }
-      setCustomListName('Lista personalizzata');
+      setCustomListName('Nuovo esercizio');
 
       toast({
-        title: "Lista salvata",
-        description: `"${customList.name}" è stata salvata con ${wordsToSave.length} parole.`,
+        title: "Esercizio salvato",
+        description: `"${customList.name}" è stato salvato con ${wordsToSave.length} parole.`,
       });
     } catch (error) {
       console.error('Error saving word list:', error);
@@ -594,8 +594,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
       await loadSavedWordLists();
       toast({
-        title: "Lista eliminata",
-        description: "La lista personalizzata è stata eliminata.",
+        title: "Esercizio eliminato",
+        description: "L'esercizio personalizzato è stato eliminato.",
       });
     } catch (error: any) {
       console.error('Error deleting word list:', error);
@@ -679,7 +679,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       
       // Clear form
       setCustomWords('');
-      setCustomListName('Lista personalizzata');
+      setCustomListName('Nuovo esercizio');
       setEditingList(null);
 
       toast({
@@ -711,13 +711,13 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
   const handleCancelEdit = () => {
     setCustomWords('');
-    setCustomListName('Lista personalizzata');
+    setCustomListName('Nuovo esercizio');
     setEditingList(null);
   };
 
   const handleClearCustomWords = () => {
     setCustomWords('');
-    setCustomListName('Lista personalizzata');
+    setCustomListName('Nuovo esercizio');
     setEditingList(null);
   };
 
@@ -727,10 +727,10 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BookOpen className="h-5 w-5" />
-            Gestione Liste Parole
+            Crea nuovo esercizio
           </CardTitle>
           <CardDescription>
-            Seleziona una lista esistente o crea una personalizzata
+            Crea esercizi personalizzati con parole e impostazioni integrate
           </CardDescription>
         </CardHeader>
       </Card>
@@ -738,9 +738,9 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Selezione e Gestione Liste</CardTitle>
+            <CardTitle>Esercizi salvati</CardTitle>
             <CardDescription>
-              Seleziona liste salvate o genera nuove liste
+              Seleziona esercizi esistenti o creane di nuovi
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -775,13 +775,13 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
             {/* Liste salvate */}
             <div className="space-y-2">
-              <h4 className="font-medium text-sm">Le tue liste salvate</h4>
+              <h4 className="font-medium text-sm">I tuoi esercizi salvati</h4>
               {savedWordLists.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Nessuna lista salvata. Crea la tua prima lista usando il generatore o inserendo parole manualmente.
+                  Nessun esercizio salvato. Crea il tuo primo esercizio usando il generatore o inserendo parole manualmente.
                 </p>
               ) : (
-                <div className="space-y-2 max-h-60 overflow-y-auto">
+                <div className="space-y-2">{/* Rimossa limitazione altezza max-h-60 overflow-y-auto */}
                   {savedWordLists.map((list) => (
                     <div 
                       key={list.id} 
@@ -850,17 +850,17 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>
-              {editingList ? 'Modifica lista' : 'Crea nuova lista'}
+              {editingList ? 'Modifica esercizio' : 'Crea nuovo esercizio'}
             </CardTitle>
             <CardDescription>
-              {editingList ? 'Modifica la lista esistente' : 'Genera parole automaticamente o inseriscile manualmente'}
+              {editingList ? 'Modifica l\'esercizio esistente' : 'Genera parole automaticamente o inseriscile manualmente'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {editingList && (
               <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-md">
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Stai modificando una lista esistente. Le modifiche saranno salvate automaticamente.
+                  Stai modificando un esercizio esistente. Le modifiche saranno salvate automaticamente.
                 </p>
               </div>
             )}
@@ -889,13 +889,13 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="list-name">Nome lista</Label>
+              <Label htmlFor="list-name">Nome esercizio</Label>
               <Input
                 id="list-name"
                 type="text"
                 value={customListName}
                 onChange={(e) => setCustomListName(e.target.value)}
-                placeholder="Inserisci nome lista"
+                placeholder="Inserisci nome esercizio"
               />
             </div>
 
@@ -903,7 +903,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Tipo di lista</Label>
+                    <Label>Tipo di esercizio</Label>
                     <Select 
                       value={generatorParams.type} 
                       onValueChange={(value: any) => setGeneratorParams(prev => ({ ...prev, type: value }))}
@@ -1141,7 +1141,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                     className="flex-1"
                   >
                     <Save className="mr-2 h-4 w-4" />
-                    {isLoading ? 'Salvataggio...' : therapistId ? 'Salva lista' : 'Usa temporaneamente'}
+                    {isLoading ? 'Salvataggio...' : therapistId ? 'Salva esercizio' : 'Usa temporaneamente'}
                   </Button>
                   <Button 
                     onClick={handleClearCustomWords} 
