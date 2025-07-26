@@ -978,7 +978,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                     <Label className="text-xs font-medium text-gray-700">Tipo</Label>
                     <Select
                       value={generatorParams.type}
-                      onValueChange={(value) => setGeneratorParams({...generatorParams, type: value as any})}
+                      onValueChange={(value) => setGeneratorParams(prev => ({ ...prev, type: value as any }))}
                     >
                       <SelectTrigger className="h-9">
                         <SelectValue />
@@ -999,7 +999,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                       min="5"
                       max="50"
                       value={generatorParams.count}
-                      onChange={(e) => setGeneratorParams({...generatorParams, count: parseInt(e.target.value) || 10})}
+                      onChange={(e) => setGeneratorParams(prev => ({ ...prev, count: parseInt(e.target.value) || 10 }))}
                       className="h-9"
                     />
                   </div>
@@ -1010,7 +1010,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                     <Label className="text-xs font-medium text-gray-700">Sillabe</Label>
                     <Select
                       value={generatorParams.syllableCount}
-                      onValueChange={(value) => setGeneratorParams({...generatorParams, syllableCount: value})}
+                      onValueChange={(value) => setGeneratorParams(prev => ({ ...prev, syllableCount: value }))}
                     >
                       <SelectTrigger className="h-9">
                         <SelectValue />
@@ -1029,7 +1029,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                     <Input
                       placeholder="es. ca"
                       value={generatorParams.startsWith}
-                      onChange={(e) => setGeneratorParams({...generatorParams, startsWith: e.target.value})}
+                      onChange={(e) => setGeneratorParams(prev => ({ ...prev, startsWith: e.target.value }))}
                       className="h-9"
                     />
                   </div>
@@ -1039,7 +1039,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                     <Input
                       placeholder="es. ar"
                       value={generatorParams.contains}
-                      onChange={(e) => setGeneratorParams({...generatorParams, contains: e.target.value})}
+                      onChange={(e) => setGeneratorParams(prev => ({ ...prev, contains: e.target.value }))}
                       className="h-9"
                     />
                   </div>
