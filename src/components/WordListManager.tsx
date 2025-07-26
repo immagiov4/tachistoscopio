@@ -800,7 +800,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                         ? 'border-blue-500 bg-blue-50' 
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
-                    onClick={() => onWordListChange(list)}
+                    onClick={() => handleEditWordList(list)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
@@ -814,17 +814,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                         )}
                       </div>
                       <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditWordList(list);
-                          }}
-                          className="h-6 w-6 p-0"
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
