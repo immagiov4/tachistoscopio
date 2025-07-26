@@ -16,6 +16,8 @@ import { toast } from '@/hooks/use-toast';
 
 import { PatientExerciseManager } from '@/components/PatientExerciseManager';
 import { TutorialModal } from '@/components/TutorialModal';
+import { WordListManager } from '@/components/WordListManager';
+import { WordList as TachistoscopeWordList, PREDEFINED_WORD_LISTS } from '@/types/tachistoscope';
 
 export const TherapistDashboard: React.FC = () => {
   const { profile, signOut } = useAuth();
@@ -24,16 +26,14 @@ export const TherapistDashboard: React.FC = () => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Word list manager state
+  const [currentWordList, setCurrentWordList] = useState<TachistoscopeWordList>(PREDEFINED_WORD_LISTS[0]);
+
   // Patient creation state
   const [newPatientEmail, setNewPatientEmail] = useState('');
   const [newPatientName, setNewPatientName] = useState('');
   const [createPatientLoading, setCreatePatientLoading] = useState(false);
 
-  // Word list creation state
-  const [newListName, setNewListName] = useState('');
-  const [newListDescription, setNewListDescription] = useState('');
-  const [newListWords, setNewListWords] = useState('');
-  const [createListLoading, setCreateListLoading] = useState(false);
 
   // Exercise creation state
   const [selectedPatient, setSelectedPatient] = useState('');
@@ -59,7 +59,6 @@ export const TherapistDashboard: React.FC = () => {
   const fetchData = async () => {
     await Promise.all([
       fetchPatients(),
-      fetchWordLists(),
       fetchExercises(),
     ]);
     setLoading(false);
@@ -80,21 +79,6 @@ export const TherapistDashboard: React.FC = () => {
     }
   };
 
-  const fetchWordLists = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('word_lists')
-        .select('*')
-        .eq('created_by', profile?.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      console.log('Fetched word lists:', data);
-      setWordLists(data || []);
-    } catch (error) {
-      console.error('Error fetching word lists:', error);
-    }
-  };
 
   const fetchExercises = async () => {
     try {
@@ -167,56 +151,6 @@ export const TherapistDashboard: React.FC = () => {
     }
   };
 
-  const createWordList = async () => {
-    if (!newListName || !newListWords) {
-      toast({
-        title: 'Errore',
-        description: 'Nome e parole sono obbligatori',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setCreateListLoading(true);
-    try {
-      const words = newListWords
-        .split(/[\n,\s]+/)
-        .map(word => word.trim())
-        .filter(word => word.length > 0);
-
-      console.log('Words array:', words, 'Length:', words.length);
-
-      const { error } = await supabase
-        .from('word_lists')
-        .insert({
-          name: newListName,
-          description: newListDescription,
-          words,
-          created_by: profile?.id!,
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: 'Successo',
-        description: 'Lista di parole creata con successo',
-      });
-
-      setNewListName('');
-      setNewListDescription('');
-      setNewListWords('');
-      await fetchWordLists();
-    } catch (error) {
-      console.error('Error creating word list:', error);
-      toast({
-        title: 'Errore',
-        description: 'Errore durante la creazione della lista',
-        variant: 'destructive',
-      });
-    } finally {
-      setCreateListLoading(false);
-    }
-  };
 
   const createExercise = async () => {
     if (!selectedWordList) {
@@ -285,40 +219,6 @@ export const TherapistDashboard: React.FC = () => {
     }
   };
 
-  const deleteWordList = async (listId: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questa lista di parole? Verranno eliminati anche tutti gli esercizi che la utilizzano.')) return;
-    
-    try {
-      // Prima elimina tutti gli esercizi che usano questa lista
-      await supabase
-        .from('exercises')
-        .delete()
-        .eq('word_list_id', listId);
-
-      // Poi elimina la lista di parole
-      const { error } = await supabase
-        .from('word_lists')
-        .delete()
-        .eq('id', listId);
-
-      if (error) throw error;
-
-      toast({
-        title: 'Successo',
-        description: 'Lista di parole e relativi esercizi eliminati con successo',
-      });
-
-      await fetchWordLists();
-      await fetchExercises();
-    } catch (error) {
-      console.error('Error deleting word list:', error);
-      toast({
-        title: 'Errore',
-        description: 'Errore durante l\'eliminazione della lista',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const deleteExercise = async (exerciseId: string) => {
     if (!confirm('Sei sicuro di voler eliminare questo esercizio?')) return;
@@ -395,96 +295,11 @@ export const TherapistDashboard: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="wordlists" className="mt-6">
-            <div className="grid gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Crea Nuova Lista di Parole</CardTitle>
-                  <CardDescription>
-                    Crea una lista personalizzata di parole per gli esercizi
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="list-name">Nome Lista</Label>
-                      <Input
-                        id="list-name"
-                        value={newListName}
-                        onChange={(e) => setNewListName(e.target.value)}
-                        placeholder="Nome della lista"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="list-description">Descrizione (opzionale)</Label>
-                      <Input
-                        id="list-description"
-                        value={newListDescription}
-                        onChange={(e) => setNewListDescription(e.target.value)}
-                        placeholder="Descrizione della lista"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="list-words">Parole (una per riga o separate da virgole)</Label>
-                    <Textarea
-                      id="list-words"
-                      value={newListWords}
-                      onChange={(e) => setNewListWords(e.target.value)}
-                      placeholder="gatto&#10;cane&#10;sole&#10;luna"
-                      rows={8}
-                    />
-                  </div>
-                  <Button 
-                    onClick={createWordList} 
-                    disabled={createListLoading}
-                    className="w-full md:w-auto"
-                  >
-                    {createListLoading ? 'Creazione...' : 'Crea Lista'}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Le Mie Liste di Parole ({wordLists.length})</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {wordLists.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">
-                      Non hai ancora creato nessuna lista di parole
-                    </p>
-                  ) : (
-                    <div className="grid gap-4">
-                       {wordLists.map((list) => (
-                         <div key={list.id} className="p-4 border rounded-lg">
-                           <div className="flex items-center justify-between mb-2">
-                             <h3 className="font-medium">{list.name}</h3>
-                             <div className="flex items-center gap-2">
-                               <Badge variant="outline">{list.words.length} parole</Badge>
-                               <Button
-                                 variant="outline"
-                                 size="sm"
-                                 onClick={() => deleteWordList(list.id)}
-                                 className="h-8 w-8 p-0"
-                               >
-                                 <Trash2 className="h-4 w-4" />
-                               </Button>
-                             </div>
-                           </div>
-                           {list.description && (
-                             <p className="text-sm text-muted-foreground mb-2">{list.description}</p>
-                           )}
-                           <p className="text-sm text-muted-foreground">
-                             Prime parole: {list.words.slice(0, 5).join(', ')}
-                             {list.words.length > 5 && '...'}
-                           </p>
-                         </div>
-                       ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+            <WordListManager
+              currentWordList={currentWordList}
+              onWordListChange={setCurrentWordList}
+              therapistId={profile?.id}
+            />
           </TabsContent>
 
           <TabsContent value="exercises" className="mt-6">
