@@ -384,7 +384,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
 
             {displayState === 'mask' && (
               <div className="text-center animate-scale-in">
-                <div className="relative inline-block p-8 bg-black rounded-3xl shadow-2xl min-w-[400px] min-h-[200px]">
+                <div className="relative inline-block p-8 bg-foreground rounded-3xl shadow-2xl min-w-[400px] min-h-[200px]">
                   {/* Maschera completamente nera */}
                 </div>
               </div>
