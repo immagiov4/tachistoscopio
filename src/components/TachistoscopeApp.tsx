@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings } from 'lucide-react';
 import { SettingsPanel } from './SettingsPanel';
-import { ExerciseDisplay } from './ExerciseDisplay';
+import { SimpleExerciseDisplay } from './SimpleExerciseDisplay';
 import { ResultsPanel } from './ResultsPanel';
 import { WordListManager } from './WordListManager';
 import {
@@ -41,39 +41,16 @@ export const TachistoscopeApp: React.FC = () => {
     setActiveTab('exercise');
   }, [currentWordList, settings]);
 
-  const handleExerciseComplete = useCallback((sessionData: ExerciseSession) => {
-    const endTime = Date.now();
-    const duration = endTime - sessionData.startTime;
-    const totalWords = sessionData.wordList.words.length;
-    const incorrectWords = sessionData.errors.length;
-    const correctWords = totalWords - incorrectWords;
-    const accuracy = (correctWords / totalWords) * 100;
-
-    const missedWords = sessionData.errors.map(
-      index => sessionData.wordList.words[index]
-    );
-
-    const result: SessionResult = {
-      totalWords,
-      correctWords,
-      incorrectWords,
-      accuracy,
-      duration,
-      missedWords,
-      settings: sessionData.settings,
-      wordListName: sessionData.wordList.name,
-    };
-
+  const handleExerciseComplete = useCallback((result: SessionResult) => {
     setResults(result);
     setSession(null);
     setActiveTab('results');
   }, []);
 
   const handleStopExercise = useCallback(() => {
-    if (session) {
-      handleExerciseComplete(session);
-    }
-  }, [session, handleExerciseComplete]);
+    setSession(null);
+    setActiveTab('settings');
+  }, []);
 
   const handleBackToSettings = useCallback(() => {
     setActiveTab('settings');
@@ -94,11 +71,28 @@ export const TachistoscopeApp: React.FC = () => {
         </header>
 
         {session ? (
-          <ExerciseDisplay
-            session={session}
+          <SimpleExerciseDisplay
+            session={{
+              words: session.wordList.words,
+              settings: session.settings,
+              startTime: session.startTime,
+              currentWordIndex: session.currentWordIndex,
+              errors: session.errors,
+              isRunning: session.isRunning,
+              isPaused: session.isPaused,
+            }}
             onComplete={handleExerciseComplete}
             onStop={handleStopExercise}
-            onUpdateSession={setSession}
+            onUpdateSession={(updatedSession) => {
+              setSession({
+                ...session,
+                currentWordIndex: updatedSession.currentWordIndex,
+                errors: updatedSession.errors,
+                isRunning: updatedSession.isRunning,
+                isPaused: updatedSession.isPaused,
+              });
+            }}
+            theme="rainbow"
           />
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
