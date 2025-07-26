@@ -154,7 +154,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
         oscillator.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.1);
         
-        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime); // Solo volume più alto
+        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime); // Volume più alto per tutti i dispositivi
         gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
         
         oscillator.start(audioContext.currentTime);
