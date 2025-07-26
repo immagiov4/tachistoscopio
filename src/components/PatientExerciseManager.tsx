@@ -426,7 +426,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
             </div>
           </div>
           
-          <div className="grid gap-2 max-h-60 overflow-y-auto">
+          <div className="grid gap-4 max-h-60 overflow-y-auto">
             {paginatedPatients.map(patient => <div key={patient.id} className={`p-3 border-2 border-dashed rounded-lg cursor-pointer transition-all hover:shadow-md ${selectedPatient?.id === patient.id ? 'bg-primary/10 border-primary border-solid shadow-md' : 'hover:bg-muted border-muted-foreground/30'}`} onClick={() => setSelectedPatient(patient)}>
                 <div className="flex items-center justify-between">
                   <div>
