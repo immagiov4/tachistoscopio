@@ -59,29 +59,30 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     }
   }, [selectedPatient]);
   
-  // Scroll listener for floating actions - simplified approach
+  // Simple visibility logic for floating actions
   useEffect(() => {
-    let ticking = false;
-    
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          const patientListCard = document.querySelector('[data-patient-list]');
-          if (patientListCard) {
-            const rect = patientListCard.getBoundingClientRect();
-            const shouldShow = rect.bottom < window.innerHeight * 0.6;
-            setShowFloatingActions(shouldShow);
-          }
-          ticking = false;
-        });
-        ticking = true;
+    const checkVisibility = () => {
+      const patientListCard = document.querySelector('[data-patient-list]');
+      if (patientListCard) {
+        const rect = patientListCard.getBoundingClientRect();
+        // Show buttons when list is scrolled past 70% of screen height
+        setShowFloatingActions(rect.bottom < window.innerHeight * 0.7);
       }
     };
 
+    // Check on scroll with throttling
+    let timeout: NodeJS.Timeout;
+    const handleScroll = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(checkVisibility, 100);
+    };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
+    checkVisibility(); // Initial check
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeout);
     };
   }, []);
   
@@ -500,7 +501,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
             </div>
           </div>
           
-          <div className="grid gap-4 h-80 overflow-y-auto">  {/* Increased from max-h-60 to h-80 */}
+          <div className="grid gap-4 h-96 overflow-y-auto">  {/* Increased from h-80 to h-96 */}
             {paginatedPatients.map(patient => <div key={patient.id} className={`p-3 border-2 border-dashed rounded-lg cursor-pointer transition-all hover:shadow-md ${selectedPatient?.id === patient.id ? 'bg-primary/10 border-primary border-solid shadow-md' : 'hover:bg-muted border-muted-foreground/30'}`} onClick={() => handlePatientSelection(patient)}>
                 <div className="flex items-center justify-between">
                   <div>
