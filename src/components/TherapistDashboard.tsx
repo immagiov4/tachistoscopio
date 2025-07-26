@@ -309,7 +309,7 @@ export const TherapistDashboard: React.FC = () => {
             </TabsTrigger>
             <TabsTrigger value="wordlists" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
-              Liste Parole & Esercizi
+              Liste Parole &amp; Esercizi
             </TabsTrigger>
           </TabsList>
 
