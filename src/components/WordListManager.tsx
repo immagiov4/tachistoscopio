@@ -136,10 +136,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       const text = await response.text();
       const words = text.split('\n').filter(word => word.trim().length > 0);
       setAllWords(words);
-      toast({
-        title: "Dataset caricato",
-        description: `${words.length} parole italiane caricate`,
-      });
+      // Dataset caricato silenziosamente
     } catch (error) {
       console.error('Error loading words dataset:', error);
       toast({
