@@ -355,7 +355,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       });
       if (error) throw error;
       const wordLists: WordList[] = data.map(dbList => {
-        const settings = (dbList.settings as unknown as ExerciseSettings) || DEFAULT_SETTINGS;
+        const settings = dbList.settings as unknown as ExerciseSettings || DEFAULT_SETTINGS;
         return {
           id: dbList.id,
           name: dbList.name,
@@ -621,17 +621,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   };
   return <div className="space-y-6">
       {/* Header Card - Compatto */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <BookOpen className="h-5 w-5" />
-            Liste Parole & Esercizi
-          </CardTitle>
-          <CardDescription>
-            Gestisci i tuoi esercizi salvati o creane di nuovi
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      
 
       {/* Layout a 3 colonne per meglio bilanciare */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
