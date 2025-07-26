@@ -476,7 +476,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
               <Label htmlFor="search">Cerca paziente</Label>
               <Input
                 id="search"
-                placeholder="Nome del paziente..."
+                placeholder="Nome o email del paziente..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
