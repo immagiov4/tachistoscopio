@@ -112,17 +112,17 @@ export const AuthPage: React.FC = () => {
         </div>
 
         <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6 p-1 bg-muted/50 border-2 border-muted">
+          <TabsList className="grid w-full grid-cols-2 mb-6 p-1 bg-muted/50 border-2 border-muted h-auto">
             <TabsTrigger 
               value="login" 
-              className="text-sm font-semibold py-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border flex items-center gap-2"
+              className="text-sm font-semibold py-2 px-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border flex items-center gap-2 h-auto"
             >
               <User className="w-4 h-4" />
               Accedi
             </TabsTrigger>
             <TabsTrigger 
               value="signup" 
-              className="text-sm font-semibold py-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border flex items-center gap-2"
+              className="text-sm font-semibold py-2 px-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border flex items-center gap-2 h-auto"
             >
               <UserPlus className="w-4 h-4" />
               Registrati come Terapista
