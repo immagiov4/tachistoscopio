@@ -146,10 +146,17 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
     try {
       let finalWordListId = wordListId;
       
+      // Prima rimuovi l'esercizio esistente per questo giorno, se esiste
+      await supabase
+        .from('exercises')
+        .delete()
+        .eq('patient_id', selectedPatient.id)
+        .eq('day_of_week', dayOfWeek);
 
+      // Poi inserisci il nuovo esercizio
       const { error } = await supabase
         .from('exercises')
-        .upsert({
+        .insert({
           patient_id: selectedPatient.id,
           therapist_id: therapistId,
           word_list_id: finalWordListId,
