@@ -363,8 +363,11 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
   const generateSyllables = (): string[] => {
     const syllables: string[] = [];
+    let attempts = 0;
+    const maxAttempts = generatorParams.count * 100; // Limite per evitare infinite loop
     
-    while (syllables.length < generatorParams.count) {
+    while (syllables.length < generatorParams.count && attempts < maxAttempts) {
+      attempts++;
       const syllable = ITALIAN_SYLLABLES[Math.floor(Math.random() * ITALIAN_SYLLABLES.length)];
       
       if (generatorParams.startsWith && !syllable.startsWith(generatorParams.startsWith.toLowerCase())) continue;
@@ -382,8 +385,11 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     const nonWords: string[] = [];
     const consonants = ['b', 'c', 'd', 'f', 'g', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'z'];
     const vowels = ['a', 'e', 'i', 'o', 'u'];
+    let attempts = 0;
+    const maxAttempts = generatorParams.count * 100; // Limite per evitare infinite loop
     
-    while (nonWords.length < generatorParams.count) {
+    while (nonWords.length < generatorParams.count && attempts < maxAttempts) {
+      attempts++;
       let word = '';
       const syllables = parseInt(generatorParams.syllableCount) || 2;
       const syllablesToGenerate = syllables;
