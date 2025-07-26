@@ -188,7 +188,10 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     markErrorRef.current?.();
   }, []); // Dipendenze vuote - funzione sempre stabile
 
-  const nextWord = useCallback(() => {
+  // Usa ref per mantenere una versione stabile di nextWord
+  const nextWordRef = useRef<() => void>();
+  
+  nextWordRef.current = () => {
     const newIndex = session.currentWordIndex + 1;
     console.log('Next word called. Current index:', session.currentWordIndex, 'New index:', newIndex);
     console.log('Current errors in nextWord:', session.errors);
@@ -224,7 +227,11 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     };
     console.log('Updating session with preserved errors:', newSession.errors);
     onUpdateSession(newSession);
-  }, [session, onComplete, onUpdateSession]);
+  };
+
+  const nextWord = useCallback(() => {
+    nextWordRef.current?.();
+  }, []); // Dipendenze vuote - funzione sempre stabile
 
   const pauseResume = useCallback(() => {
     onUpdateSession({
@@ -404,9 +411,9 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     session.settings.exposureDuration,
     session.settings.intervalDuration,
     isCountingDown, 
-    formatWord, 
-    nextWord
-  ]); // Solo le dipendenze necessarie per la visualizzazione, NON session.errors
+    formatWord
+    // nextWord rimosso perché ora è stabile
+  ]); // Solo le dipendenze necessarie per la visualizzazione
 
   const progress = (session.currentWordIndex / session.words.length) * 100;
   const accuracy = session.currentWordIndex > 0 ? 
