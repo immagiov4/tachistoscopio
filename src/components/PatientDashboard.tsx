@@ -287,7 +287,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
         }}
       ></div>
       <div className="container mx-auto p-4 max-w-4xl">
-        <header className="mb-8 flex justify-between items-center bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border border-white/20">
+        <header className="mb-8 flex justify-between items-center bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/20">
           <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
               La Mia Area
@@ -303,7 +303,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
         </header>
 
         <div className="grid gap-6">
-          <Card className="bg-white/90 backdrop-blur-sm border-white/30 shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <Card className="bg-white/90 backdrop-blur-sm border-white/30 shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-gray-800">
                 <Calendar className="h-5 w-5" />
