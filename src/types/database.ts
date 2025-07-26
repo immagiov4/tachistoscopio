@@ -200,11 +200,11 @@ export const DEFAULT_SETTINGS: ExerciseSettings = {
 };
 
 export const DAYS_OF_WEEK = [
-  'Domenica',
   'Lunedì',
-  'Martedì',
+  'Martedì', 
   'Mercoledì',
   'Giovedì',
   'Venerdì',
-  'Sabato'
+  'Sabato',
+  'Domenica'
 ];

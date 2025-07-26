@@ -273,7 +273,7 @@ export const PatientDashboard: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-gray-800">
                 <Calendar className="h-5 w-5" />
-                Esercizio di Oggi - {DAYS_OF_WEEK[new Date().getDay()]}
+                Esercizio di Oggi - {DAYS_OF_WEEK[(new Date().getDay() + 6) % 7]}
               </CardTitle>
               <CardDescription className="text-gray-600">
                 {todayExercise 

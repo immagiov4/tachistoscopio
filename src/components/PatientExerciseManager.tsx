@@ -139,7 +139,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
 
       toast({
         title: 'Successo',
-        description: `Esercizio per ${DAYS_OF_WEEK[dayOfWeek]} aggiornato`,
+        description: `Esercizio per ${DAYS_OF_WEEK[dayOfWeek === 0 ? 6 : dayOfWeek - 1]} aggiornato`,
       });
 
       await fetchPatientData();
@@ -167,7 +167,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
 
       toast({
         title: 'Successo',
-        description: `Esercizio per ${DAYS_OF_WEEK[dayOfWeek]} rimosso`,
+        description: `Esercizio per ${DAYS_OF_WEEK[dayOfWeek === 0 ? 6 : dayOfWeek - 1]} rimosso`,
       });
 
       await fetchPatientData();
@@ -439,7 +439,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
             <CardContent>
             <div className="grid gap-2">
                 {DAYS_OF_WEEK.map((day, index) => {
-                  const dayOfWeek = index; // Sunday = 0, Monday = 1, ..., Saturday = 6
+                  const dayOfWeek = (index + 1) % 7; // Monday = 1, ..., Saturday = 6, Sunday = 0
                   const exercise = weeklyExercises[dayOfWeek];
                   
                   return (
