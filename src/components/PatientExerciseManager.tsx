@@ -586,9 +586,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                       
                       {exercise ? (
                         <div className="flex-1 flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            {exercise.word_list?.name}
-                          </Badge>
                           <span className="text-xs text-muted-foreground">
                             {exercise.word_list?.words?.length} parole • {exercise.word_list?.settings?.exposureDuration || exercise.settings?.exposureDuration}ms • {exercise.word_list?.settings?.intervalDuration || exercise.settings?.intervalDuration}ms
                           </span>
