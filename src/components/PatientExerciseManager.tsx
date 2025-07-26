@@ -381,7 +381,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       <Card>
         <CardHeader>
           <CardTitle>Crea Nuovo Paziente</CardTitle>
-          <CardDescription>
+          <CardDescription className="leading-relaxed space-y-1">
             Aggiungi un nuovo paziente al tuo gruppo. Verrà inviata automaticamente un'email al genitore/tutore con:
             <br />• <strong>Link di accesso rapido</strong> (magic link) per entrare immediatamente
             <br />• <strong>Password temporanea</strong> come alternativa per l'accesso manuale
