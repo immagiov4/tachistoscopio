@@ -112,9 +112,19 @@ export const AuthPage: React.FC = () => {
         </div>
 
         <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Accedi</TabsTrigger>
-            <TabsTrigger value="signup">Registrati come Terapista</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-6 p-1 bg-muted/50 border-2 border-muted">
+            <TabsTrigger 
+              value="login" 
+              className="text-sm font-semibold py-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border"
+            >
+              👤 Accedi
+            </TabsTrigger>
+            <TabsTrigger 
+              value="signup" 
+              className="text-sm font-semibold py-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border"
+            >
+              👨‍⚕️ Registrati come Terapista
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="login">

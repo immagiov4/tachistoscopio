@@ -292,39 +292,49 @@ export const TherapistDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-4 max-w-6xl">
-        <header className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Dashboard Terapista
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              Benvenuto, {profile?.full_name}
-            </p>
+        <header className="mb-8">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                Dashboard Terapista
+              </h1>
+              <p className="text-lg text-muted-foreground">
+                Benvenuto, {profile?.full_name}
+              </p>
+            </div>
+            <Button onClick={handleSignOut} variant="outline">
+              <LogOut className="h-4 w-4 mr-2" />
+              Esci
+            </Button>
           </div>
-          <Button onClick={handleSignOut} variant="outline">
-            <LogOut className="h-4 w-4 mr-2" />
-            Esci
-          </Button>
+          
+          {/* Alert informativo sulla navigazione */}
+          <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/30">
+            <AlertDescription className="text-blue-800 dark:text-blue-200">
+              💡 <strong>Suggerimento:</strong> Usa i tab qui sotto per navigare tra <strong>"Gestione Pazienti"</strong> (per creare pazienti e assegnare esercizi) 
+              e <strong>"Liste Parole"</strong> (per creare e modificare le liste di parole).
+            </AlertDescription>
+          </Alert>
         </header>
 
 
         <Tabs defaultValue="patients" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 mb-8 p-1 bg-gradient-to-r from-primary/10 to-secondary/10 border-2 border-primary/20 rounded-lg shadow-sm">
             <TabsTrigger 
               value="patients" 
-              className="flex items-center gap-2 cursor-pointer"
-              onClick={() => {}}
+              className="flex items-center gap-3 text-base font-semibold py-4 px-6 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border-2 data-[state=active]:border-primary/30 data-[state=active]:scale-[1.02] transition-all duration-200"
             >
-              <UserCog className="h-4 w-4" />
-              Gestione Pazienti
+              <UserCog className="h-5 w-5" />
+              <span>Gestione Pazienti</span>
+              <Badge variant="secondary" className="ml-auto">Pazienti & Esercizi</Badge>
             </TabsTrigger>
             <TabsTrigger 
               value="wordlists" 
-              className="flex items-center gap-2 cursor-pointer"
-              onClick={() => {}}
+              className="flex items-center gap-3 text-base font-semibold py-4 px-6 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border-2 data-[state=active]:border-primary/30 data-[state=active]:scale-[1.02] transition-all duration-200"
             >
-              <BookOpen className="h-4 w-4" />
-              Liste Parole &amp; Esercizi
+              <BookOpen className="h-5 w-5" />
+              <span>Liste Parole</span>
+              <Badge variant="secondary" className="ml-auto">Creazione & Modifica</Badge>
             </TabsTrigger>
           </TabsList>
 
