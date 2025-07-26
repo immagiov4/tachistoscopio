@@ -167,37 +167,38 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     
     setIsGenerating(true);
     
+    // Piccolo delay per permettere al UI di aggiornare
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
     try {
       // Load dataset if not already loaded and we're generating real words
       if (generatorParams.type === 'words' && allWords.length === 0) {
         await loadWordsDataset();
       }
       
-      // Delay minimo più breve per mostrare brevemente l'indicatore
-      const startTime = Date.now();
-      
-      let words: string[] = [];
-      
-      switch (generatorParams.type) {
-        case 'words':
-          words = generateRealWords();
-          break;
-        case 'syllables':
-          words = generateSyllables();
-          break;
-        case 'nonwords':
-          words = generateNonWords();
-          break;
-        case 'minimal-pairs':
-          words = generateMinimalPairs();
-          break;
-      }
-      
-      // Assicura un tempo minimo di 300ms per vedere l'indicatore
-      const elapsed = Date.now() - startTime;
-      if (elapsed < 300) {
-        await new Promise(resolve => setTimeout(resolve, 300 - elapsed));
-      }
+      // Genera parole in modo asincrono per non bloccare l'UI
+      const words = await new Promise<string[]>((resolve) => {
+        setTimeout(() => {
+          let result: string[] = [];
+          
+          switch (generatorParams.type) {
+            case 'words':
+              result = generateRealWords();
+              break;
+            case 'syllables':
+              result = generateSyllables();
+              break;
+            case 'nonwords':
+              result = generateNonWords();
+              break;
+            case 'minimal-pairs':
+              result = generateMinimalPairs();
+              break;
+          }
+          
+          resolve(result);
+        }, 10);
+      });
       
       setGeneratedWords(words);
     } catch (error) {
