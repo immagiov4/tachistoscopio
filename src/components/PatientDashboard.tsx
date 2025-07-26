@@ -252,13 +252,20 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
   const currentTheme = themes.find(t => t.id === selectedTheme) || themes[3];
 
   return (
-    <div className={`min-h-screen ${
+    <div className={`min-h-screen relative ${
       selectedTheme === 'rainbow' ? 'bg-gradient-to-r' : 
       selectedTheme === 'space' ? 'bg-gradient-to-br' :
       selectedTheme === 'ocean' ? 'bg-gradient-to-tr' :
       selectedTheme === 'nature' ? 'bg-gradient-to-bl' :
       'bg-gradient-to-r'
     } ${currentTheme.preview.background}`}>
+      <div 
+        className="absolute inset-0 opacity-8 pointer-events-none"
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,1) 0.5px, transparent 0)`,
+          backgroundSize: '2px 2px'
+        }}
+      ></div>
       <div className="container mx-auto p-4 max-w-4xl">
         <header className="mb-8 flex justify-between items-center bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-2xl border border-white/20">
           <div>
