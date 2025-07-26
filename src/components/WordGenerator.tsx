@@ -52,6 +52,17 @@ const ITALIAN_WORD_STEMS = [
 
 const WORD_ENDINGS = ['a', 'e', 'i', 'o', 'u', 'are', 'ere', 'ire', 'ato', 'uto', 'ito'];
 
+// Lista di parole inappropriate da filtrare
+const INAPPROPRIATE_WORDS = [
+  'negro', 'negri', 'negra', 'negre',
+  'merda', 'cazzo', 'fica', 'puttana', 'troia', 'stronzo', 'stronza',
+  'coglione', 'coglioni', 'bastardo', 'bastarda', 'porco', 'porca',
+  'frocio', 'ricchione', 'culattone', 'finocchio',
+  'zoccola', 'mignotta', 'battona', 'puttaniere',
+  'cazzi', 'merdate', 'cagare', 'pisciare',
+  'aspreggiai' // parola inesistente
+];
+
 export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSave }) => {
   const [params, setParams] = useState<GenerationParams>({
     type: 'words',
@@ -110,6 +121,9 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
     
     // Filtra le parole del dizionario
     let filteredWords = italianWords.filter(word => {
+      // Filter inappropriate words first
+      if (INAPPROPRIATE_WORDS.includes(word.toLowerCase())) return false;
+      
       // Applica filtri di testo
       if (params.startsWith && !word.startsWith(params.startsWith.toLowerCase())) return false;
       if (params.contains && !word.includes(params.contains.toLowerCase())) return false;

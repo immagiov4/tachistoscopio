@@ -76,6 +76,18 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     'va', 've', 'vi', 'vo', 'vu', 'za', 'ze', 'zi', 'zo', 'zu'
   ];
 
+  // Lista di parole inappropriate da filtrare
+  const INAPPROPRIATE_WORDS = [
+    'negro', 'negri', 'negra', 'negre',
+    'merda', 'cazzo', 'fica', 'puttana', 'troia', 'stronzo', 'stronza',
+    'coglione', 'coglioni', 'bastardo', 'bastarda', 'porco', 'porca',
+    'frocio', 'ricchione', 'culattone', 'finocchio',
+    'zoccola', 'mignotta', 'battona', 'puttaniere',
+    'cazzi', 'merdate', 'cagare', 'pisciare',
+    'aspreggiai' // parola inesistente
+  ];
+
+  // Usa ITALIAN_WORDS come base validata
   const ITALIAN_WORDS = [
     // Parole di 1 sillaba
     'blu', 'tre', 'sei', 'qui', 'qua', 'poi', 'per', 'fra', 'tra', 'pro', 'pre', 'sub', 'sud',
@@ -86,7 +98,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     'mondo', 'tempo', 'giorno', 'notte', 'donna', 'uomo', 'madre', 'padre', 'figlio', 'figlia',
     'fiore', 'acqua', 'terra', 'cielo', 'libro', 'tavolo', 'sedia', 'porta', 'finestra', 'strada',
     'scuola', 'amico', 'cane', 'gatto', 'uccello', 'pesce', 'albero', 'erba', 'bello', 'grande',
-    'piccolo', 'rosso', 'verde', 'giallo', 'nero', 'bianco', 'nuovo', 'vecchio', 'buono', 'cattivo',
+    'piccolo', 'rosso', 'verde', 'giallo', 'bianco', 'nuovo', 'vecchio', 'buono', 'cattivo',
     'alto', 'basso', 'lungo', 'corto', 'caldo', 'freddo', 'dolce', 'amaro', 'salato', 'aspro',
     'forte', 'debole', 'veloce', 'lento', 'facile', 'difficile', 'aperto', 'chiuso', 'pieno', 'vuoto',
     'ricco', 'povero', 'felice', 'triste', 'giovane', 'anziano', 'magro', 'grasso', 'pulito', 'sporco',
@@ -120,11 +132,11 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     'novembre', 'dicembre', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato', 'domenica', 'mattina',
     'pomeriggio', 'sera', 'notte', 'mezzogiorno', 'mezzanotte', 'aurora', 'tramonto', 'alba', 'crepuscolo', 'buio',
     'animale', 'mammifero', 'uccello', 'pesce', 'rettile', 'insetto', 'farfalla', 'ape', 'mosca', 'zanzara',
-    'cavallo', 'mucca', 'pecora', 'capra', 'maiale', 'gallina', 'anatra', 'tacchino', 'coniglio', 'criceto',
+    'cavallo', 'mucca', 'pecora', 'capra', 'gallina', 'anatra', 'tacchino', 'coniglio', 'criceto',
     'tigre', 'leone', 'elefante', 'giraffa', 'zebra', 'scimmia', 'orso', 'lupo', 'volpe', 'cervo',
     
     // Parole di 4+ sillabe  
-    'automobile', 'metropolitana', 'motocicletta', 'elicottero', 'sottomarino', 'astronave', 'automobile', 'locomotiva', 'funicolare', 'seggiovia',
+    'automobile', 'metropolitana', 'motocicletta', 'elicottero', 'sottomarino', 'astronave', 'locomotiva', 'funicolare', 'seggiovia',
     'televisione', 'videocamera', 'registratore', 'altoparlante', 'microfono', 'amplificatore', 'sintetizzatore', 'pianoforte', 'chitarra', 'violino',
     'ospedaliero', 'universitario', 'elementare', 'superiore', 'professionale', 'tecnico', 'scientifico', 'letterario', 'artistico', 'musicale',
     'ristoratore', 'pasticciere', 'panettiere', 'macellaio', 'pescivendolo', 'fruttivendolo', 'verduraio', 'salumiere', 'farmacista', 'benzina',
@@ -133,6 +145,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     'matematica', 'geometria', 'algebra', 'aritmetica', 'statistica', 'informatica', 'biologia', 'chimica', 'fisica', 'geografia',
     'meteorologia', 'astronomia', 'geologia', 'archeologia', 'antropologia', 'sociologia', 'psicologia', 'filosofia', 'teologia', 'letteratura'
   ];
+
+  const VALIDATED_ITALIAN_WORDS = ITALIAN_WORDS;
 
   // Load the complete Italian words dataset
   const loadWordsDataset = async () => {
@@ -249,12 +263,15 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   };
 
   const generateRealWords = (): string[] => {
-    // Use complete dataset
-    const wordsToUse = allWords.length > 0 ? allWords : ITALIAN_WORDS;
+    // Use validated Italian words dataset
+    const wordsToUse = allWords.length > 0 ? allWords : VALIDATED_ITALIAN_WORDS;
     const targetSyllables = parseInt(generatorParams.syllableCount) || 2;
     
-    // Filter words based on criteria
+    // Filter words based on criteria AND inappropriate content
     const filteredWords = wordsToUse.filter(word => {
+      // Check if word is inappropriate
+      if (INAPPROPRIATE_WORDS.includes(word.toLowerCase())) return false;
+      
       // Check basic filters
       if (generatorParams.startsWith && !word.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) return false;
       if (generatorParams.contains && !word.toLowerCase().includes(generatorParams.contains.toLowerCase())) return false;
@@ -369,6 +386,9 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       for (const word of shuffledWords) {
         if (result.length >= generatorParams.count) break;
 
+        // Controlla se la parola è inappropriata
+        if (INAPPROPRIATE_WORDS.includes(word.toLowerCase())) continue;
+        
         // Controlla se la parola soddisfa i criteri
         const syllables = countSyllables(word);
         const validSyllables = syllables === targetSyllables;
