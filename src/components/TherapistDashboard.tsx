@@ -285,9 +285,9 @@ export const TherapistDashboard: React.FC = () => {
               <BookOpen className="h-4 w-4" />
               Liste Parole
             </TabsTrigger>
-            <TabsTrigger value="statistics" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Statistiche
+            <TabsTrigger value="exercises" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Esercizi
             </TabsTrigger>
           </TabsList>
 
@@ -303,18 +303,112 @@ export const TherapistDashboard: React.FC = () => {
             />
           </TabsContent>
 
-          <TabsContent value="statistics" className="mt-6">
+          <TabsContent value="exercises" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Statistiche</CardTitle>
+                <CardTitle>Crea Esercizio</CardTitle>
                 <CardDescription>
-                  Panoramica delle prestazioni dei pazienti
+                  Crea un nuovo esercizio selezionando una lista di parole e configurando le impostazioni
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-center py-8">
-                  Le statistiche saranno disponibili quando i pazienti completeranno gli esercizi
-                </p>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="wordlist-select">Lista Parole</Label>
+                    <Select value={selectedWordList} onValueChange={setSelectedWordList}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleziona una lista di parole" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="predefined">Lista Predefinita</SelectItem>
+                        <SelectItem value="custom">Lista Personalizzata</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Impostazioni Esercizio</h3>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="exposureDuration">Durata Esposizione (ms)</Label>
+                        <Input
+                          id="exposureDuration"
+                          type="number"
+                          value={exerciseSettings.exposureDuration}
+                          onChange={(e) => setExerciseSettings({
+                            ...exerciseSettings,
+                            exposureDuration: parseInt(e.target.value)
+                          })}
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="intervalDuration">Durata Intervallo (ms)</Label>
+                        <Input
+                          id="intervalDuration"
+                          type="number"
+                          value={exerciseSettings.intervalDuration}
+                          onChange={(e) => setExerciseSettings({
+                            ...exerciseSettings,
+                            intervalDuration: parseInt(e.target.value)
+                          })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="fontSize">Dimensione Font</Label>
+                        <Select 
+                          value={exerciseSettings.fontSize} 
+                          onValueChange={(value) => setExerciseSettings({
+                            ...exerciseSettings,
+                            fontSize: value as any
+                          })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="small">Piccolo</SelectItem>
+                            <SelectItem value="medium">Medio</SelectItem>
+                            <SelectItem value="large">Grande</SelectItem>
+                            <SelectItem value="extra-large">Extra Grande</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="textCase">Formato Testo</Label>
+                        <Select 
+                          value={exerciseSettings.textCase} 
+                          onValueChange={(value) => setExerciseSettings({
+                            ...exerciseSettings,
+                            textCase: value as any
+                          })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="original">Originale</SelectItem>
+                            <SelectItem value="uppercase">MAIUSCOLO</SelectItem>
+                            <SelectItem value="lowercase">minuscolo</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <Button 
+                      onClick={createExercise} 
+                      disabled={createExerciseLoading || !selectedWordList}
+                      className="w-full"
+                    >
+                      {createExerciseLoading ? 'Creazione...' : 'Crea Template Esercizio'}
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
