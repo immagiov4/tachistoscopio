@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, BookOpen, BarChart3, Search, Copy, Plus, Trash2, UserCheck, ArrowUp, Users, UserCog } from 'lucide-react';
+import { Calendar, Clock, BookOpen, BarChart3, Search, Copy, Plus, Trash2, UserCheck, ArrowUp, Users, UserCog, Edit } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, WordList, Exercise, ExerciseSettings, DAYS_OF_WEEK } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
@@ -575,20 +575,20 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
+                    <Badge variant="secondary">{patient.exerciseCount} esercizi</Badge>
                     <Button variant="default" size="sm" onClick={e => {
                       e.stopPropagation();
                       handlePatientSelection(patient);
-                    }} className="h-8 px-3">
+                    }} className="h-8 px-3 bg-gray-600 hover:bg-gray-700 text-white">
                       <UserCog className="h-4 w-4 mr-1" />
                       Gestisci Paziente
                     </Button>
-                    <Badge variant="secondary">{patient.exerciseCount} esercizi</Badge>
                     <Button variant="default" size="sm" onClick={e => {
                   e.stopPropagation();
                   enterStudioMode(patient.id);
-                }} className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white" title="Modalità Studio: Gestisci gli esercizi del paziente durante la terapia">
-                      <UserCheck className="h-4 w-4 mr-1" />
-                      Modalità Studio
+                }} className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white" title="Modalità Allenamento: Gestisci gli esercizi del paziente durante la terapia">
+                      <BookOpen className="h-4 w-4 mr-1" />
+                      Modalità Allenamento
                     </Button>
                     <Button variant="delete" size="sm" onClick={e => {
                   e.stopPropagation();
@@ -647,8 +647,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
                   className="flex items-center gap-2"
                   disabled={!onNavigateToWordLists}
                 >
-                  <Plus className="h-4 w-4" />
-                  Aggiungi esercizi
+                  <Edit className="h-4 w-4" />
+                  Crea nuovo esercizio
                 </Button>
               </div>
             </CardHeader>
@@ -791,8 +791,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
               className="shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full h-14 px-6 font-medium border-0 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
               title="Entra in modalità studio per il paziente selezionato"
             >
-              <UserCheck className="h-5 w-5 mr-2" />
-              Modalità Studio
+              <BookOpen className="h-5 w-5 mr-2" />
+              Modalità Allenamento
             </Button>
           )}
         </div>

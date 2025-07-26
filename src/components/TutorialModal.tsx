@@ -23,10 +23,10 @@ const tutorialSteps = [
     content: "Nella sezione 'Gestione Pazienti' puoi:\n• Creare nuovi pazienti inserendo nome ed email del tutore\n• Cercare pazienti esistenti\n• Cliccare su un paziente per modificare il suo piano settimanale\n• Visualizzare le statistiche individuali di ogni paziente"
   },
   {
-    title: "Modalità Studio",
+    title: "Modalità Allenamento",
     description: "Gestisci gli esercizi durante la terapia",
     icon: UserCheck,
-    content: "Il pulsante 'Modalità Studio' ti permette di:\n• Entrare nella dashboard del paziente senza login\n• Gestire gli esercizi durante le sessioni in studio\n• Avviare e supervisionare gli esercizi direttamente\n\nPerfetto per le terapie in presenza!"
+    content: "Il pulsante 'Modalità Allenamento' ti permette di:\n• Entrare nella dashboard del paziente senza login\n• Gestire gli esercizi durante le sessioni in studio\n• Avviare e supervisionare gli esercizi direttamente\n\nPerfetto per le terapie in presenza!"
   },
   {
     title: "Piano Settimanale",
@@ -38,7 +38,7 @@ const tutorialSteps = [
     title: "Liste Parole & Esercizi",
     description: "Crea esercizi personalizzati",
     icon: BookOpen,
-    content: "Nella sezione 'Liste Parole & Esercizi' puoi:\n• Creare esercizi completi con parole e impostazioni integrate\n• Generare parole automaticamente o inserirle manualmente\n• Configurare durata esposizione, intervallo e formato testo\n• Salvare i tuoi esercizi per riutilizzarli con diversi pazienti"
+    content: "Nella sezione 'Liste Parole & Esercizi' puoi:\n• Creare esercizi completi con parole e impostazioni integrate\n• Generare parole automaticamente o inserirle manualmente\n• Configurare durata esposizione, intervallo e formato testo\n• Salvare i tuoi esercizi per riutilizzarli con diversi pazienti\n\nUsa il pulsante 'Crea nuovo esercizio' dal Piano Settimanale per accesso rapido!"
   },
   {
     title: "Statistiche",
