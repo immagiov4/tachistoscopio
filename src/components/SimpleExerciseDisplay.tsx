@@ -394,7 +394,19 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         setDisplayState('interval');
       };
     }
-  }, [session.isRunning, session.isPaused, session.currentWordIndex, isCountingDown, formatWord, nextWord]);
+  }, [
+    session.isRunning, 
+    session.isPaused, 
+    session.currentWordIndex, 
+    session.words,
+    session.settings.useMask,
+    session.settings.maskDuration,
+    session.settings.exposureDuration,
+    session.settings.intervalDuration,
+    isCountingDown, 
+    formatWord, 
+    nextWord
+  ]); // Solo le dipendenze necessarie per la visualizzazione, NON session.errors
 
   const progress = (session.currentWordIndex / session.words.length) * 100;
   const accuracy = session.currentWordIndex > 0 ? 
