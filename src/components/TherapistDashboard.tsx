@@ -29,6 +29,7 @@ export const TherapistDashboard: React.FC = () => {
   const [wordLists, setWordLists] = useState<WordList[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('patients'); // Add state for active tab
 
   // Word list manager state
   const [currentWordList, setCurrentWordList] = useState<TachistoscopeWordList>({ id: 'empty', name: 'Nessuna lista', words: [], description: '' });
@@ -327,7 +328,7 @@ export const TherapistDashboard: React.FC = () => {
         </header>
 
 
-        <Tabs defaultValue="patients" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8 p-1 bg-gradient-to-r from-primary/10 to-secondary/10 border-2 border-primary/20 rounded-lg shadow-sm h-auto">
             <TabsTrigger 
               value="patients" 
@@ -352,13 +353,7 @@ export const TherapistDashboard: React.FC = () => {
           <TabsContent value="patients" className="mt-6">
             <PatientExerciseManager 
               therapistId={profile?.id || ''} 
-              onNavigateToWordLists={() => {
-                // Find and click the wordlists tab
-                const wordlistsTab = document.querySelector('[value="wordlists"]') as HTMLElement;
-                if (wordlistsTab) {
-                  wordlistsTab.click();
-                }
-              }}
+              onNavigateToWordLists={() => setActiveTab('wordlists')}
             />
           </TabsContent>
 

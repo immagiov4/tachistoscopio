@@ -566,7 +566,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
           <div className="grid gap-4 max-h-96 overflow-y-auto">  {/* Changed from h-96 to max-h-96 */}
             {paginatedPatients.map(patient => <div key={patient.id} className={`p-3 border-2 border-dashed rounded-lg cursor-pointer transition-all hover:shadow-md min-h-[80px] ${selectedPatient?.id === patient.id ? 'bg-primary/10 border-primary border-solid shadow-md' : 'hover:bg-muted border-muted-foreground/30'}`} onClick={() => handlePatientSelection(patient)}>
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-medium">{patient.full_name}</h3>
                     <p className="text-sm text-muted-foreground">
                       {patient.email && <span className="text-blue-600">{patient.email}</span>}
@@ -575,6 +575,13 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
+                    <Button variant="default" size="sm" onClick={e => {
+                      e.stopPropagation();
+                      handlePatientSelection(patient);
+                    }} className="h-8 px-3">
+                      <UserCog className="h-4 w-4 mr-1" />
+                      Gestisci Paziente
+                    </Button>
                     <Badge variant="secondary">{patient.exerciseCount} esercizi</Badge>
                     <Button variant="default" size="sm" onClick={e => {
                   e.stopPropagation();
