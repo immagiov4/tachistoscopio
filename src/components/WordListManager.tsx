@@ -140,8 +140,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     } catch (error) {
       console.error('Error loading words dataset:', error);
       toast({
-        title: "Errore",
-        description: "Impossibile caricare il dataset delle parole",
+        title: "Errore di caricamento",
+        description: "Impossibile caricare il dataset delle parole italiane. Controlla la connessione internet.",
         variant: "destructive"
       });
     } finally {
@@ -432,8 +432,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     } catch (error) {
       console.error('Error loading word lists:', error);
       toast({
-        title: "Errore",
-        description: "Impossibile caricare le liste salvate.",
+        title: "Errore di caricamento",
+        description: "Impossibile caricare le liste salvate dal database. Riprova più tardi.",
         variant: "destructive",
       });
     } finally {
@@ -504,8 +504,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     } catch (error) {
       console.error('Error saving word list:', error);
       toast({
-        title: "Errore",
-        description: "Impossibile salvare la lista personalizzata.",
+        title: "Errore di salvataggio",
+        description: "Impossibile salvare la lista nel database. Verifica la connessione e riprova.",
         variant: "destructive",
       });
     } finally {
@@ -583,11 +583,25 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         title: "Lista eliminata",
         description: "La lista personalizzata è stata eliminata.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting word list:', error);
+      
+      let errorMessage = "Impossibile eliminare la lista.";
+      
+      // Check for specific error types
+      if (error.code === '23503') {
+        errorMessage = "Impossibile eliminare la lista perché è attualmente utilizzata in esercizi attivi. Rimuovi prima gli esercizi che la utilizzano.";
+      } else if (error.code === 'PGRST116') {
+        errorMessage = "Lista non trovata o non hai i permessi per eliminarla.";
+      } else if (error.message?.includes('network')) {
+        errorMessage = "Errore di connessione. Controlla la rete e riprova.";
+      } else if (error.message) {
+        errorMessage = `Errore durante l'eliminazione: ${error.message}`;
+      }
+      
       toast({
-        title: "Errore",
-        description: "Impossibile eliminare la lista.",
+        title: "Errore di eliminazione",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -657,11 +671,22 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         title: "Lista aggiornata",
         description: `"${updatedList.name}" è stata aggiornata.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating word list:', error);
+      
+      let errorMessage = "Impossibile aggiornare la lista.";
+      
+      if (error.code === 'PGRST116') {
+        errorMessage = "Lista non trovata o non hai i permessi per modificarla.";
+      } else if (error.message?.includes('network')) {
+        errorMessage = "Errore di connessione. Controlla la rete e riprova.";
+      } else if (error.message) {
+        errorMessage = `Errore durante l'aggiornamento: ${error.message}`;
+      }
+      
       toast({
-        title: "Errore",
-        description: "Impossibile aggiornare la lista.",
+        title: "Errore di modifica",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

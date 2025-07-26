@@ -195,11 +195,24 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
       });
 
       await fetchPatientData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating exercise:', error);
+      
+      let errorMessage = 'Errore durante l\'aggiornamento dell\'esercizio';
+      
+      if (error.code === '23503') {
+        errorMessage = 'Impossibile aggiornare: la lista di parole selezionata non esiste più.';
+      } else if (error.code === 'PGRST116') {
+        errorMessage = 'Non hai i permessi per modificare questo esercizio.';
+      } else if (error.message?.includes('network')) {
+        errorMessage = 'Errore di connessione. Controlla la rete e riprova.';
+      } else if (error.message) {
+        errorMessage = `Errore: ${error.message}`;
+      }
+      
       toast({
-        title: 'Errore',
-        description: 'Errore durante l\'aggiornamento dell\'esercizio',
+        title: 'Errore di aggiornamento',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -223,11 +236,22 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
       });
 
       await fetchPatientData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error removing exercise:', error);
+      
+      let errorMessage = 'Errore durante la rimozione dell\'esercizio';
+      
+      if (error.code === 'PGRST116') {
+        errorMessage = 'Esercizio non trovato o non hai i permessi per rimuoverlo.';
+      } else if (error.message?.includes('network')) {
+        errorMessage = 'Errore di connessione. Controlla la rete e riprova.';
+      } else if (error.message) {
+        errorMessage = `Errore: ${error.message}`;
+      }
+      
       toast({
-        title: 'Errore',
-        description: 'Errore durante la rimozione dell\'esercizio',
+        title: 'Errore di rimozione',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -275,9 +299,22 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
       await fetchInitialData();
     } catch (error: any) {
       console.error('Error creating patient:', error);
+      
+      let errorMessage = 'Errore durante la creazione del paziente';
+      
+      if (error.message?.includes('email')) {
+        errorMessage = 'Email non valida o già utilizzata da un altro utente.';
+      } else if (error.message?.includes('already exists')) {
+        errorMessage = 'Un paziente con questa email esiste già.';
+      } else if (error.message?.includes('network')) {
+        errorMessage = 'Errore di connessione. Controlla la rete e riprova.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
-        title: 'Errore',
-        description: error.message || 'Errore durante la creazione del paziente',
+        title: 'Errore di creazione',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -305,11 +342,24 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
         setSelectedPatient(null);
       }
       await fetchInitialData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting patient:', error);
+      
+      let errorMessage = 'Errore durante l\'eliminazione del paziente';
+      
+      if (error.code === '23503') {
+        errorMessage = 'Impossibile eliminare il paziente perché ha esercizi o sessioni attive. Rimuovi prima tutti i suoi dati.';
+      } else if (error.code === 'PGRST116') {
+        errorMessage = 'Paziente non trovato o non hai i permessi per eliminarlo.';
+      } else if (error.message?.includes('network')) {
+        errorMessage = 'Errore di connessione. Controlla la rete e riprova.';
+      } else if (error.message) {
+        errorMessage = `Errore: ${error.message}`;
+      }
+      
       toast({
-        title: 'Errore',
-        description: 'Errore durante l\'eliminazione del paziente',
+        title: 'Errore di eliminazione',
+        description: errorMessage,
         variant: 'destructive',
       });
     }

@@ -224,11 +224,22 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
       }
 
       setListName('');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving word list:', error);
+      
+      let errorMessage = "Impossibile salvare la lista.";
+      
+      if (error.message?.includes('network')) {
+        errorMessage = "Errore di connessione. Controlla la rete e riprova.";
+      } else if (error.message?.includes('unique')) {
+        errorMessage = "Esiste già una lista con questo nome. Scegli un nome diverso.";
+      } else if (error.message) {
+        errorMessage = `Errore: ${error.message}`;
+      }
+      
       toast({
-        title: "Errore",
-        description: "Impossibile salvare la lista.",
+        title: "Errore di salvataggio",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
