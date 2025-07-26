@@ -201,6 +201,30 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       setLoading(false);
     }
   };
+
+  // Funzione per aggiornare dinamicamente il conteggio esercizi di un paziente
+  const updatePatientExerciseCount = useCallback(async () => {
+    if (!selectedPatient) return;
+    
+    try {
+      const { data: exercises } = await supabase
+        .from('exercises')
+        .select('patient_id')
+        .eq('patient_id', selectedPatient.id);
+        
+      const newCount = exercises?.length || 0;
+      
+      setPatientsWithExercises(prev => 
+        prev.map(patient => 
+          patient.id === selectedPatient.id 
+            ? { ...patient, exerciseCount: newCount }
+            : patient
+        )
+      );
+    } catch (error) {
+      console.error('Error updating exercise count:', error);
+    }
+  }, [selectedPatient]);
   const fetchPatientData = async () => {
     if (!selectedPatient) return;
     try {
@@ -258,8 +282,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         if (error) throw error;
       }
       await fetchPatientData();
-      // Aggiorna anche la lista principale dei pazienti per riflettere il nuovo conteggio esercizi
-      await fetchInitialData();
+      // Aggiorna dinamicamente il conteggio esercizi senza ricaricare tutta la pagina
+      updatePatientExerciseCount();
     } catch (error: any) {
       console.error('Error updating exercise:', error);
       let errorMessage = 'Errore durante l\'aggiornamento dell\'esercizio';
@@ -297,8 +321,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         description: `Esercizio per ${DAYS_OF_WEEK[dayOfWeek === 0 ? 6 : dayOfWeek - 1]} rimosso`
       });
       await fetchPatientData();
-      // Aggiorna anche la lista principale dei pazienti per riflettere il nuovo conteggio esercizi
-      await fetchInitialData();
+      // Aggiorna dinamicamente il conteggio esercizi senza ricaricare tutta la pagina
+      updatePatientExerciseCount();
     } catch (error: any) {
       console.error('Error removing exercise:', error);
       let errorMessage = 'Errore durante la rimozione dell\'esercizio';

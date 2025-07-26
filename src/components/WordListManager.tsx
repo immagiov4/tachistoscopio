@@ -504,7 +504,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
       // Check for specific error types
       if (error.code === '23503') {
-        errorMessage = "Impossibile eliminare la lista perché è attualmente utilizzata in esercizi attivi. Rimuovi prima gli esercizi che la utilizzano.";
+        errorMessage = "Impossibile eliminare la lista perché è utilizzata in esercizi attivi. Per procedere, rimuovi prima gli esercizi dalla sezione Gestione Pazienti.";
       } else if (error.code === 'PGRST116') {
         errorMessage = "Lista non trovata o non hai i permessi per eliminarla.";
       } else if (error.message?.includes('network')) {
