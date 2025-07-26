@@ -216,30 +216,33 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     if (letters.length === 0) return 0;
     if (letters.length <= 2) return 1;
     
-    // Count vowel groups (improved Italian syllable counting)
-    let syllables = 0;
-    let previousWasVowel = false;
+    // Simple vowel counting approach - more reliable for Italian
+    const vowels = letters.match(/[aeiou]/g);
+    if (!vowels) return 1;
     
-    for (let i = 0; i < letters.length; i++) {
-      const isVowel = 'aeiou'.includes(letters[i]);
-      
-      if (isVowel && !previousWasVowel) {
-        syllables++;
+    let syllables = vowels.length;
+    
+    // Adjust for common diphthongs that should count as one syllable
+    // But only when they are truly together in pronunciation
+    const diphthongs = [
+      'ia', 'ie', 'io', 'iu',  // i + vowel
+      'ua', 'ue', 'ui', 'uo',  // u + vowel  
+      'ai', 'au', 'ei', 'eu', 'oi', 'ou'  // vowel + i/u
+    ];
+    
+    for (const diphthong of diphthongs) {
+      const regex = new RegExp(diphthong, 'g');
+      const matches = letters.match(regex);
+      if (matches) {
+        // Each diphthong reduces syllable count by 1 (since we counted 2 vowels but it's 1 syllable)
+        syllables -= matches.length;
       }
-      
-      // Handle common Italian vowel combinations that stay together
-      if (isVowel && previousWasVowel) {
-        const combo = letters.substring(i-1, i+1);
-        // Common diphthongs that count as one syllable
-        if (['ai', 'au', 'ei', 'eu', 'ia', 'ie', 'io', 'iu', 'oa', 'oe', 'oi', 'ou', 'ua', 'ue', 'ui', 'uo'].includes(combo)) {
-          // Don't increment, they form one syllable
-        } else {
-          // Two separate vowels = two syllables
-          syllables++;
-        }
-      }
-      
-      previousWasVowel = isVowel;
+    }
+    
+    // Special cases for common Italian patterns
+    // Words ending in -zione, -sione should have the correct count
+    if (letters.match(/(zione|sione)$/)) {
+      syllables += 1; // These endings add complexity
     }
     
     // Minimum of 1 syllable
