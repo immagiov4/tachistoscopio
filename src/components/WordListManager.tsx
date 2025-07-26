@@ -58,13 +58,23 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     'va', 've', 'vi', 'vo', 'vu', 'za', 'ze', 'zi', 'zo', 'zu'
   ];
 
-  const ITALIAN_WORD_STEMS = [
-    'cas', 'mar', 'sol', 'lun', 'vit', 'man', 'tes', 'cuo', 'amo', 'nom',
-    'pac', 'mon', 'tem', 'gior', 'not', 'don', 'uom', 'fig', 'mad', 'pad',
-    'fio', 'acq', 'ter', 'cie', 'alt', 'ben', 'dov', 'com', 'cos', 'mol'
+  const ITALIAN_WORDS = [
+    // Parole di 2 sillabe
+    'casa', 'mare', 'sole', 'luna', 'vita', 'mano', 'testa', 'cuore', 'nome', 'pace',
+    'mondo', 'tempo', 'giorno', 'notte', 'donna', 'uomo', 'madre', 'padre', 'figlio', 'figlia',
+    'fiore', 'acqua', 'terra', 'cielo', 'libro', 'tavolo', 'sedia', 'porta', 'finestra', 'strada',
+    'scuola', 'amico', 'bambino', 'bambina', 'cane', 'gatto', 'uccello', 'pesce', 'albero', 'erba',
+    
+    // Parole di 3 sillabe
+    'famiglia', 'bambino', 'ragazzo', 'ragazza', 'macchina', 'telefono', 'computer', 'medicina',
+    'ospedale', 'università', 'ristorante', 'automobile', 'bicicletta', 'motorino', 'televisore',
+    'frigorifero', 'lavastoviglie', 'aspirapolvere', 'calendario', 'biblioteca', 'farmacia',
+    'montagna', 'collina', 'pianura', 'oceano', 'continente', 'nazione', 'regione', 'provincia',
+    
+    // Parole di 4+ sillabe
+    'università', 'ospedale', 'automobile', 'bicicletta', 'televisore', 'frigorifero',
+    'aspirapolvere', 'metropolitana', 'supermercato', 'panetteria', 'pasticceria', 'pizzeria'
   ];
-
-  const WORD_ENDINGS = ['a', 'e', 'i', 'o', 'u', 'are', 'ere', 'ire', 'ato', 'uto', 'ito'];
 
   // Load saved word lists from database
   useEffect(() => {
@@ -109,23 +119,31 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     const words: string[] = [];
     const [minSyl, maxSyl] = generatorParams.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
     
-    while (words.length < generatorParams.count) {
-      const stem = ITALIAN_WORD_STEMS[Math.floor(Math.random() * ITALIAN_WORD_STEMS.length)];
-      const ending = WORD_ENDINGS[Math.floor(Math.random() * WORD_ENDINGS.length)];
-      let word = stem + ending;
+    // Filtra le parole italiane in base ai criteri
+    const filteredWords = ITALIAN_WORDS.filter(word => {
+      // Controlla filtri
+      if (generatorParams.startsWith && !word.startsWith(generatorParams.startsWith.toLowerCase())) return false;
+      if (generatorParams.contains && !word.includes(generatorParams.contains.toLowerCase())) return false;
       
-      if (generatorParams.startsWith && !word.startsWith(generatorParams.startsWith.toLowerCase())) continue;
-      if (generatorParams.contains && !word.includes(generatorParams.contains.toLowerCase())) continue;
-      
+      // Conta le sillabe (approssimativamente usando le vocali)
       const syllableCount = word.match(/[aeiou]/g)?.length || 1;
-      if (syllableCount < minSyl || syllableCount > maxSyl) continue;
+      if (syllableCount < minSyl || syllableCount > maxSyl) return false;
       
-      if (!words.includes(word)) {
-        words.push(word);
-      }
+      return true;
+    });
+    
+    // Se non ci sono abbastanza parole che soddisfano i criteri, aggiungi parole casuali dalla lista
+    const shuffled = [...filteredWords].sort(() => Math.random() - 0.5);
+    
+    // Se non abbiamo abbastanza parole filtrate, riempi con parole casuali
+    if (shuffled.length < generatorParams.count) {
+      const remainingWords = ITALIAN_WORDS
+        .filter(word => !shuffled.includes(word))
+        .sort(() => Math.random() - 0.5);
+      shuffled.push(...remainingWords);
     }
     
-    return words;
+    return shuffled.slice(0, generatorParams.count);
   };
 
   const generateSyllables = (): string[] => {
