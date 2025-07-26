@@ -13,8 +13,7 @@ import {
   WordList
  } from '@/types/tachistoscope';
 import { supabase } from '@/integrations/supabase/client';
-import { WordList as DBWordList, ExerciseSettings as DBExerciseSettings, DEFAULT_SETTINGS } from '@/types/database';
-import { ExerciseSettings } from '@/types/tachistoscope';
+import { WordList as DBWordList, ExerciseSettings, DEFAULT_SETTINGS } from '@/types/database';
 
 // Import the complete Italian word dataset
 import wordDatasetUrl from '@/data/parole_italiane_complete.txt?url';
@@ -40,7 +39,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   // Generator state
   const [generatorParams, setGeneratorParams] = useState({
     type: 'words' as 'words' | 'syllables' | 'nonwords' | 'minimal-pairs',
-    syllableCount: '2',
+    syllableCount: '2-3',
     startsWith: '',
     contains: '',
     count: 10
@@ -55,8 +54,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     textCase: 'original' as const,
     useMask: false,
     maskDuration: 100,        // 100ms: breve per non interferire
-    fontSize: 'large' as const,
-    intervalVariability: 100  // 100ms variabilità di default
+    fontSize: 'large' as const
   });
   
   // State for complete Italian words dataset
@@ -76,18 +74,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     'va', 've', 'vi', 'vo', 'vu', 'za', 'ze', 'zi', 'zo', 'zu'
   ];
 
-  // Lista di parole inappropriate da filtrare
-  const INAPPROPRIATE_WORDS = [
-    'negro', 'negri', 'negra', 'negre',
-    'merda', 'cazzo', 'fica', 'puttana', 'troia', 'stronzo', 'stronza',
-    'coglione', 'coglioni', 'bastardo', 'bastarda', 'porco', 'porca',
-    'frocio', 'ricchione', 'culattone', 'finocchio',
-    'zoccola', 'mignotta', 'battona', 'puttaniere',
-    'cazzi', 'merdate', 'cagare', 'pisciare',
-    'aspreggiai' // parola inesistente
-  ];
-
-  // Usa ITALIAN_WORDS come base validata
   const ITALIAN_WORDS = [
     // Parole di 1 sillaba
     'blu', 'tre', 'sei', 'qui', 'qua', 'poi', 'per', 'fra', 'tra', 'pro', 'pre', 'sub', 'sud',
@@ -98,7 +84,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     'mondo', 'tempo', 'giorno', 'notte', 'donna', 'uomo', 'madre', 'padre', 'figlio', 'figlia',
     'fiore', 'acqua', 'terra', 'cielo', 'libro', 'tavolo', 'sedia', 'porta', 'finestra', 'strada',
     'scuola', 'amico', 'cane', 'gatto', 'uccello', 'pesce', 'albero', 'erba', 'bello', 'grande',
-    'piccolo', 'rosso', 'verde', 'giallo', 'bianco', 'nuovo', 'vecchio', 'buono', 'cattivo',
+    'piccolo', 'rosso', 'verde', 'giallo', 'nero', 'bianco', 'nuovo', 'vecchio', 'buono', 'cattivo',
     'alto', 'basso', 'lungo', 'corto', 'caldo', 'freddo', 'dolce', 'amaro', 'salato', 'aspro',
     'forte', 'debole', 'veloce', 'lento', 'facile', 'difficile', 'aperto', 'chiuso', 'pieno', 'vuoto',
     'ricco', 'povero', 'felice', 'triste', 'giovane', 'anziano', 'magro', 'grasso', 'pulito', 'sporco',
@@ -132,11 +118,11 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     'novembre', 'dicembre', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato', 'domenica', 'mattina',
     'pomeriggio', 'sera', 'notte', 'mezzogiorno', 'mezzanotte', 'aurora', 'tramonto', 'alba', 'crepuscolo', 'buio',
     'animale', 'mammifero', 'uccello', 'pesce', 'rettile', 'insetto', 'farfalla', 'ape', 'mosca', 'zanzara',
-    'cavallo', 'mucca', 'pecora', 'capra', 'gallina', 'anatra', 'tacchino', 'coniglio', 'criceto',
+    'cavallo', 'mucca', 'pecora', 'capra', 'maiale', 'gallina', 'anatra', 'tacchino', 'coniglio', 'criceto',
     'tigre', 'leone', 'elefante', 'giraffa', 'zebra', 'scimmia', 'orso', 'lupo', 'volpe', 'cervo',
     
     // Parole di 4+ sillabe  
-    'automobile', 'metropolitana', 'motocicletta', 'elicottero', 'sottomarino', 'astronave', 'locomotiva', 'funicolare', 'seggiovia',
+    'automobile', 'metropolitana', 'motocicletta', 'elicottero', 'sottomarino', 'astronave', 'automobile', 'locomotiva', 'funicolare', 'seggiovia',
     'televisione', 'videocamera', 'registratore', 'altoparlante', 'microfono', 'amplificatore', 'sintetizzatore', 'pianoforte', 'chitarra', 'violino',
     'ospedaliero', 'universitario', 'elementare', 'superiore', 'professionale', 'tecnico', 'scientifico', 'letterario', 'artistico', 'musicale',
     'ristoratore', 'pasticciere', 'panettiere', 'macellaio', 'pescivendolo', 'fruttivendolo', 'verduraio', 'salumiere', 'farmacista', 'benzina',
@@ -145,8 +131,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     'matematica', 'geometria', 'algebra', 'aritmetica', 'statistica', 'informatica', 'biologia', 'chimica', 'fisica', 'geografia',
     'meteorologia', 'astronomia', 'geologia', 'archeologia', 'antropologia', 'sociologia', 'psicologia', 'filosofia', 'teologia', 'letteratura'
   ];
-
-  const VALIDATED_ITALIAN_WORDS = ITALIAN_WORDS;
 
   // Load the complete Italian words dataset
   const loadWordsDataset = async () => {
@@ -226,59 +210,71 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }, 300);
   };
 
-  // Algoritmo migliorato per contare le sillabe in italiano
+  // Function to count syllables in Italian words (improved)
   const countSyllables = (word: string): number => {
     if (!word) return 0;
     
-    const cleanWord = word.toLowerCase().trim();
-    if (cleanWord.length === 0) return 0;
+    // Convert to lowercase and remove accents for better processing
+    const cleanWord = word.toLowerCase()
+      .replace(/[àáâãä]/g, 'a')
+      .replace(/[èéêë]/g, 'e')
+      .replace(/[ìíîï]/g, 'i')
+      .replace(/[òóôõö]/g, 'o')
+      .replace(/[ùúûü]/g, 'u');
     
-    // Vocali italiane
-    const vowels = /[aeiouàèéìíîòóù]/g;
+    // Remove non-alphabetic characters
+    const letters = cleanWord.replace(/[^a-z]/g, '');
     
-    // Trova tutte le vocali
-    const vowelMatches = cleanWord.match(vowels) || [];
-    let syllables = vowelMatches.length;
+    if (letters.length === 0) return 0;
+    if (letters.length <= 2) return 1;
     
-    // Regole specifiche per l'italiano
+    // Simple vowel counting approach - more reliable for Italian
+    const vowels = letters.match(/[aeiou]/g);
+    if (!vowels) return 1;
     
-    // 1. Dittonghi e trittonghi che contano come una sillaba
+    let syllables = vowels.length;
+    
+    // Adjust for common diphthongs that should count as one syllable
+    // But only when they are truly together in pronunciation
     const diphthongs = [
-      /ai/g, /au/g, /ei/g, /eu/g, /oi/g, /ou/g,  // dittonghi discendenti
-      /ia/g, /ie/g, /io/g, /iu/g,                // dittonghi ascendenti con i
-      /ua/g, /ue/g, /ui/g, /uo/g,                // dittonghi ascendenti con u
-      /iai/g, /iei/g, /uai/g, /uei/g, /uoi/g     // trittonghi
+      'ia', 'ie', 'io', 'iu',  // i + vowel
+      'ua', 'ue', 'ui', 'uo',  // u + vowel  
+      'ai', 'au', 'ei', 'eu', 'oi', 'ou'  // vowel + i/u
     ];
     
     for (const diphthong of diphthongs) {
-      const matches = cleanWord.match(diphthong);
+      const regex = new RegExp(diphthong, 'g');
+      const matches = letters.match(regex);
       if (matches) {
-        // Ogni dittongo riduce il conteggio di 1 (2 vocali = 1 sillaba)
+        // Each diphthong reduces syllable count by 1 (since we counted 2 vowels but it's 1 syllable)
         syllables -= matches.length;
       }
     }
     
-    // Assicurati che ci sia almeno una sillaba
+    // Special cases for common Italian patterns
+    // Words ending in -zione, -sione should have the correct count
+    if (letters.match(/(zione|sione)$/)) {
+      syllables += 1; // These endings add complexity
+    }
+    
+    // Minimum of 1 syllable
     return Math.max(1, syllables);
   };
 
   const generateRealWords = (): string[] => {
-    // Use validated Italian words dataset
-    const wordsToUse = allWords.length > 0 ? allWords : VALIDATED_ITALIAN_WORDS;
-    const targetSyllables = parseInt(generatorParams.syllableCount) || 2;
+    // Use complete dataset
+    const wordsToUse = allWords.length > 0 ? allWords : ITALIAN_WORDS;
+    const [minSyl, maxSyl] = generatorParams.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
     
-    // Filter words based on criteria AND inappropriate content
+    // Filter words based on criteria
     const filteredWords = wordsToUse.filter(word => {
-      // Check if word is inappropriate
-      if (INAPPROPRIATE_WORDS.includes(word.toLowerCase())) return false;
-      
       // Check basic filters
       if (generatorParams.startsWith && !word.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) return false;
       if (generatorParams.contains && !word.toLowerCase().includes(generatorParams.contains.toLowerCase())) return false;
       
       // Count syllables accurately
       const syllableCount = countSyllables(word);
-      if (syllableCount !== targetSyllables) return false;
+      if (syllableCount < minSyl || syllableCount > maxSyl) return false;
       
       return true;
     });
@@ -317,7 +313,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     
     while (nonWords.length < generatorParams.count) {
       let word = '';
-      const syllables = parseInt(generatorParams.syllableCount) || 2;
+      const [minSyl, maxSyl] = generatorParams.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
+      const syllables = Math.floor(Math.random() * (maxSyl - minSyl + 1)) + minSyl;
       
       for (let i = 0; i < syllables; i++) {
         const consonant = consonants[Math.floor(Math.random() * consonants.length)];
@@ -338,7 +335,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
   const generateMinimalPairs = (): string[] => {
     const pairs: string[] = [];
-    const targetSyllables = parseInt(generatorParams.syllableCount) || 2;
+    const [minSyl, maxSyl] = generatorParams.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
     
     // Algoritmo efficiente per trovare coppie minime dal dizionario interno
     const findMinimalPairsFromDictionary = (): string[] => {
@@ -368,9 +365,31 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
       // Lista di parole inappropriate da evitare (per bambini)
       const inappropriateWords = new Set([
-        'pene', 'ano', 'culo', 'merda', 'cacca', 'pipi', 'popo',
-        'stupido', 'idiota', 'cretino', 'scemo', 'deficiente'
-      ]);
+      'pene', 'ano', 'culo', 'merda', 'cacca', 'pipi', 'popo',
+      'stupido', 'idiota', 'cretino', 'scemo', 'deficiente',
+      'stronzo', 'troia', 'puttana', 'figa', 'fica', 'vaffanculo',
+      'cazzo', 'fottiti', 'inculare', 'mignotta', 'bastardo',
+      'bastardissimo', 'zoccola', 'cornuto', 'coglione',
+      'stronza', 'cogliona', 'rompipalle', 'mado', 'puttanella',
+      'fichetto', 'pischello', 'pischella', 'merdoso', 'babbeo',
+      'imbecille', 'scassacazzo', 'baldracca', 'cagna', 'ficco',
+      'troione', 'bastardone', 'ficcona', 'puzzone', 'zzozzo',
+      'caccone', 'pennuto', 'pezzente', 'zingaro', 'paccottiglia',
+      'lurido', 'ciuccio', 'schifoso', 'brutto', 'schifo', 'lurida',
+      'str*nza', 'schifosa', 'cafone', 'duro', 'cretina', 'cornuta',
+      'mignotta', 'ficaginosa', 'pippone', 'pirla', 'babbuino',
+      'merdone', 'zoccola', 'frocione', 'checca', 'frocio', 'omosessuale',
+      'froci', 'patacca', 'minkia', 'minkione', 'scemoide',
+      'fesso', 'troione', 'tamarro', 'ubriacone', 'cogliona',
+      'merdaccia', 'scemi', 'scemotti', 'frocetto', 'swaghetto',
+      'sfigato', 'zigomo', 'vaffangulo', 'puttanella', 'vaffanculo',
+      'strunz', 'ricchione', 'stronza', 'piscio', 'pisciare', 'pisciatoio',
+      'ricchioni', 'schifosa', 'puzzone', 'cazzone', 'affanculo',
+      'porco', 'maiale', 'bischero', 'cafone', 'stregone', 'marcio',
+      'cornetta', 'zoccoletta', 'minkietta', 'culattone', 'frocetto',
+      'culone', 'straccione', 'negro'
+    ]);
+
 
       // Filtra le parole inappropriate
       const safeWords = commonWords.filter(word => !inappropriateWords.has(word.toLowerCase()));
@@ -386,12 +405,9 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       for (const word of shuffledWords) {
         if (result.length >= generatorParams.count) break;
 
-        // Controlla se la parola è inappropriata
-        if (INAPPROPRIATE_WORDS.includes(word.toLowerCase())) continue;
-        
         // Controlla se la parola soddisfa i criteri
         const syllables = countSyllables(word);
-        const validSyllables = syllables === targetSyllables;
+        const validSyllables = syllables >= minSyl && syllables <= maxSyl;
         const validFilters = (!generatorParams.startsWith || word.startsWith(generatorParams.startsWith.toLowerCase())) &&
                            (!generatorParams.contains || word.includes(generatorParams.contains.toLowerCase()));
         
@@ -418,7 +434,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                 
                 // Aggiungi entrambe le parole se non ci sono già e soddisfano i criteri
                 const variantSyllables = countSyllables(variant);
-                const variantValidSyllables = variantSyllables === targetSyllables;
+                const variantValidSyllables = variantSyllables >= minSyl && variantSyllables <= maxSyl;
                 const variantValidFilters = (!generatorParams.startsWith || variant.startsWith(generatorParams.startsWith.toLowerCase())) &&
                                           (!generatorParams.contains || variant.includes(generatorParams.contains.toLowerCase()));
                 
@@ -460,8 +476,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         id: dbList.id,
         name: dbList.name,
         description: dbList.description || `Lista personalizzata con ${dbList.words.length} parole`,
-        words: dbList.words,
-        settings: dbList.settings ? { ...dbList.settings as any, intervalVariability: (dbList.settings as any).intervalVariability || 100 } : undefined
+        words: dbList.words
       }));
 
       setSavedWordLists(wordLists);
@@ -522,8 +537,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         id: data.id,
         name: data.name,
         description: data.description || `Lista personalizzata con ${wordsToSave.length} parole`,
-        words: data.words,
-        settings: data.settings ? { ...data.settings as any, intervalVariability: (data.settings as any).intervalVariability || 100 } : undefined
+        words: data.words
       };
 
       await loadSavedWordLists();
@@ -645,8 +659,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     setCustomWords(list.words.join('\n'));
     setCustomListName(list.name);
     setEditingList(list.id);
-    // Evidenzia anche l'elemento come selezionato
-    onWordListChange(list);
   };
 
   const handleUpdateWordList = async () => {
@@ -687,8 +699,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         id: data.id,
         name: data.name,
         description: data.description || `Lista personalizzata con ${words.length} parole`,
-        words: data.words,
-        settings: data.settings ? { ...data.settings as any, intervalVariability: (data.settings as any).intervalVariability || 100 } : undefined
+        words: data.words
       };
 
       // Update current selection if it's the edited list
@@ -734,20 +745,16 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     setCustomWords('');
     setCustomListName('Nuovo esercizio');
     setEditingList(null);
-    // Reset anche la selezione evidenziata
-    onWordListChange({ id: '', name: '', words: [] });
   };
 
   const handleClearCustomWords = () => {
     setCustomWords('');
     setCustomListName('Nuovo esercizio');
     setEditingList(null);
-    // Reset anche la selezione evidenziata  
-    onWordListChange({ id: '', name: '', words: [] });
     setGeneratedWords([]);
     setGeneratorParams({
       type: 'words',
-                    syllableCount: '2',
+      syllableCount: '2-3',
       startsWith: '',
       contains: '',
       count: 10
@@ -758,8 +765,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       textCase: 'original' as const,
       useMask: false,
       maskDuration: 100,
-      fontSize: 'large' as const,
-      intervalVariability: 100
+      fontSize: 'large' as const
     });
     toast({
       title: "Form pulito",
@@ -806,24 +812,32 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                   <div
                     key={list.id}
                     className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
-                      (currentWordList.id === list.id || editingList === list.id)
+                      currentWordList.id === list.id 
                         ? 'border-blue-500 bg-blue-50' 
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
-                    onClick={() => handleEditWordList(list)}
+                    onClick={() => onWordListChange(list)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm text-gray-900 truncate">{list.name}</h4>
                         <p className="text-xs text-gray-500">{list.words.length} parole</p>
-                        {list.settings && (
-                          <div className="text-xs text-gray-400 mt-1 space-y-0.5">
-                            <p>Durata: {list.settings.exposureDuration}ms • Pausa: {list.settings.intervalDuration}ms</p>
-                            <p>Testo: {list.settings.textCase === 'uppercase' ? 'MAIUSCOLO' : list.settings.textCase === 'lowercase' ? 'minuscolo' : 'Originale'} • {list.settings.useMask ? 'Con maschera' : 'Senza maschera'}</p>
-                          </div>
+                        {list.description && (
+                          <p className="text-xs text-gray-400 mt-1 line-clamp-2">{list.description}</p>
                         )}
                       </div>
                       <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditWordList(list);
+                          }}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -849,13 +863,13 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                           <Download className="h-3 w-3" />
                         </Button>
                         <Button
-                          variant="ghost-destructive"
+                          variant="ghost"
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteWordList(list.id);
                           }}
-                          className="h-6 w-6 p-0"
+                          className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -967,10 +981,10 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="2">2 sillabe</SelectItem>
-                      <SelectItem value="3">3 sillabe</SelectItem>
-                      <SelectItem value="4">4 sillabe</SelectItem>
-                      <SelectItem value="5">5 sillabe</SelectItem>
+                      <SelectItem value="1-2">1-2</SelectItem>
+                      <SelectItem value="2-3">2-3</SelectItem>
+                      <SelectItem value="3-4">3-4</SelectItem>
+                      <SelectItem value="4-5">4-5</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
