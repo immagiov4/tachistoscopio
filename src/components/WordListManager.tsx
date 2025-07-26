@@ -162,7 +162,17 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   }, [therapistId]);
 
-  // Rimuovo l'effect automatico - ora genera solo su richiesta esplicita
+  // Effect automatico solo per il cambio quantità
+  useEffect(() => {
+    if (activeTab !== 'generator') return;
+    
+    // Debounce la generazione solo per evitare chiamate multiple rapide
+    const timeoutId = setTimeout(() => {
+      generateWords();
+    }, 300);
+    
+    return () => clearTimeout(timeoutId);
+  }, [generatorParams.count]); // Solo quando cambia la quantità
 
   // Load dataset on component mount
   useEffect(() => {
