@@ -209,9 +209,12 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
   // Effect automatico per generazione con debounce appropriato
   useEffect(() => {
+    // Solo genera se siamo nel tab Generator e non se cambiamo tab
+    if (activeTab !== 'generator') return;
+    
     const timeoutId = setTimeout(() => {
       performWordGeneration();
-    }, 300); // Debounce di 300ms per evitare chiamate eccessive
+    }, 300);
     
     return () => clearTimeout(timeoutId);
   }, [
@@ -219,9 +222,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     generatorParams.syllableCount, 
     generatorParams.startsWith, 
     generatorParams.contains, 
-    generatorParams.count,
-    activeTab
-  ]); // Direct dependencies
+    generatorParams.count
+  ]); // Rimossa activeTab dalle dipendenze per evitare loop
 
   // Function to count syllables in Italian words (improved)
   const countSyllables = (word: string): number => {
