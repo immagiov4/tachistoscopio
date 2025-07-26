@@ -337,131 +337,78 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     const pairs: string[] = [];
     const [minSyl, maxSyl] = generatorParams.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
     
-    // Database of verified Italian minimal pairs - only real words
-    const basePairs = [
-      // Consonanti occlusive (p/b, t/d, k/g)
-      ['pane', 'bane'], ['palla', 'balla'], ['polo', 'bolo'],
-      ['tana', 'dana'], ['tono', 'dono'], ['torre', 'terra'],
-      ['cane', 'gane'], ['casa', 'gasa'], ['core', 'gore'],
-      ['pino', 'bino'], ['porto', 'borto'], ['pasta', 'basta'],
-      ['tipo', 'tibo'], ['tempo', 'dembo'], ['terra', 'dera'],
-      ['cola', 'gola'], ['caldo', 'galdo'], ['come', 'gome'],
-      
-      // Consonanti fricative (f/v, s/z)
-      ['fare', 'vare'], ['fila', 'vila'], ['fino', 'vino'], ['fede', 'vede'],
-      ['sole', 'zole'], ['sera', 'zera'], ['sano', 'zano'],
-      ['foca', 'voca'], ['foto', 'voto'], ['fase', 'vase'],
-      ['sala', 'zala'], ['seta', 'zeta'], ['sogno', 'zogno'],
-      
-      // Consonanti liquide (l/r)
-      ['lana', 'rana'], ['lotto', 'rotto'], ['lume', 'rume'],
-      ['male', 'mare'], ['melo', 'mero'], ['palo', 'paro'], ['velo', 'vero'],
-      ['bello', 'berro'], ['collo', 'corro'], ['valle', 'varre'],
-      ['luce', 'ruce'], ['lago', 'rago'], ['lima', 'rima'],
-      ['lato', 'rato'], ['luna', 'runa'], ['loro', 'roro'],
-      
-      // Consonanti nasali (m/n)
-      ['mano', 'nano'], ['mono', 'nono'], ['rama', 'rana'], ['dama', 'dana'],
-      ['mare', 'nare'], ['moto', 'noto'], ['maso', 'naso'],
-      ['mimo', 'nino'], ['meta', 'neta'], ['modo', 'nodo'],
-      
-      // Vocali (a/e/i/o/u)
-      ['pane', 'pene'], ['pane', 'pino'], ['pane', 'pone'],
-      ['male', 'mele'], ['male', 'mule'], ['mala', 'mila'],
-      ['casa', 'case'], ['casa', 'cose'], ['rosa', 'rose'],
-      ['vino', 'veno'], ['vino', 'vano'], ['luce', 'lace'],
-      ['muro', 'mero'], ['duro', 'daro'], ['puro', 'paro'],
-      ['tela', 'tila'], ['nero', 'niro'], ['peso', 'piso'],
-      ['bene', 'bane'], ['sera', 'sira'], ['pelo', 'pulo'],
-      ['meta', 'mita'], ['neve', 'niva'], ['leva', 'liva'],
-      
-      // Consonanti doppie vs singole (verificate)
-      ['cane', 'canne'], ['pala', 'palla'], ['casa', 'cassa'], ['rosa', 'rossa'],
-      ['papa', 'pappa'], ['gala', 'galla'], ['cola', 'colla'], ['bela', 'bella'],
-      ['pena', 'penna'], ['sano', 'sanno'], ['fato', 'fatto'], ['note', 'notte'],
-      ['moto', 'motto'], ['caro', 'carro'], ['sera', 'serra'],
-      ['nono', 'nonno'], ['coro', 'corro'], ['foro', 'forro'],
-      ['tela', 'tella'], ['buco', 'bucco'], ['eco', 'ecco'],
-      ['grano', 'granno'], ['piano', 'pianno'], ['mono', 'monno'],
-      
-      // Gruppi consonantici (verificati)
-      ['prato', 'pato'], ['fronte', 'fonte'], ['spazio', 'sazio'],
-      ['grande', 'garde'], ['presto', 'pesto'], ['bravo', 'bavo'],
-      ['plico', 'pico'], ['blusa', 'busa'],
-      ['trave', 'tave'], ['classe', 'case'], ['franco', 'fanco'],
-      ['grasso', 'gasso'], ['primo', 'pimo'], ['brutto', 'butto'],
-      ['altro', 'alto'], ['fresco', 'fesco'], ['spina', 'sina'],
-      
-      // Consonanti palatali
-      ['bagno', 'banno'], ['sogno', 'sonno'], ['legno', 'lenno'],
-      ['pesce', 'pece'], ['bosco', 'boco'], ['mosca', 'moca'],
-      ['foglia', 'folia'], ['famiglia', 'familia'], ['figlia', 'filia'],
-      ['maggio', 'maio'], ['aggio', 'aio'], ['baggio', 'baio'],
-      
-      // Contrasti semantici comuni (verificati)
-      ['bene', 'benne'], ['mele', 'melle'], ['sole', 'solle'],
-      ['filo', 'fillo'], ['dito', 'ditto'],
-      ['toro', 'torre'], ['foro', 'forre'], ['moro', 'morre'],
-      ['oro', 'orre'], ['coro', 'corre'], ['loro', 'lorre'],
-      
-      // Consonanti sibilanti e affricate
-      ['pezzo', 'peso'], ['mezzo', 'meso'], ['prezzo', 'presso'],
-      ['cioè', 'ciò'], ['già', 'gia'], ['più', 'piu'],
-      ['chiesa', 'chesa'], ['chilo', 'kilo'], ['che', 'ke'],
-      
-      // Contrasti vocalici complessi
-      ['fiume', 'fiame'], ['piume', 'piame'], ['buone', 'boane'],
-      ['cuore', 'care'], ['fuori', 'fari'], ['suoi', 'sai'],
-      ['tuoi', 'tai'], ['nuovi', 'navi'], ['ruote', 'rate'],
-      
-      // Plurali e forme flesse (verificate)
-      ['ferro', 'ferri'], ['vetro', 'vetri'], ['centro', 'centri'],
-      ['numero', 'numeri'], ['studio', 'studi'],
-      ['libro', 'libri'], ['quadro', 'quadri'], ['teatro', 'teatri'],
-      ['metro', 'metri'], ['filtro', 'filtri'], ['altro', 'altri'],
-      
-      // Coppie con consonanti aspirate
-      ['hotel', 'otel'], ['hobby', 'obbi'], ['hockey', 'occhei'],
-      
-      // Consonanti retroflesse e palatali
-      ['sciare', 'siare'], ['scienza', 'sienza'], ['scenario', 'senario'],
-      ['gnocchi', 'nocchi'], ['gnomo', 'nomo'], ['gnu', 'nu']
-    ];
-    
-    // Filter pairs based on all criteria, including syllable count
-    const validPairs: string[] = [];
-    
-    for (const [word1, word2] of basePairs) {
-      // Check syllable count for both words in the pair
-      const word1Syllables = countSyllables(word1);
-      const word2Syllables = countSyllables(word2);
-      
-      // Both words must be within syllable range
-      const word1ValidSyllables = word1Syllables >= minSyl && word1Syllables <= maxSyl;
-      const word2ValidSyllables = word2Syllables >= minSyl && word2Syllables <= maxSyl;
-      
-      // Check other filters
-      const word1Valid = word1ValidSyllables &&
-                        (!generatorParams.startsWith || word1.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) &&
-                        (!generatorParams.contains || word1.toLowerCase().includes(generatorParams.contains.toLowerCase()));
-      
-      const word2Valid = word2ValidSyllables &&
-                        (!generatorParams.startsWith || word2.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) &&
-                        (!generatorParams.contains || word2.toLowerCase().includes(generatorParams.contains.toLowerCase()));
-      
-      // Add words that meet all criteria
-      if (word1Valid && validPairs.length < generatorParams.count) {
-        validPairs.push(word1);
+    // Algoritmo efficiente per trovare coppie minime dal dizionario interno
+    const findMinimalPairsFromDictionary = (): string[] => {
+      // Parole comuni italiane verificate (subset del dizionario per prestazioni)
+      const commonWords = [
+        'casa', 'cassa', 'cane', 'canne', 'pane', 'pena', 'penna', 'male', 'mare', 'mele',
+        'sole', 'suole', 'filo', 'fino', 'vino', 'pino', 'lana', 'rana', 'mano', 'nano',
+        'polo', 'bolo', 'tana', 'dana', 'pala', 'palla', 'cola', 'colla', 'gala', 'galla',
+        'caro', 'carro', 'nero', 'nero', 'loro', 'oro', 'foro', 'moro', 'coro', 'toro',
+        'sera', 'serra', 'terra', 'cera', 'peso', 'pezzo', 'mese', 'messe', 'base', 'basse',
+        'rosa', 'rossa', 'massa', 'mazza', 'pazzo', 'passo', 'tasso', 'tazza', 'razzo',
+        'note', 'notte', 'botte', 'moto', 'motto', 'foto', 'fatto', 'gatto', 'lago',
+        'carta', 'casta', 'pasta', 'basta', 'vasta', 'fede', 'sede', 'vede', 'cede',
+        'bene', 'gene', 'pene', 'rene', 'meta', 'beta', 'zeta', 'seta', 'vita', 'dita',
+        'buco', 'bucco', 'eco', 'ecco', 'sano', 'sanno', 'papa', 'pappa', 'bella', 'bela',
+        'torre', 'borre', 'corre', 'forre', 'dorme', 'forme', 'norme', 'torme'
+      ];
+
+      const dictionary = new Set(commonWords);
+      const foundPairs: Set<string> = new Set();
+      const result: string[] = [];
+
+      // Per ogni parola, genera varianti con sostituzione di un carattere
+      for (const word of commonWords) {
+        if (result.length >= generatorParams.count) break;
+
+        // Controlla se la parola soddisfa i criteri
+        const syllables = countSyllables(word);
+        const validSyllables = syllables >= minSyl && syllables <= maxSyl;
+        const validFilters = (!generatorParams.startsWith || word.startsWith(generatorParams.startsWith.toLowerCase())) &&
+                           (!generatorParams.contains || word.includes(generatorParams.contains.toLowerCase()));
+        
+        if (!validSyllables || !validFilters) continue;
+
+        for (let i = 0; i < word.length; i++) {
+          // Sostituisci carattere i con ogni lettera dell'alfabeto
+          const letters = 'abcdefghijklmnopqrstuvwxyz';
+          for (const letter of letters) {
+            if (letter === word[i]) continue; // Salta se è lo stesso carattere
+            
+            const variant = word.slice(0, i) + letter + word.slice(i + 1);
+            
+            // Controlla se la variante esiste nel dizionario
+            if (dictionary.has(variant)) {
+              const pair = [word, variant].sort().join('-');
+              
+              if (!foundPairs.has(pair)) {
+                foundPairs.add(pair);
+                
+                // Aggiungi entrambe le parole se non ci sono già e soddisfano i criteri
+                const variantSyllables = countSyllables(variant);
+                const variantValidSyllables = variantSyllables >= minSyl && variantSyllables <= maxSyl;
+                const variantValidFilters = (!generatorParams.startsWith || variant.startsWith(generatorParams.startsWith.toLowerCase())) &&
+                                          (!generatorParams.contains || variant.includes(generatorParams.contains.toLowerCase()));
+                
+                if (!result.includes(word) && result.length < generatorParams.count) {
+                  result.push(word);
+                }
+                if (!result.includes(variant) && result.length < generatorParams.count && 
+                    variantValidSyllables && variantValidFilters) {
+                  result.push(variant);
+                }
+              }
+            }
+          }
+        }
       }
-      if (word2Valid && validPairs.length < generatorParams.count) {
-        validPairs.push(word2);
-      }
-      
-      // Stop if we have enough words
-      if (validPairs.length >= generatorParams.count) break;
-    }
+
+      return result;
+    };
+
+    return findMinimalPairsFromDictionary();
     
-    return validPairs.slice(0, generatorParams.count);
   };
 
   const loadSavedWordLists = async () => {
