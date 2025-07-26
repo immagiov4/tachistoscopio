@@ -187,14 +187,9 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
 
   const handleExerciseComplete = async (result: SessionResult) => {
     try {
-      // Debug info
-      console.log('Current user:', user?.id);
-      console.log('Current profile:', profile);
-      console.log('effectivePatientId:', effectivePatientId);
-      
       // Check if we have the required data
-      if (!profile || !todayExercise) {
-        console.error('Missing required data:', { profile, todayExercise });
+      if (!effectivePatientId || !todayExercise) {
+        console.error('Missing required data:', { effectivePatientId, todayExercise });
         toast({
           title: 'Errore',
           description: 'Dati mancanti per salvare la sessione',
@@ -203,10 +198,10 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
         return;
       }
 
-      // Save session to database
+      // Save session to database - use effectivePatientId (the actual patient)
       const sessionData = {
         exercise_id: todayExercise.id,
-        patient_id: profile.id,
+        patient_id: effectivePatientId, // Use the patient ID, not the therapist profile ID
         total_words: result.totalWords,
         correct_words: result.correctWords,
         incorrect_words: result.incorrectWords,
@@ -214,8 +209,6 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
         duration: result.duration,
         missed_words: result.missedWords,
       };
-      
-      console.log('Attempting to save session:', sessionData);
       
       const { error } = await supabase
         .from('exercise_sessions')
