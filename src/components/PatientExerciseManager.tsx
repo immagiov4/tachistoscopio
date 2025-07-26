@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, BookOpen, BarChart3, Search, Copy, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, WordList, Exercise, ExerciseSettings, DAYS_OF_WEEK } from '@/types/database';
+import { PREDEFINED_WORD_LISTS } from '@/types/tachistoscope';
 import { toast } from '@/hooks/use-toast';
 
 interface PatientExerciseManagerProps {
@@ -77,9 +78,22 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
         exerciseCount: exerciseCounts[patient.id] || 0
       }));
 
+      // Combine predefined lists with custom lists
+      const predefinedAsWordList: WordList[] = PREDEFINED_WORD_LISTS.map(list => ({
+        id: list.id,
+        name: list.name,
+        description: list.description || '',
+        words: list.words,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: 'system'
+      }));
+
+      const allWordLists = [...predefinedAsWordList, ...(wordListsData.data || [])];
+
       setPatients(patients);
       setPatientsWithExercises(patientsWithCounts);
-      setWordLists(wordListsData.data || []);
+      setWordLists(allWordLists);
     } catch (error) {
       console.error('Error fetching initial data:', error);
     } finally {

@@ -17,6 +17,7 @@ import { toast } from '@/hooks/use-toast';
 import { PatientExerciseManager } from '@/components/PatientExerciseManager';
 import { TutorialModal } from '@/components/TutorialModal';
 import { WordListManager } from '@/components/WordListManager';
+import { WordGenerator } from '@/components/WordGenerator';
 import { WordList as TachistoscopeWordList, PREDEFINED_WORD_LISTS } from '@/types/tachistoscope';
 
 export const TherapistDashboard: React.FC = () => {
@@ -275,7 +276,7 @@ export const TherapistDashboard: React.FC = () => {
 
 
         <Tabs defaultValue="patients" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="patients" className="flex items-center gap-2">
               <UserCog className="h-4 w-4" />
               Gestione Pazienti
@@ -284,9 +285,13 @@ export const TherapistDashboard: React.FC = () => {
               <BookOpen className="h-4 w-4" />
               Liste Parole
             </TabsTrigger>
-            <TabsTrigger value="exercises" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Crea Esercizio
+            <TabsTrigger value="generator" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              Generatore
+            </TabsTrigger>
+            <TabsTrigger value="statistics" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Statistiche
             </TabsTrigger>
           </TabsList>
 
@@ -302,99 +307,11 @@ export const TherapistDashboard: React.FC = () => {
             />
           </TabsContent>
 
-          <TabsContent value="exercises" className="mt-6">
-            <div className="grid gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Crea/Modifica Esercizio</CardTitle>
-                 <CardDescription>
-                     Crea template di esercizi che potrai assegnare ai pazienti
-                   </CardDescription>
-                 </CardHeader>
-                 <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>Lista di Parole</Label>
-                      <Select value={selectedWordList} onValueChange={setSelectedWordList}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleziona lista" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {wordLists.map((list) => (
-                            <SelectItem key={list.id} value={list.id}>
-                              {list.name} ({list.words.length} parole)
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label>Durata Esposizione (ms)</Label>
-                      <Input
-                        type="number"
-                        min="50"
-                        max="2000"
-                        value={exerciseSettings.exposureDuration}
-                        onChange={(e) => setExerciseSettings(prev => ({
-                          ...prev,
-                          exposureDuration: parseInt(e.target.value)
-                        }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Intervallo (ms)</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="1000"
-                        value={exerciseSettings.intervalDuration}
-                        onChange={(e) => setExerciseSettings(prev => ({
-                          ...prev,
-                          intervalDuration: parseInt(e.target.value)
-                        }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Formato Testo</Label>
-                      <Select 
-                        value={exerciseSettings.textCase} 
-                        onValueChange={(value: any) => setExerciseSettings(prev => ({
-                          ...prev,
-                          textCase: value
-                        }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="original">Originale</SelectItem>
-                          <SelectItem value="uppercase">MAIUSCOLO</SelectItem>
-                          <SelectItem value="lowercase">minuscolo</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                   <Button 
-                     onClick={createExercise} 
-                     disabled={createExerciseLoading}
-                     className="w-full md:w-auto"
-                   >
-                     {createExerciseLoading ? 'Salvataggio...' : 'Salva Template'}
-                   </Button>
-                   
-                   <Alert>
-                     <AlertDescription>
-                       I template creati qui possono essere assegnati ai pazienti tramite la sezione "Gestione Pazienti"
-                     </AlertDescription>
-                   </Alert>
-                 </CardContent>
-               </Card>
-            </div>
+          <TabsContent value="generator" className="mt-6">
+            <WordGenerator therapistId={profile?.id} />
           </TabsContent>
 
-          <TabsContent value="analytics" className="mt-6">
+          <TabsContent value="statistics" className="mt-6">
             <Card>
               <CardHeader>
                 <CardTitle>Statistiche</CardTitle>
