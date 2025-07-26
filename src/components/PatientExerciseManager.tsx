@@ -311,15 +311,37 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   };
   const removeExercise = async (dayOfWeek: number) => {
     if (!selectedPatient) return;
+    
     try {
-      const {
-        error
-      } = await supabase.from('exercises').delete().eq('patient_id', selectedPatient.id).eq('day_of_week', dayOfWeek);
-      if (error) throw error;
+      // Prima elimina tutte le sessioni associate a questo esercizio
+      const { data: exerciseToDelete } = await supabase
+        .from('exercises')
+        .select('id')
+        .eq('patient_id', selectedPatient.id)
+        .eq('day_of_week', dayOfWeek)
+        .single();
+
+      if (exerciseToDelete) {
+        // Elimina prima le sessioni associate
+        await supabase
+          .from('exercise_sessions')
+          .delete()
+          .eq('exercise_id', exerciseToDelete.id);
+
+        // Poi elimina l'esercizio
+        const { error } = await supabase
+          .from('exercises')
+          .delete()
+          .eq('id', exerciseToDelete.id);
+
+        if (error) throw error;
+      }
+
       toast({
         title: 'Successo',
         description: `Esercizio per ${DAYS_OF_WEEK[dayOfWeek === 0 ? 6 : dayOfWeek - 1]} rimosso`
       });
+      
       await fetchPatientData();
       // Aggiorna dinamicamente il conteggio esercizi senza ricaricare tutta la pagina
       updatePatientExerciseCount();
