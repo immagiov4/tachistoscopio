@@ -157,10 +157,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     const list = PREDEFINED_WORD_LISTS.find(l => l.id === listId);
     if (list) {
       onWordListChange(list);
-      toast({
-        title: "Word list loaded",
-        description: `Loaded "${list.name}" with ${list.words.length} words.`,
-      });
     }
   };
 
@@ -180,8 +176,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   const handleExportList = () => {
     if (currentWordList.words.length === 0) {
       toast({
-        title: "No words to export",
-        description: "The current word list is empty.",
+        title: "Nessuna parola da esportare",
+        description: "La lista attuale è vuota.",
         variant: "destructive",
       });
       return;
@@ -199,8 +195,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     URL.revokeObjectURL(url);
 
     toast({
-      title: "List exported",
-      description: `"${currentWordList.name}" has been downloaded.`,
+      title: "Lista esportata",
+      description: `"${currentWordList.name}" è stata scaricata.`,
     });
   };
 

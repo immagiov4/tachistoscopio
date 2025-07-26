@@ -62,9 +62,9 @@ export const PREDEFINED_WORD_LISTS: WordList[] = [
     name: 'Parole di Tre Lettere',
     description: 'Parole semplici con struttura consonante-vocale-consonante',
     words: [
-      'can', 'bat', 'car', 'gas', 'bar', 'col', 'dal', 'fan', 'gel', 'mal',
-      'non', 'per', 'poi', 'qui', 'sei', 'sul', 'tra', 'una', 'via', 'zoo',
-      'due', 'tre', 'oro', 'lei', 'lui', 'mio', 'tuo', 'suo', 'sta', 'vai'
+      'ape', 'oro', 'uva', 'eco', 'era', 'età', 'eva', 'oca', 'uso', 'via',
+      'bar', 'gas', 'gel', 'web', 'zoo', 'due', 'tre', 'sei', 'più', 'già',
+      'qui', 'qua', 'poi', 'per', 'fra', 'tra', 'pro', 'pre', 'sub', 'sud'
     ]
   },
   {
@@ -83,9 +83,9 @@ export const PREDEFINED_WORD_LISTS: WordList[] = [
     name: 'Parole di Quattro Lettere',
     description: 'Parole leggermente più complesse',
     words: [
-      'casa', 'mare', 'sole', 'luna', 'vita', 'mano', 'occhi', 'testa', 'cuore', 'amore',
-      'nome', 'paese', 'mondo', 'tempo', 'giorno', 'notte', 'donna', 'uomo', 'figlio', 'madre',
-      'padre', 'fiore', 'acqua', 'terra', 'cielo', 'alto', 'bene', 'dove', 'come', 'cosa'
+      'casa', 'mare', 'sole', 'luna', 'vita', 'mano', 'testa', 'cuore', 'amore', 'nome',
+      'pace', 'mondo', 'tempo', 'giorno', 'notte', 'donna', 'uomo', 'figlio', 'madre', 'padre',
+      'fiore', 'acqua', 'terra', 'cielo', 'alto', 'bene', 'dove', 'come', 'cosa', 'molto'
     ]
   }
 ];
