@@ -384,36 +384,28 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
 
             {displayState === 'mask' && (
               <div className="text-center animate-scale-in">
-                <div className="relative inline-block p-12 bg-white/25 backdrop-blur-lg rounded-3xl border border-white/30 shadow-2xl min-w-[400px] min-h-[200px]">
+                <div className="relative inline-block p-8 bg-white/25 backdrop-blur-lg rounded-3xl border border-white/30 shadow-2xl min-w-[400px]">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 rounded-3xl"></div>
                   
-                  {/* Pattern di interferenza più efficace */}
-                  <div className="relative grid grid-cols-12 gap-1 max-w-md mx-auto">
-                    {Array.from({length: 144}).map((_, i) => {
-                      const patterns = ['#', 'X', '○', '●', '◆', '◇', '▲', '▼', '♦', '♣', '♠', '♥'];
-                      const colors = ['text-gray-800', 'text-gray-700', 'text-gray-600', 'text-black', 'text-gray-900'];
-                      const sizes = ['text-sm', 'text-base', 'text-lg', 'text-xl'];
+                  {/* Pattern di interferenza compatto ed efficace */}
+                  <div className="relative grid grid-cols-10 gap-1 max-w-sm mx-auto">
+                    {Array.from({length: 80}).map((_, i) => {
+                      const patterns = ['#', 'X', '●', '◆', '▲', '♦', '@', '%', '&', '*'];
+                      const colors = ['text-gray-800', 'text-gray-700', 'text-black', 'text-gray-900'];
+                      const sizes = ['text-lg', 'text-xl'];
                       
                       return (
                         <div 
                           key={i}
-                          className={`${colors[i % colors.length]} ${sizes[i % sizes.length]} font-bold select-none`}
+                          className={`${colors[i % colors.length]} ${sizes[i % sizes.length]} font-bold select-none text-center leading-none`}
                           style={{ 
-                            animationDelay: `${(i * 0.01)}s`,
-                            transform: `rotate(${(i * 15) % 360}deg)`
+                            animationDelay: `${(i * 0.02)}s`,
                           }}
                         >
                           {patterns[i % patterns.length]}
                         </div>
                       );
                     })}
-                  </div>
-                  
-                  {/* Pattern aggiuntivo per maggiore interferenza */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-30">
-                    <div className="text-6xl font-bold text-gray-800 animate-spin" style={{ animationDuration: '0.3s' }}>
-                      ████
-                    </div>
                   </div>
                 </div>
               </div>
