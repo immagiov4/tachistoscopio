@@ -5,11 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, BookOpen, BarChart3, Search, Copy, Plus, Trash2 } from 'lucide-react';
+import { Calendar, Clock, BookOpen, BarChart3, Search, Copy, Plus, Trash2, UserCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, WordList, Exercise, ExerciseSettings, DAYS_OF_WEEK } from '@/types/database';
 import { PREDEFINED_WORD_LISTS } from '@/types/tachistoscope';
 import { toast } from '@/hooks/use-toast';
+import { PatientDashboard } from '@/components/PatientDashboard';
 
 interface PatientExerciseManagerProps {
   therapistId: string;
@@ -35,6 +36,9 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
 
   // Exercise settings for each day
   const [weeklyExercises, setWeeklyExercises] = useState<{[key: number]: Partial<Exercise>}>({});
+  
+  // Studio mode state
+  const [studioMode, setStudioMode] = useState<string | null>(null);
 
   useEffect(() => {
     fetchInitialData();
@@ -396,8 +400,51 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
   const startIndex = (currentPage - 1) * patientsPerPage;
   const paginatedPatients = filteredPatients.slice(startIndex, startIndex + patientsPerPage);
 
+  const enterStudioMode = (patientId: string) => {
+    setStudioMode(patientId);
+  };
+
+  const exitStudioMode = () => {
+    setStudioMode(null);
+  };
+
   if (loading) {
     return <div className="p-4">Caricamento...</div>;
+  }
+
+  // Se in modalità studio, mostra la dashboard del paziente
+  if (studioMode) {
+    const studioPatient = patients.find(p => p.id === studioMode);
+    if (studioPatient) {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center gap-3">
+              <UserCheck className="h-5 w-5 text-blue-600" />
+              <div>
+                <h3 className="font-medium text-blue-900 dark:text-blue-100">
+                  Modalità Studio - {studioPatient.full_name}
+                </h3>
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Stai gestendo gli esercizi come se fossi il paziente
+                </p>
+              </div>
+            </div>
+            <Button 
+              onClick={exitStudioMode}
+              variant="outline"
+              size="sm"
+              className="border-blue-300 text-blue-700 hover:bg-blue-100"
+            >
+              Torna alla Gestione
+            </Button>
+          </div>
+          
+          {/* Importa e usa il PatientDashboard */}
+          <PatientDashboard studioPatientId={studioMode} />
+        </div>
+      );
+    }
   }
 
   return (
@@ -491,6 +538,19 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">{patient.exerciseCount} esercizi</Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        enterStudioMode(patient.id);
+                      }}
+                      className="h-8 px-3 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                      title="Entra in modalità studio per gestire gli esercizi del paziente"
+                    >
+                      <UserCheck className="h-4 w-4 mr-1" />
+                      Studio
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"

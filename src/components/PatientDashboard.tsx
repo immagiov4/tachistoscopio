@@ -32,7 +32,11 @@ interface SessionResult {
   settings: any;
 }
 
-export const PatientDashboard: React.FC = () => {
+interface PatientDashboardProps {
+  studioPatientId?: string; // Per modalità studio del terapista
+}
+
+export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatientId }) => {
   const { profile, signOut } = useAuth();
   const [todayExercise, setTodayExercise] = useState<Exercise | null>(null);
   const [completedToday, setCompletedToday] = useState(false);
@@ -42,6 +46,9 @@ export const PatientDashboard: React.FC = () => {
   const [selectedTheme, setSelectedTheme] = useState<ThemeType>('rainbow');
   const [recentSessions, setRecentSessions] = useState<DBExerciseSession[]>([]);
   const [statsLoading, setStatsLoading] = useState(true);
+  
+  // Usa il patientId dalla modalità studio o dal profilo corrente
+  const effectivePatientId = studioPatientId || profile?.id;
 
   // Carica le preferenze salvate
   useEffect(() => {
@@ -71,11 +78,11 @@ export const PatientDashboard: React.FC = () => {
   }, [selectedTheme]);
 
   useEffect(() => {
-    if (profile) {
+    if (effectivePatientId) {
       fetchTodayExercise();
       fetchRecentSessions();
     }
-  }, [profile]);
+  }, [effectivePatientId]);
 
   const fetchTodayExercise = async () => {
     try {
@@ -88,7 +95,7 @@ export const PatientDashboard: React.FC = () => {
           *,
           word_list:word_lists(*)
         `)
-        .eq('patient_id', profile?.id)
+        .eq('patient_id', effectivePatientId)
         .eq('day_of_week', today)
         .single();
 
@@ -110,7 +117,7 @@ export const PatientDashboard: React.FC = () => {
           .from('exercise_sessions')
           .select('*')
           .eq('exercise_id', exercise.id)
-          .eq('patient_id', profile?.id)
+          .eq('patient_id', effectivePatientId)
           .gte('completed_at', startOfDay.toISOString())
           .lte('completed_at', endOfDay.toISOString());
 
@@ -135,7 +142,7 @@ export const PatientDashboard: React.FC = () => {
       const { data: sessions, error } = await supabase
         .from('exercise_sessions')
         .select('*')
-        .eq('patient_id', profile?.id)
+        .eq('patient_id', effectivePatientId)
         .order('completed_at', { ascending: false })
         .limit(10);
 
@@ -185,7 +192,7 @@ export const PatientDashboard: React.FC = () => {
         .from('exercise_sessions')
         .insert({
           exercise_id: todayExercise!.id,
-          patient_id: profile!.id,
+          patient_id: effectivePatientId!,
           total_words: result.totalWords,
           correct_words: result.correctWords,
           incorrect_words: result.incorrectWords,
