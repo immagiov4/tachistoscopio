@@ -166,12 +166,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   useEffect(() => {
     if (activeTab !== 'generator') return;
     
-    // Debounce la generazione per evitare chiamate multiple rapide
-    const timeoutId = setTimeout(() => {
-      generateWords();
-    }, 300);
-    
-    return () => clearTimeout(timeoutId);
+    // Generazione immediata senza debounce per migliori performance
+    generateWords();
   }, [generatorParams]); // Tutti i parametri del generatore
 
   // Load dataset on component mount
@@ -187,27 +183,26 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       await loadWordsDataset();
     }
     
-    setTimeout(() => {
-      let words: string[] = [];
-      
-      switch (generatorParams.type) {
-        case 'words':
-          words = generateRealWords();
-          break;
-        case 'syllables':
-          words = generateSyllables();
-          break;
-        case 'nonwords':
-          words = generateNonWords();
-          break;
-        case 'minimal-pairs':
-          words = generateMinimalPairs();
-          break;
-      }
-      
-      setGeneratedWords(words);
-      setIsGenerating(false);
-    }, 300);
+    // Generazione immediata senza timeout artificiale
+    let words: string[] = [];
+    
+    switch (generatorParams.type) {
+      case 'words':
+        words = generateRealWords();
+        break;
+      case 'syllables':
+        words = generateSyllables();
+        break;
+      case 'nonwords':
+        words = generateNonWords();
+        break;
+      case 'minimal-pairs':
+        words = generateMinimalPairs();
+        break;
+    }
+    
+    setGeneratedWords(words);
+    setIsGenerating(false);
   };
 
   // Function to count syllables in Italian words (improved)
@@ -266,56 +261,66 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     const wordsToUse = allWords.length > 0 ? allWords : ITALIAN_WORDS;
     const syllables = parseInt(generatorParams.syllableCount) || 2;
     
-    // Filter words based on criteria
-    const filteredWords = wordsToUse.filter(word => {
-      // Filter inappropriate words first
-      const inappropriateWords = new Set([
-        'pene', 'ano', 'culo', 'merda', 'cacca', 'pipi', 'popo',
-        'stupido', 'idiota', 'cretino', 'scemo', 'deficiente',
-        'stronzo', 'troia', 'puttana', 'figa', 'fica', 'vaffanculo',
-        'cazzo', 'fottiti', 'inculare', 'mignotta', 'bastardo',
-        'bastardissimo', 'zoccola', 'cornuto', 'coglione',
-        'stronza', 'cogliona', 'rompipalle', 'mado', 'puttanella',
-        'fichetto', 'pischello', 'pischella', 'merdoso', 'babbeo',
-        'imbecille', 'scassacazzo', 'baldracca', 'cagna', 'ficco',
-        'troione', 'bastardone', 'ficcona', 'puzzone', 'zzozzo',
-        'caccone', 'pennuto', 'pezzente', 'zingaro', 'paccottiglia',
-        'lurido', 'ciuccio', 'schifoso', 'brutto', 'schifo', 'lurida',
-        'str*nza', 'schifosa', 'cafone', 'duro', 'cretina', 'cornuta',
-        'mignotta', 'ficaginosa', 'pippone', 'pirla', 'babbuino',
-        'merdone', 'zoccola', 'frocione', 'checca', 'frocio', 'omosessuale',
-        'froci', 'patacca', 'minkia', 'minkione', 'scemoide',
-        'fesso', 'troione', 'tamarro', 'ubriacone', 'cogliona',
-        'merdaccia', 'scemi', 'scemotti', 'frocetto', 'swaghetto',
-        'sfigato', 'zigomo', 'vaffangulo', 'puttanella', 'vaffanculo',
-        'strunz', 'ricchione', 'stronza', 'piscio', 'pisciare', 'pisciatoio',
-        'ricchioni', 'schifosa', 'puzzone', 'cazzone', 'affanculo',
-        'porco', 'maiale', 'bischero', 'cafone', 'stregone', 'marcio',
-        'cornetta', 'zoccoletta', 'minkietta', 'culattone', 'frocetto',
-        'culone', 'straccione', 'negro'
-      ]);
-      
-      if (inappropriateWords.has(word.toLowerCase())) return false;
-      
-      // Check basic filters
-      if (generatorParams.startsWith && !word.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) return false;
-      if (generatorParams.contains && !word.toLowerCase().includes(generatorParams.contains.toLowerCase())) return false;
+    // Pre-filtro più efficiente delle parole inappropriate
+    const inappropriateWordsSet = new Set([
+      'pene', 'ano', 'culo', 'merda', 'cacca', 'pipi', 'popo',
+      'stupido', 'idiota', 'cretino', 'scemo', 'deficiente',
+      'stronzo', 'troia', 'puttana', 'figa', 'fica', 'vaffanculo',
+      'cazzo', 'fottiti', 'inculare', 'mignotta', 'bastardo',
+      'bastardissimo', 'zoccola', 'cornuto', 'coglione',
+      'stronza', 'cogliona', 'rompipalle', 'mado', 'puttanella',
+      'fichetto', 'pischello', 'pischella', 'merdoso', 'babbeo',
+      'imbecille', 'scassacazzo', 'baldracca', 'cagna', 'ficco',
+      'troione', 'bastardone', 'ficcona', 'puzzone', 'zzozzo',
+      'caccone', 'pennuto', 'pezzente', 'zingaro', 'paccottiglia',
+      'lurido', 'ciuccio', 'schifoso', 'brutto', 'schifo', 'lurida',
+      'str*nza', 'schifosa', 'cafone', 'duro', 'cretina', 'cornuta',
+      'mignotta', 'ficaginosa', 'pippone', 'pirla', 'babbuino',
+      'merdone', 'zoccola', 'frocione', 'checca', 'frocio', 'omosessuale',
+      'froci', 'patacca', 'minkia', 'minkione', 'scemoide',
+      'fesso', 'troione', 'tamarro', 'ubriacone', 'cogliona',
+      'merdaccia', 'scemi', 'scemotti', 'frocetto', 'swaghetto',
+      'sfigato', 'zigomo', 'vaffangulo', 'puttanella', 'vaffanculo',
+      'strunz', 'ricchione', 'stronza', 'piscio', 'pisciare', 'pisciatoio',
+      'ricchioni', 'schifosa', 'puzzone', 'cazzone', 'affanculo',
+      'porco', 'maiale', 'bischero', 'cafone', 'stregone', 'marcio',
+      'cornetta', 'zoccoletta', 'minkietta', 'culattone', 'frocetto',
+      'culone', 'straccione', 'negro'
+    ]);
 
-      // Count syllables accurately
-      const syllableCount = countSyllables(word);
-      if (syllableCount !== syllables) return false;
-
-      return true;
-    });
+    // Pre-calcola filtri per ottimizzazione
+    const hasStartsWith = generatorParams.startsWith.length > 0;
+    const hasContains = generatorParams.contains.length > 0;
+    const startsWithLower = generatorParams.startsWith.toLowerCase();
+    const containsLower = generatorParams.contains.toLowerCase();
     
-    // If no words match criteria, return empty array
-    if (filteredWords.length === 0) {
-      return [];
+    // Algoritmo ottimizzato con early exit
+    const filteredWords: string[] = [];
+    let examined = 0;
+    const maxExamine = Math.min(wordsToUse.length, 5000); // Limita ricerca per performance
+    
+    for (let i = 0; i < wordsToUse.length && filteredWords.length < generatorParams.count && examined < maxExamine; i++) {
+      const word = wordsToUse[i];
+      examined++;
+      
+      // Quick filters first (più veloci)
+      if (inappropriateWordsSet.has(word.toLowerCase())) continue;
+      if (hasStartsWith && !word.toLowerCase().startsWith(startsWithLower)) continue;
+      if (hasContains && !word.toLowerCase().includes(containsLower)) continue;
+      
+      // Syllable check last (più costoso)
+      if (countSyllables(word) === syllables) {
+        filteredWords.push(word);
+      }
     }
     
-    // Shuffle and return requested count
-    const shuffled = [...filteredWords].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, Math.min(generatorParams.count, filteredWords.length));
+    // Shuffle risultati per varietà
+    for (let i = filteredWords.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [filteredWords[i], filteredWords[j]] = [filteredWords[j], filteredWords[i]];
+    }
+    
+    return filteredWords.slice(0, generatorParams.count);
   };
 
   const generateSyllables = (): string[] => {
