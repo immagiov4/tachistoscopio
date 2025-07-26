@@ -438,8 +438,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
             </CardHeader>
             <CardContent>
             <div className="grid gap-2">
-                {DAYS_OF_WEEK.slice(1, 6).map((day, index) => {
-                  const dayOfWeek = index + 1; // Monday = 1, Friday = 5
+                {DAYS_OF_WEEK.map((day, index) => {
+                  const dayOfWeek = index; // Sunday = 0, Monday = 1, ..., Saturday = 6
                   const exercise = weeklyExercises[dayOfWeek];
                   
                   return (
