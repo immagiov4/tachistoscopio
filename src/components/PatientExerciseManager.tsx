@@ -565,13 +565,26 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
       </Card>
 
       {selectedPatient && (
-        <>
+        <div className="space-y-6">
+          {/* Indicatore paziente selezionato */}
+          <div className="flex items-center gap-3 p-3 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+            <UserCheck className="h-5 w-5 text-blue-600" />
+            <div>
+              <p className="text-sm font-medium text-blue-900">
+                Stai gestendo: <span className="font-semibold">{selectedPatient.full_name}</span>
+              </p>
+              <p className="text-xs text-blue-700">
+                Tutti i form sottostanti si riferiscono a questo paziente
+              </p>
+            </div>
+          </div>
+
           {/* Weekly Exercise Schedule */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Piano Settimanale - {selectedPatient.full_name}
+                Piano Settimanale
               </CardTitle>
               <CardDescription>
                 Gestisci gli esercizi per ogni giorno della settimana
@@ -718,7 +731,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
               )}
             </CardContent>
           </Card>
-        </>
+        </div>
       )}
     </div>
   );
