@@ -412,24 +412,28 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
                 }
                 console.log('Mask timer finished, showing interval');
                 setDisplayState('interval');
+                const randomVariation = Math.random() * session.settings.intervalVariability * 2 - session.settings.intervalVariability;
+                const actualInterval = Math.max(50, session.settings.intervalDuration + randomVariation);
                 const intervalTimer = addTimer(setTimeout(() => {
                   if (!isRunningRef.current) {
                     console.log('Session stopped during interval timer');
                     return;
                   }
                   nextWord();
-                }, session.settings.intervalDuration));
+                }, actualInterval));
               }, session.settings.maskDuration));
             } else {
               console.log('No mask, going directly to interval');
               setDisplayState('interval');
+              const randomVariation = Math.random() * session.settings.intervalVariability * 2 - session.settings.intervalVariability;
+              const actualInterval = Math.max(50, session.settings.intervalDuration + randomVariation);
               const intervalTimer = addTimer(setTimeout(() => {
                 if (!isRunningRef.current) {
                   console.log('Session stopped during interval timer (no mask)');
                   return;
                 }
                 nextWord();
-              }, session.settings.intervalDuration));
+              }, actualInterval));
             }
           }, session.settings.exposureDuration));
         }, 300)); // Timing fisso per transizione
@@ -551,10 +555,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
 
             {displayState === 'interval' && (
               <div className="text-center">
-                {/* Effetto di pulsazione morbida dello sfondo durante l'intervallo */}
-                <div className="absolute inset-0 bg-black/15 animate-pulse" style={{
-                  animation: 'pulse 1.5s ease-in-out infinite alternate'
-                }}></div>
+                {/* Intervallo senza pulsazione per evitare prevedibilità */}
               </div>
             )}
           </div>

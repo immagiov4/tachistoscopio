@@ -13,6 +13,7 @@ export interface ExerciseSettings {
   textCase: 'original' | 'uppercase' | 'lowercase';
   useMask: boolean;
   maskDuration: number; // milliseconds
+  intervalVariability: number; // milliseconds of random variation
 }
 
 export interface ExerciseSession {
@@ -44,4 +45,5 @@ export const DEFAULT_SETTINGS: ExerciseSettings = {
   textCase: 'original',
   useMask: false,
   maskDuration: 200,
+  intervalVariability: 100,
 };
