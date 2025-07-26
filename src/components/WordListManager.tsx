@@ -423,10 +423,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         setCustomWords('');
       }
       setCustomListName('Nuovo esercizio');
-      toast({
-        title: "Esercizio salvato",
-        description: `"${customList.name}" è stato salvato con ${wordsToSave.length} parole.`
-      });
     } catch (error) {
       console.error('Error saving word list:', error);
       toast({
@@ -894,7 +890,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                 </> : <>
                   <Button onClick={handleCreateCustomList} disabled={isLoading || !customListName.trim() || (activeTab === 'generator' ? generatedWords.length === 0 : !customWords.trim())} className="flex-1">
                     {isLoading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-                    {isLoading ? 'Salvataggio...' : 'Salva esercizio'}
+                    {isLoading ? 'Salvataggio...' : 'Aggiungi esercizio'}
                   </Button>
                   <Button onClick={() => document.getElementById('file-import')?.click()} variant="outline">
                     <Upload className="h-4 w-4 mr-2" />
