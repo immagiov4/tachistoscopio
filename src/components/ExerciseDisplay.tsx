@@ -55,17 +55,8 @@ export const ExerciseDisplay: React.FC<ExerciseDisplayProps> = ({
     const nextIndex = session.currentWordIndex + 1;
     
     if (nextIndex >= session.wordList.words.length) {
-      // For the final word display, set currentWordIndex to show the total count
-      const finalSession = {
-        ...session,
-        currentWordIndex: session.wordList.words.length - 1 // This will show "10/10"
-      };
-      onUpdateSession(finalSession);
-      
-      // Small delay to show the final progress, then complete
-      setTimeout(() => {
-        onComplete(session);
-      }, 100);
+      // Exercise complete - no need to update session again, just complete
+      onComplete(session);
       return;
     }
 
@@ -184,13 +175,6 @@ export const ExerciseDisplay: React.FC<ExerciseDisplayProps> = ({
   const errorsCount = session.errors.length;
   const accuracy = currentWordNumber > 1 ? 
     ((currentWordNumber - 1 - errorsCount) / (currentWordNumber - 1)) * 100 : 100;
-  
-  console.log('Display state:', {
-    currentWordIndex: session.currentWordIndex,
-    currentWordNumber: currentWordNumber,
-    totalWords: session.wordList.words.length,
-    displayText: `${currentWordNumber}/${session.wordList.words.length}`
-  });
 
   if (isCountingDown) {
     return (
