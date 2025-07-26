@@ -365,12 +365,6 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
                           <p className="text-xs text-gray-500 mt-1">Anteprima</p>
                         </div>
                       </div>
-
-                      {/* Selezione Tema */}
-                      <div>
-                        
-                        <ThemeSelector selectedTheme={selectedTheme} onThemeChange={setSelectedTheme} />
-                      </div>
                     </CardContent>
                   </Card>
 
