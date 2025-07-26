@@ -278,10 +278,12 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
               Benvenuto, {profile?.full_name}
             </p>
           </div>
-          <Button onClick={handleSignOut} variant="outline" className="bg-white/40 border-gray-600 text-gray-800 hover:bg-white/60 hover:border-gray-800 hover:text-gray-900 backdrop-blur-sm transition-all duration-200">
-            <LogOut className="h-4 w-4 mr-2" />
-            Esci
-          </Button>
+          {!studioPatientId && (
+            <Button onClick={handleSignOut} variant="outline" className="bg-white/40 border-gray-600 text-gray-800 hover:bg-white/60 hover:border-gray-800 hover:text-gray-900 backdrop-blur-sm transition-all duration-200">
+              <LogOut className="h-4 w-4 mr-2" />
+              Esci
+            </Button>
+          )}
         </header>
 
         <div className="grid gap-6">
