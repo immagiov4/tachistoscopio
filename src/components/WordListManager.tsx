@@ -56,6 +56,11 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     fontSize: 'large' as const
   });
 
+  // Function to generate description from settings
+  const generateDescriptionFromSettings = (wordCount: number, settings: ExerciseSettings) => {
+    return `${wordCount} parole • Esp: ${settings.exposureDuration}ms • Int: ${settings.intervalDuration}ms${settings.useMask ? ` • Maschera: ${settings.maskDuration}ms` : ''}`;
+  };
+
   // State for complete Italian words dataset
   const [allWords, setAllWords] = useState<string[]>([]);
   const [isLoadingWords, setIsLoadingWords] = useState(false);
@@ -354,7 +359,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         return {
           id: dbList.id,
           name: dbList.name,
-          description: dbList.description || `${dbList.words.length} parole • Esp: ${settings.exposureDuration}ms • Int: ${settings.intervalDuration}ms${settings.useMask ? ` • Maschera: ${settings.maskDuration}ms` : ''}`,
+          description: generateDescriptionFromSettings(dbList.words.length, settings),
           words: dbList.words
         };
       });
