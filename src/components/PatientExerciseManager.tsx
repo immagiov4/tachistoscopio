@@ -660,7 +660,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
                           </Select>
                           
                           <span className="text-xs text-muted-foreground">
-                            {exercise.word_list?.words?.length} parole • Esp: {exercise.word_list?.settings?.exposureDuration || exercise.settings?.exposureDuration}ms • Int: {exercise.word_list?.settings?.intervalDuration || exercise.settings?.intervalDuration}ms{exercise.word_list?.settings?.useMask || exercise.settings?.useMask ? ' • Maschera' : ''}
+                            {exercise.word_list?.words?.length} parole • Esp: {exercise.word_list?.settings?.exposureDuration || exercise.settings?.exposureDuration}ms • Int: {exercise.word_list?.settings?.intervalDuration || exercise.settings?.intervalDuration}ms{(exercise.word_list?.settings?.useMask !== undefined ? exercise.word_list.settings.useMask : exercise.settings?.useMask) ? ' • Maschera' : ''}
                           </span>
                         </div> : <div className="flex-1">
                           <Select onValueChange={value => {

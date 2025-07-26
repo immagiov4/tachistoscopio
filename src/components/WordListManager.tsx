@@ -568,8 +568,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       setCustomListName('Nuovo esercizio');
       setEditingList(null);
       toast({
-        title: "Lista aggiornata",
-        description: `"${updatedList.name}" è stata aggiornata.`
+        title: "Esercizio aggiornato",
+        description: `"${updatedList.name}" è stato aggiornato.`
       });
     } catch (error: any) {
       console.error('Error updating word list:', error);
@@ -612,7 +612,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       intervalDuration: 800,
       textCase: 'original' as const,
       useMask: false,
-      maskDuration: 100,
+      maskDuration: 200, // Consistent with DEFAULT_SETTINGS
       fontSize: 'large' as const
     });
     toast({
