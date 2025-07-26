@@ -340,20 +340,35 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
 
       console.log(`Esercizio trovato con ID: ${exerciseToDelete.id}`);
 
-      // Elimina prima tutte le sessioni associate
-      console.log(`Tentativo di eliminazione sessioni per exercise_id: ${exerciseToDelete.id}`);
-      const { data: sessionsToDelete, error: sessionsError } = await supabase
+      // Prima controlla se esistono sessioni per questo esercizio
+      const { data: existingSessions, error: checkError } = await supabase
         .from('exercise_sessions')
-        .delete()
-        .eq('exercise_id', exerciseToDelete.id)
-        .select();
+        .select('*')
+        .eq('exercise_id', exerciseToDelete.id);
 
-      if (sessionsError) {
-        console.error('Errore nell\'eliminazione delle sessioni:', sessionsError);
-        throw sessionsError;
+      if (checkError) {
+        console.error('Errore nella verifica delle sessioni:', checkError);
+        throw checkError;
       }
 
-      console.log('Sessioni eliminate:', sessionsToDelete?.length || 0);
+      console.log(`Sessioni trovate da eliminare: ${existingSessions?.length || 0}`, existingSessions);
+
+      // Elimina tutte le sessioni associate se esistono
+      if (existingSessions && existingSessions.length > 0) {
+        console.log(`Tentativo di eliminazione di ${existingSessions.length} sessioni`);
+        const { error: sessionsError } = await supabase
+          .from('exercise_sessions')
+          .delete()
+          .eq('exercise_id', exerciseToDelete.id);
+
+        if (sessionsError) {
+          console.error('Errore nell\'eliminazione delle sessioni:', sessionsError);
+          throw sessionsError;
+        }
+        console.log('Sessioni eliminate con successo');
+      } else {
+        console.log('Nessuna sessione da eliminare');
+      }
 
       // Poi elimina l'esercizio
       const { error: exerciseError } = await supabase
