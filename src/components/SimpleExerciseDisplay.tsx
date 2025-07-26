@@ -345,85 +345,142 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       
       <div className="flex-1 flex items-center justify-center relative z-10">
         {!session.isPaused ? (
-          <>
-            {/* Area pulita per la concentrazione - rimosse distrazioni */}
-            
-            <div className="relative z-10 text-center">
-              <div className={`font-bold text-foreground ${getFontSize(session.settings.fontSize)} min-h-[200px] flex items-center justify-center`}>
-                {displayState === 'stimulus' && (
-                  <div className={`transition-all duration-500 ease-out transform ${
-                    stimulusVisible ? 'scale-100 opacity-100' : 'scale-75 opacity-0'
-                  }`}>
-                    <div className="relative">
-                      <div className={`text-8xl filter ${getThemeShadow(theme)}`}>
-                        {currentTheme.preview.shapes[0]}
-                      </div>
-                      <div className={`absolute inset-0 animate-ping text-8xl opacity-20`}>
-                        {currentTheme.preview.shapes[0]}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {displayState === 'word' && (
-                  <div className={`animate-fade-in filter ${getWordShadow(theme)} ${getTextShadow(theme)}`}>
-                    {currentWord}
-                  </div>
-                )}
-                {displayState === 'mask' && (
-                  <div className={`animate-fade-in text-muted-foreground filter ${getWordShadow(theme)}`}>
-                    ####
-                  </div>
-                )}
-                {displayState === 'interval' && ' '}
+          <div className="w-full">
+            {displayState === 'stimulus' && (
+              <div className="text-center animate-fade-in">
+                <div className="inline-block p-8 bg-white/20 backdrop-blur-md rounded-full border border-white/30 shadow-2xl">
+                  <div className="w-8 h-8 bg-white rounded-full animate-pulse shadow-lg"></div>
+                </div>
               </div>
-            </div>
-          </>
+            )}
+
+            {displayState === 'word' && (
+              <div className="text-center animate-scale-in">
+                <div className="relative inline-block">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent blur-xl transform rotate-45"></div>
+                  <p 
+                    className={`relative ${getFontSize(session.settings.fontSize)} font-black tracking-wide ${getWordShadow(theme)} transition-all duration-300 hover:scale-105`}
+                    style={{
+                      color: theme === 'space' ? '#ffffff' :
+                             theme === 'nature' || theme === 'clouds' ? '#1f2937' :
+                             '#ffffff',
+                      textShadow: `
+                        0 0 20px currentColor,
+                        0 0 40px currentColor,
+                        0 0 60px currentColor
+                      `
+                    }}
+                  >
+                    {formatWord(currentWord)}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {displayState === 'mask' && (
+              <div className="text-center animate-fade-in">
+                <div className="grid grid-cols-8 gap-2 max-w-lg mx-auto">
+                  {Array.from({length: 32}).map((_, i) => (
+                    <div 
+                      key={i}
+                      className="aspect-square bg-white/30 rounded-md animate-pulse"
+                      style={{ animationDelay: `${i * 0.02}s` }}
+                    ></div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {displayState === 'interval' && (
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+              </div>
+            )}
+          </div>
         ) : (
-          <div className="text-center space-y-6">
-            <p className="text-2xl font-bold text-primary">ESERCIZIO IN PAUSA</p>
-            <Button onClick={pauseResume} size="lg" className="text-lg min-h-[60px] px-8">
-              <Play className="mr-2 h-6 w-6" />
+          <div className="text-center space-y-8 animate-fade-in">
+            <div className="relative">
+              <div className="absolute inset-0 bg-white/10 blur-2xl rounded-full"></div>
+              <p className="relative text-4xl font-bold text-white drop-shadow-2xl">⏸️ ESERCIZIO IN PAUSA</p>
+            </div>
+            <Button 
+              onClick={pauseResume} 
+              size="lg" 
+              className="text-xl min-h-[70px] px-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 border-2 border-white/20 shadow-2xl hover:shadow-blue-500/25 hover:scale-105 transition-all duration-300"
+            >
+              <Play className="mr-3 h-8 w-8" />
               Riprendi Esercizio
             </Button>
           </div>
         )}
 
-        <div className="absolute top-4 left-4 right-4 bg-white/60 backdrop-blur-md border border-white/40 p-4 rounded-2xl shadow-lg" style={{ 
-          boxShadow: 'inset rgba(0, 0, 0, 0.2) 0px 2px 1px',
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 100%)',
-          backdropFilter: 'blur(12px) saturate(1.5)'
-        }}>
-          <div className="text-center space-y-2 mb-4">
-            <p className="text-sm text-gray-700 font-medium">
-              Progresso: {session.currentWordIndex}/{session.words.length}
-            </p>
-            <Progress value={progress} className="w-full" />
-            <p className="text-sm text-gray-700 font-medium">
-              Precisione: {accuracy.toFixed(1)}%
-            </p>
-          </div>
-
-          <div className="flex gap-2 justify-center flex-wrap">
-            <Button onClick={pauseResume} variant="outline" size="lg" className="flex items-center gap-2 min-w-[120px] touch-manipulation">
-              {session.isPaused ? <><Play className="h-5 w-5" />Riprendi</> : <><Pause className="h-5 w-5" />Pausa</>}
-            </Button>
-            <Button onClick={onStop} variant="outline" size="lg" className="flex items-center gap-2 min-w-[120px] touch-manipulation">
-              <Square className="h-5 w-5" />Stop
-            </Button>
+        <div className="absolute top-4 left-4 right-4 z-20">
+          <div className="bg-white/80 backdrop-blur-md border border-white/40 p-4 rounded-2xl shadow-2xl animate-fade-in" style={{ 
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.6) 100%)',
+            backdropFilter: 'blur(20px) saturate(1.8)'
+          }}>
+            <div className="text-center space-y-3 mb-6">
+              <div className="flex items-center justify-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                  <p className="text-sm text-gray-700 font-semibold">
+                    Progresso: {session.currentWordIndex}/{session.words.length}
+                  </p>
+                </div>
+                <div className="text-sm text-gray-600 font-medium">
+                  Precisione: {Math.round(((session.currentWordIndex - session.errors.length) / Math.max(session.currentWordIndex, 1)) * 100)}%
+                </div>
+              </div>
+              <div className="relative">
+                <Progress value={progress} className="w-full h-3 bg-gray-200/50" />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-600/20 rounded-full"></div>
+              </div>
+            </div>
+            <div className="flex gap-3 justify-center">
+              <Button 
+                onClick={pauseResume} 
+                variant="outline" 
+                size="lg" 
+                className="flex items-center gap-2 min-w-[140px] bg-white/70 border-2 border-gray-300 hover:bg-white/90 hover:border-blue-400 hover:scale-105 transition-all duration-200 shadow-lg font-semibold"
+              >
+                {session.isPaused ? <><Play className="h-5 w-5" />Riprendi</> : <><Pause className="h-5 w-5" />Pausa</>}
+              </Button>
+              <Button 
+                onClick={onStop} 
+                variant="outline" 
+                size="lg" 
+                className="flex items-center gap-2 min-w-[120px] bg-red-50 border-2 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-400 hover:scale-105 transition-all duration-200 shadow-lg font-semibold"
+              >
+                <Square className="h-5 w-5" />Stop
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="absolute bottom-4 left-4 right-4 text-center">
-          <div className="bg-white/60 backdrop-blur-md rounded-2xl p-3 border border-white/40 shadow-lg" style={{
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 100%)',
-            backdropFilter: 'blur(12px) saturate(1.5)'
+        <div className="absolute bottom-6 left-6 right-6 text-center z-20">
+          <div className="bg-white/80 backdrop-blur-md rounded-2xl p-4 border border-white/40 shadow-2xl animate-fade-in" style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.6) 100%)',
+            backdropFilter: 'blur(20px) saturate(1.8)',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
           }}>
-            <p className="text-sm font-medium text-gray-700 mb-1">
-              💭 Tocca lo schermo per segnare un errore
-            </p>
-            <p className="text-xs text-gray-600">
-              Comandi: <kbd className="px-2 py-1 bg-gray-700/80 text-white rounded text-xs">X</kbd> = Marca errore
-            </p>
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <div className="text-2xl">👆</div>
+              <p className="text-base font-semibold text-gray-700">
+                Tocca lo schermo per segnare un errore
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <div className="px-3 py-1 bg-gray-800 text-white rounded-lg font-mono font-bold shadow-md">X</div>
+                <span>Marca errore</span>
+              </div>
+              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-xs">👆</div>
+                <span>Touch per errore</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
