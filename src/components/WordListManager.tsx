@@ -16,6 +16,9 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { WordList as DBWordList } from '@/types/database';
 
+// Import the complete Italian word dataset
+import wordDatasetUrl from '@/data/parole_italiane_complete.txt?url';
+
 interface WordListManagerProps {
   currentWordList: WordList;
   onWordListChange: (wordList: WordList) => void;
@@ -44,6 +47,10 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   });
   const [generatedWords, setGeneratedWords] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  // State for complete Italian words dataset
+  const [allWords, setAllWords] = useState<string[]>([]);
+  const [isLoadingWords, setIsLoadingWords] = useState(false);
   
   const { toast } = useToast();
 
@@ -116,6 +123,32 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     'meteorologia', 'astronomia', 'geologia', 'archeologia', 'antropologia', 'sociologia', 'psicologia', 'filosofia', 'teologia', 'letteratura'
   ];
 
+  // Load the complete Italian words dataset
+  const loadWordsDataset = async () => {
+    if (allWords.length > 0) return; // Already loaded
+    
+    setIsLoadingWords(true);
+    try {
+      const response = await fetch(wordDatasetUrl);
+      const text = await response.text();
+      const words = text.split('\n').filter(word => word.trim().length > 0);
+      setAllWords(words);
+      toast({
+        title: "Dataset caricato",
+        description: `${words.length} parole italiane caricate`,
+      });
+    } catch (error) {
+      console.error('Error loading words dataset:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile caricare il dataset delle parole",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoadingWords(false);
+    }
+  };
+
   // Load saved word lists from database
   useEffect(() => {
     if (therapistId) {
@@ -129,8 +162,18 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   }, [generatorParams, activeTab]);
 
-  const generateWords = () => {
+  // Load dataset on component mount
+  useEffect(() => {
+    loadWordsDataset();
+  }, []);
+
+  const generateWords = async () => {
     setIsGenerating(true);
+    
+    // Load dataset if not already loaded and we're generating real words
+    if (generatorParams.type === 'words' && allWords.length === 0) {
+      await loadWordsDataset();
+    }
     
     setTimeout(() => {
       let words: string[] = [];
@@ -155,28 +198,80 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }, 300);
   };
 
+  // Function to count syllables in Italian words (improved)
+  const countSyllables = (word: string): number => {
+    if (!word) return 0;
+    
+    // Convert to lowercase and remove accents for better processing
+    const cleanWord = word.toLowerCase()
+      .replace(/[àáâãä]/g, 'a')
+      .replace(/[èéêë]/g, 'e')
+      .replace(/[ìíîï]/g, 'i')
+      .replace(/[òóôõö]/g, 'o')
+      .replace(/[ùúûü]/g, 'u');
+    
+    // Remove non-alphabetic characters
+    const letters = cleanWord.replace(/[^a-z]/g, '');
+    
+    if (letters.length === 0) return 0;
+    if (letters.length <= 2) return 1;
+    
+    // Count vowel groups (improved Italian syllable counting)
+    let syllables = 0;
+    let previousWasVowel = false;
+    
+    for (let i = 0; i < letters.length; i++) {
+      const isVowel = 'aeiou'.includes(letters[i]);
+      
+      if (isVowel && !previousWasVowel) {
+        syllables++;
+      }
+      
+      // Handle common Italian vowel combinations that stay together
+      if (isVowel && previousWasVowel) {
+        const combo = letters.substring(i-1, i+1);
+        // Common diphthongs that count as one syllable
+        if (['ai', 'au', 'ei', 'eu', 'ia', 'ie', 'io', 'iu', 'oa', 'oe', 'oi', 'ou', 'ua', 'ue', 'ui', 'uo'].includes(combo)) {
+          // Don't increment, they form one syllable
+        } else {
+          // Two separate vowels = two syllables
+          syllables++;
+        }
+      }
+      
+      previousWasVowel = isVowel;
+    }
+    
+    // Minimum of 1 syllable
+    return Math.max(1, syllables);
+  };
+
   const generateRealWords = (): string[] => {
-    const words: string[] = [];
+    // Use complete dataset if available, fallback to predefined words
+    const wordsToUse = allWords.length > 0 ? allWords : ITALIAN_WORDS;
     const [minSyl, maxSyl] = generatorParams.syllableCount.split('-').map(n => parseInt(n)) || [2, 3];
     
-    // Filtra le parole italiane in base ai criteri
-    const filteredWords = ITALIAN_WORDS.filter(word => {
-      // Controlla filtri
-      if (generatorParams.startsWith && !word.startsWith(generatorParams.startsWith.toLowerCase())) return false;
-      if (generatorParams.contains && !word.includes(generatorParams.contains.toLowerCase())) return false;
+    // Filter words based on criteria
+    const filteredWords = wordsToUse.filter(word => {
+      // Check basic filters
+      if (generatorParams.startsWith && !word.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) return false;
+      if (generatorParams.contains && !word.toLowerCase().includes(generatorParams.contains.toLowerCase())) return false;
       
-      // Conta le sillabe (approssimativamente usando le vocali)
-      const syllableCount = word.match(/[aeiou]/g)?.length || 1;
+      // Count syllables accurately
+      const syllableCount = countSyllables(word);
       if (syllableCount < minSyl || syllableCount > maxSyl) return false;
       
       return true;
     });
     
-    // Mescola le parole filtrate e restituisci solo quelle che rispettano i criteri
-    const shuffled = [...filteredWords].sort(() => Math.random() - 0.5);
+    // If no words match criteria, return empty array
+    if (filteredWords.length === 0) {
+      return [];
+    }
     
-    // Restituisci solo le parole che soddisfano i criteri, al massimo il numero richiesto
-    return shuffled.slice(0, Math.min(generatorParams.count, shuffled.length));
+    // Shuffle and return requested count
+    const shuffled = [...filteredWords].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, Math.min(generatorParams.count, filteredWords.length));
   };
 
   const generateSyllables = (): string[] => {
