@@ -104,7 +104,35 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Elimina profilo paziente e dati correlati dal database
+    // Elimina prima gli esercizi associati al paziente
+    const { error: deleteExercisesError } = await supabaseAdmin
+      .from('exercises')
+      .delete()
+      .eq('patient_id', patientId)
+
+    if (deleteExercisesError) {
+      console.error('Errore eliminazione esercizi paziente:', deleteExercisesError)
+      return new Response(
+        JSON.stringify({ error: 'Errore durante l\'eliminazione degli esercizi del paziente' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Elimina le sessioni di esercizio associate al paziente
+    const { error: deleteSessionsError } = await supabaseAdmin
+      .from('exercise_sessions')
+      .delete()
+      .eq('patient_id', patientId)
+
+    if (deleteSessionsError) {
+      console.error('Errore eliminazione sessioni paziente:', deleteSessionsError)
+      return new Response(
+        JSON.stringify({ error: 'Errore durante l\'eliminazione delle sessioni del paziente' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Elimina profilo paziente dal database
     // Questo garantisce la pulizia anche se l'eliminazione dall'auth è fallita per utente non trovato
     const { error: deleteProfileError } = await supabaseAdmin
       .from('profiles')
