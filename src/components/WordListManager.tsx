@@ -13,7 +13,8 @@ import {
   WordList
  } from '@/types/tachistoscope';
 import { supabase } from '@/integrations/supabase/client';
-import { WordList as DBWordList, ExerciseSettings, DEFAULT_SETTINGS } from '@/types/database';
+import { WordList as DBWordList, ExerciseSettings as DBExerciseSettings, DEFAULT_SETTINGS } from '@/types/database';
+import { ExerciseSettings } from '@/types/tachistoscope';
 
 // Import the complete Italian word dataset
 import wordDatasetUrl from '@/data/parole_italiane_complete.txt?url';
@@ -54,7 +55,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     textCase: 'original' as const,
     useMask: false,
     maskDuration: 100,        // 100ms: breve per non interferire
-    fontSize: 'large' as const
+    fontSize: 'large' as const,
+    intervalVariability: 100  // 100ms variabilità di default
   });
   
   // State for complete Italian words dataset
@@ -454,7 +456,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         id: dbList.id,
         name: dbList.name,
         description: dbList.description || `Lista personalizzata con ${dbList.words.length} parole`,
-        words: dbList.words
+        words: dbList.words,
+        settings: dbList.settings ? { ...dbList.settings as any, intervalVariability: (dbList.settings as any).intervalVariability || 100 } : undefined
       }));
 
       setSavedWordLists(wordLists);
@@ -515,7 +518,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         id: data.id,
         name: data.name,
         description: data.description || `Lista personalizzata con ${wordsToSave.length} parole`,
-        words: data.words
+        words: data.words,
+        settings: data.settings ? { ...data.settings as any, intervalVariability: (data.settings as any).intervalVariability || 100 } : undefined
       };
 
       await loadSavedWordLists();
@@ -677,7 +681,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         id: data.id,
         name: data.name,
         description: data.description || `Lista personalizzata con ${words.length} parole`,
-        words: data.words
+        words: data.words,
+        settings: data.settings ? { ...data.settings as any, intervalVariability: (data.settings as any).intervalVariability || 100 } : undefined
       };
 
       // Update current selection if it's the edited list
@@ -743,7 +748,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       textCase: 'original' as const,
       useMask: false,
       maskDuration: 100,
-      fontSize: 'large' as const
+      fontSize: 'large' as const,
+      intervalVariability: 100
     });
     toast({
       title: "Form pulito",
@@ -800,8 +806,11 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm text-gray-900 truncate">{list.name}</h4>
                         <p className="text-xs text-gray-500">{list.words.length} parole</p>
-                        {list.description && (
-                          <p className="text-xs text-gray-400 mt-1 line-clamp-2">{list.description}</p>
+                        {list.settings && (
+                          <div className="text-xs text-gray-400 mt-1 space-y-0.5">
+                            <p>Durata: {list.settings.exposureDuration}ms • Pausa: {list.settings.intervalDuration}ms</p>
+                            <p>Testo: {list.settings.textCase === 'uppercase' ? 'MAIUSCOLO' : list.settings.textCase === 'lowercase' ? 'minuscolo' : 'Originale'} • {list.settings.useMask ? 'Con maschera' : 'Senza maschera'}</p>
+                          </div>
                         )}
                       </div>
                       <div className="flex items-center gap-1 ml-2 flex-shrink-0">

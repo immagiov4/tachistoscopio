@@ -4,6 +4,7 @@ export interface WordList {
   name: string;
   words: string[];
   description?: string;
+  settings?: ExerciseSettings;
 }
 
 export interface ExerciseSettings {
