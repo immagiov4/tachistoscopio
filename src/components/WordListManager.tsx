@@ -1059,7 +1059,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                 Impostazioni frequenza parola
               </summary>
               <div className="p-3 pt-0 border-t">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   <div>
                     <Label className="text-xs">Esposizione (ms)</Label>
                     <Input
@@ -1111,9 +1111,25 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3 mt-3">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="useMask"
+                      checked={exerciseSettings.useMask}
+                      onChange={(e) => setExerciseSettings({
+                        ...exerciseSettings,
+                        useMask: e.target.checked
+                      })}
+                      className="h-4 w-4"
+                    />
+                    <Label htmlFor="useMask" className="text-xs">Usa maschera</Label>
+                  </div>
                   
                   <div>
-                    <Label className="text-xs">Maschera (ms)</Label>
+                    <Label className="text-xs">Durata maschera (ms)</Label>
                     <Input
                       type="number"
                       min="50"
@@ -1124,6 +1140,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                         maskDuration: parseInt(e.target.value) || 200
                       })}
                       className="h-8 text-sm"
+                      disabled={!exerciseSettings.useMask}
                     />
                   </div>
                 </div>
@@ -1166,10 +1183,11 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                     {isLoading ? 'Salvataggio...' : 'Salva esercizio'}
                   </Button>
                   <Button 
-                    onClick={handleClearCustomWords} 
+                    onClick={() => document.getElementById('file-import')?.click()}
                     variant="outline"
                   >
-                    Pulisci
+                    <Upload className="h-4 w-4 mr-2" />
+                    Importa
                   </Button>
                 </>
               )}
