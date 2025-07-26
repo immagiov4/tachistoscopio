@@ -123,6 +123,12 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     console.log('Marking error for word index:', session.currentWordIndex);
     console.log('Current errors before:', session.errors);
     
+    // Limita il numero massimo di errori al numero totale di parole
+    if (session.errors.length >= session.words.length) {
+      console.log('Maximum errors reached, not adding more');
+      return;
+    }
+    
     // Riproduci suono
     try {
       playErrorSound();
@@ -209,9 +215,6 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     const handleClick = (event: MouseEvent) => {
       // Solo se l'esercizio è in corso e non è in pausa
       if (!session.isRunning || session.isPaused || isCountingDown) return;
-      
-      // NON segnare errore durante lo stimolo visivo
-      if (displayState === 'stimulus') return;
       
       // Evita di triggerare su click dei pulsanti di controllo
       const target = event.target as HTMLElement;
