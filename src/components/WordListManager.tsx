@@ -730,12 +730,16 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     setCustomWords('');
     setCustomListName('Nuovo esercizio');
     setEditingList(null);
+    // Reset anche la selezione evidenziata
+    onWordListChange({ id: '', name: '', words: [] });
   };
 
   const handleClearCustomWords = () => {
     setCustomWords('');
     setCustomListName('Nuovo esercizio');
     setEditingList(null);
+    // Reset anche la selezione evidenziata  
+    onWordListChange({ id: '', name: '', words: [] });
     setGeneratedWords([]);
     setGeneratorParams({
       type: 'words',
