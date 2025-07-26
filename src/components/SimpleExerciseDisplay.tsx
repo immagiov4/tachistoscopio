@@ -431,10 +431,12 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
                   __html: `
                     @keyframes fadeInThenPulse {
                       0% { opacity: 0; }
-                      25% { opacity: 1; }
-                      50% { opacity: 0.3; }
-                      75% { opacity: 1; }
-                      100% { opacity: 0.5; }
+                      15% { opacity: 1; }
+                      35% { opacity: 0.3; }
+                      55% { opacity: 1; }
+                      75% { opacity: 0.5; }
+                      85% { opacity: 1; }
+                      100% { opacity: 0; }
                     }
                   `
                 }}></style>
