@@ -445,34 +445,43 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                 <div className="space-y-4">
                   {/* Statistiche generali */}
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-3 rounded-lg border-l-4 border-blue-500" style={{
-                      background: `linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%), 
-                                   url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E")`,
+                    <div className="text-center p-3 rounded-lg border-l-4 border-blue-500 relative" style={{
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
                       backdropFilter: 'blur(8px) saturate(1.2)',
                       boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px, inset rgba(255, 255, 255, 0.5) 0px 1px 0px'
                     }}>
+                      <div className="absolute inset-0 rounded-lg opacity-20" style={{
+                        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,0.15) 1px, transparent 0)`,
+                        backgroundSize: '8px 8px'
+                      }}></div>
                       <div className="text-2xl font-bold text-blue-700">
                         {recentSessions.length}
                       </div>
                       <div className="text-xs text-blue-600">Sessioni</div>
                     </div>
-                    <div className="text-center p-3 rounded-lg border-l-4 border-green-500" style={{
-                      background: `linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%), 
-                                   url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E")`,
+                    <div className="text-center p-3 rounded-lg border-l-4 border-green-500 relative" style={{
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
                       backdropFilter: 'blur(8px) saturate(1.2)',
                       boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px, inset rgba(255, 255, 255, 0.5) 0px 1px 0px'
                     }}>
+                      <div className="absolute inset-0 rounded-lg opacity-20" style={{
+                        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,0.15) 1px, transparent 0)`,
+                        backgroundSize: '8px 8px'
+                      }}></div>
                       <div className="text-2xl font-bold text-green-700">
                         {Math.round(recentSessions.reduce((acc, s) => acc + s.accuracy, 0) / recentSessions.length)}%
                       </div>
                       <div className="text-xs text-green-600">Precisione Media</div>
                     </div>
-                    <div className="text-center p-3 rounded-lg border-l-4 border-orange-500" style={{
-                      background: `linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%), 
-                                   url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E")`,
+                    <div className="text-center p-3 rounded-lg border-l-4 border-orange-500 relative" style={{
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
                       backdropFilter: 'blur(8px) saturate(1.2)',
                       boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px, inset rgba(255, 255, 255, 0.5) 0px 1px 0px'
                     }}>
+                      <div className="absolute inset-0 rounded-lg opacity-20" style={{
+                        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,0.15) 1px, transparent 0)`,
+                        backgroundSize: '8px 8px'
+                      }}></div>
                       <div className="text-2xl font-bold text-orange-700">
                         {recentSessions.reduce((acc, s) => acc + s.total_words, 0)}
                       </div>
