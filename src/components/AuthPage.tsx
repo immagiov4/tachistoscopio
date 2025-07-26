@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2 } from 'lucide-react';
+import { Loader2, User, UserPlus } from 'lucide-react';
 
 export const AuthPage: React.FC = () => {
   const { signIn, signUp } = useAuth();
@@ -115,15 +115,17 @@ export const AuthPage: React.FC = () => {
           <TabsList className="grid w-full grid-cols-2 mb-6 p-1 bg-muted/50 border-2 border-muted">
             <TabsTrigger 
               value="login" 
-              className="text-sm font-semibold py-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border"
+              className="text-sm font-semibold py-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border flex items-center gap-2"
             >
-              👤 Accedi
+              <User className="w-4 h-4" />
+              Accedi
             </TabsTrigger>
             <TabsTrigger 
               value="signup" 
-              className="text-sm font-semibold py-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border"
+              className="text-sm font-semibold py-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border flex items-center gap-2"
             >
-              👨‍⚕️ Registrati come Terapista
+              <UserPlus className="w-4 h-4" />
+              Registrati come Terapista
             </TabsTrigger>
           </TabsList>
 

@@ -308,13 +308,6 @@ export const TherapistDashboard: React.FC = () => {
             </Button>
           </div>
           
-          {/* Alert informativo sulla navigazione */}
-          <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/30">
-            <AlertDescription className="text-blue-800 dark:text-blue-200">
-              💡 <strong>Suggerimento:</strong> Usa i tab qui sotto per navigare tra <strong>"Gestione Pazienti"</strong> (per creare pazienti e assegnare esercizi) 
-              e <strong>"Liste Parole"</strong> (per creare e modificare le liste di parole).
-            </AlertDescription>
-          </Alert>
         </header>
 
 
@@ -322,19 +315,19 @@ export const TherapistDashboard: React.FC = () => {
           <TabsList className="grid w-full grid-cols-2 mb-8 p-1 bg-gradient-to-r from-primary/10 to-secondary/10 border-2 border-primary/20 rounded-lg shadow-sm">
             <TabsTrigger 
               value="patients" 
-              className="flex items-center gap-3 text-base font-semibold py-4 px-6 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border-2 data-[state=active]:border-primary/30 data-[state=active]:scale-[1.02] transition-all duration-200"
+              className="flex items-center gap-2 text-sm font-semibold py-3 px-4 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border-2 data-[state=active]:border-primary/30 data-[state=active]:scale-[1.02] transition-all duration-200"
             >
-              <UserCog className="h-5 w-5" />
+              <UserCog className="h-4 w-4" />
               <span>Gestione Pazienti</span>
-              <Badge variant="secondary" className="ml-auto">Pazienti & Esercizi</Badge>
+              <Badge variant="secondary" className="text-xs">Pazienti & Esercizi</Badge>
             </TabsTrigger>
             <TabsTrigger 
               value="wordlists" 
-              className="flex items-center gap-3 text-base font-semibold py-4 px-6 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border-2 data-[state=active]:border-primary/30 data-[state=active]:scale-[1.02] transition-all duration-200"
+              className="flex items-center gap-2 text-sm font-semibold py-3 px-4 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border-2 data-[state=active]:border-primary/30 data-[state=active]:scale-[1.02] transition-all duration-200"
             >
-              <BookOpen className="h-5 w-5" />
+              <BookOpen className="h-4 w-4" />
               <span>Liste Parole</span>
-              <Badge variant="secondary" className="ml-auto">Creazione & Modifica</Badge>
+              <Badge variant="secondary" className="text-xs">Creazione & Modifica</Badge>
             </TabsTrigger>
           </TabsList>
 
