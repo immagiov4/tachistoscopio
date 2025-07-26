@@ -86,8 +86,17 @@ export const TherapistDashboard: React.FC = () => {
         created_by: 'system'
       }));
 
-      const allWordLists = [...predefinedAsWordList, ...(data || [])];
-      setWordLists(allWordLists);
+      const allWordLists = [...predefinedAsWordList, ...(data || [])].map(list => ({
+        ...list,
+        settings: list.settings || {
+          exposureDuration: 500,
+          intervalDuration: 200,
+          textCase: 'original' as const,
+          useMask: false,
+          maskDuration: 200
+        }
+      }));
+      setWordLists(allWordLists as WordList[]);
     } catch (error) {
       console.error('Error fetching word lists:', error);
     }
@@ -304,18 +313,14 @@ export const TherapistDashboard: React.FC = () => {
 
 
         <Tabs defaultValue="patients" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="patients" className="flex items-center gap-2">
               <UserCog className="h-4 w-4" />
               Gestione Pazienti
             </TabsTrigger>
             <TabsTrigger value="wordlists" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
-              Liste Parole
-            </TabsTrigger>
-            <TabsTrigger value="exercises" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Esercizi
+              Liste Parole & Esercizi
             </TabsTrigger>
           </TabsList>
 
@@ -331,110 +336,6 @@ export const TherapistDashboard: React.FC = () => {
             />
           </TabsContent>
 
-          <TabsContent value="exercises" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Crea Esercizio</CardTitle>
-                <CardDescription>
-                  Crea un nuovo esercizio selezionando una lista di parole e configurando le impostazioni
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="wordlist-select">Lista Parole</Label>
-                    <Select value={selectedWordList} onValueChange={setSelectedWordList}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleziona una lista di parole" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background border z-50">
-                        {wordLists.map((wordList) => (
-                          <SelectItem key={wordList.id} value={wordList.id}>
-                            {wordList.name} ({wordList.words.length} parole)
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Impostazioni Esercizio</h3>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="exposureDuration">Durata Esposizione (ms)</Label>
-                        <Input
-                          id="exposureDuration"
-                          type="number"
-                          value={exerciseSettings.exposureDuration}
-                          onChange={(e) => setExerciseSettings({
-                            ...exerciseSettings,
-                            exposureDuration: parseInt(e.target.value)
-                          })}
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="intervalDuration">Durata Intervallo (ms)</Label>
-                        <Input
-                          id="intervalDuration"
-                          type="number"
-                          value={exerciseSettings.intervalDuration}
-                          onChange={(e) => setExerciseSettings({
-                            ...exerciseSettings,
-                            intervalDuration: parseInt(e.target.value)
-                          })}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="textCase">Formato Testo</Label>
-                        <Select 
-                          value={exerciseSettings.textCase} 
-                          onValueChange={(value) => setExerciseSettings({
-                            ...exerciseSettings,
-                            textCase: value as any
-                          })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-background border z-50">
-                            <SelectItem value="original">Originale</SelectItem>
-                            <SelectItem value="uppercase">MAIUSCOLO</SelectItem>
-                            <SelectItem value="lowercase">minuscolo</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="maskDuration">Durata Maschera (ms)</Label>
-                        <Input
-                          id="maskDuration"
-                          type="number"
-                          value={exerciseSettings.maskDuration}
-                          onChange={(e) => setExerciseSettings({
-                            ...exerciseSettings,
-                            maskDuration: parseInt(e.target.value)
-                          })}
-                        />
-                      </div>
-                    </div>
-
-                    <Button 
-                      onClick={createExercise} 
-                      disabled={createExerciseLoading || !selectedWordList}
-                      className="w-full"
-                    >
-                      {createExerciseLoading ? 'Creazione...' : 'Crea Template Esercizio'}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
 
         {/* Tutorial Modal */}

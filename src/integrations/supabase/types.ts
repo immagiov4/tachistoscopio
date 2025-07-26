@@ -168,6 +168,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          settings: Json | null
           updated_at: string
           words: string[]
         }
@@ -177,6 +178,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          settings?: Json | null
           updated_at?: string
           words: string[]
         }
@@ -186,6 +188,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          settings?: Json | null
           updated_at?: string
           words?: string[]
         }

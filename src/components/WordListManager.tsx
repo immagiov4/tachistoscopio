@@ -12,9 +12,9 @@ import { useToast } from '@/hooks/use-toast';
 import {
   WordList,
   PREDEFINED_WORD_LISTS
-} from '@/types/tachistoscope';
+ } from '@/types/tachistoscope';
 import { supabase } from '@/integrations/supabase/client';
-import { WordList as DBWordList } from '@/types/database';
+import { WordList as DBWordList, ExerciseSettings, DEFAULT_SETTINGS } from '@/types/database';
 
 // Import the complete Italian word dataset
 import wordDatasetUrl from '@/data/parole_italiane_complete.txt?url';
@@ -47,6 +47,9 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   });
   const [generatedWords, setGeneratedWords] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  // Exercise settings state
+  const [exerciseSettings, setExerciseSettings] = useState<ExerciseSettings>(DEFAULT_SETTINGS);
   
   // State for complete Italian words dataset
   const [allWords, setAllWords] = useState<string[]>([]);
@@ -484,6 +487,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
           name: customListName || 'Lista personalizzata',
           description: `Lista ${activeTab === 'generator' ? 'generata' : 'personalizzata'} con ${wordsToSave.length} parole`,
           words: wordsToSave,
+          settings: exerciseSettings as any,
           created_by: therapistId
         })
         .select()
@@ -649,7 +653,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         .update({
           name: customListName,
           description: `Lista personalizzata con ${words.length} parole`,
-          words: words
+          words: words,
+          settings: exerciseSettings as any
         })
         .eq('id', editingList)
         .eq('created_by', therapistId)
@@ -1031,6 +1036,83 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                 </div>
               </div>
             )}
+
+            {/* Exercise Settings Section */}
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="font-medium text-sm">Impostazioni Esercizio</h3>
+              <p className="text-xs text-muted-foreground">
+                Configura le impostazioni predefinite per questa lista
+              </p>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="exposureDuration">Durata Esposizione (ms)</Label>
+                  <Input
+                    id="exposureDuration"
+                    type="number"
+                    min="100"
+                    max="5000"
+                    value={exerciseSettings.exposureDuration}
+                    onChange={(e) => setExerciseSettings({
+                      ...exerciseSettings,
+                      exposureDuration: parseInt(e.target.value) || 500
+                    })}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="intervalDuration">Durata Intervallo (ms)</Label>
+                  <Input
+                    id="intervalDuration"
+                    type="number"
+                    min="50"
+                    max="2000"
+                    value={exerciseSettings.intervalDuration}
+                    onChange={(e) => setExerciseSettings({
+                      ...exerciseSettings,
+                      intervalDuration: parseInt(e.target.value) || 200
+                    })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="textCase">Formato Testo</Label>
+                  <Select 
+                    value={exerciseSettings.textCase} 
+                    onValueChange={(value) => setExerciseSettings({
+                      ...exerciseSettings,
+                      textCase: value as any
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border z-50">
+                      <SelectItem value="original">Originale</SelectItem>
+                      <SelectItem value="uppercase">MAIUSCOLO</SelectItem>
+                      <SelectItem value="lowercase">minuscolo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="maskDuration">Durata Maschera (ms)</Label>
+                  <Input
+                    id="maskDuration"
+                    type="number"
+                    min="50"
+                    max="1000"
+                    value={exerciseSettings.maskDuration}
+                    onChange={(e) => setExerciseSettings({
+                      ...exerciseSettings,
+                      maskDuration: parseInt(e.target.value) || 200
+                    })}
+                  />
+                </div>
+              </div>
+            </div>
 
             <div className="flex gap-2">
               {editingList ? (

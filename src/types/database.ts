@@ -150,6 +150,7 @@ export interface WordList {
   name: string;
   description: string | null;
   words: string[];
+  settings?: ExerciseSettings;
   created_by: string;
   created_at: string;
   updated_at: string;

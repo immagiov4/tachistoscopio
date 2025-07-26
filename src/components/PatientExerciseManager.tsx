@@ -89,11 +89,18 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
         created_by: 'system'
       }));
 
-      const allWordLists = [...predefinedAsWordList, ...(wordListsData.data || [])];
+      const allWordLists = [...predefinedAsWordList, ...(wordListsData.data || [])].map(list => ({
+        ...list,
+        settings: list.settings || {
+          exposureDuration: 500,
+          intervalDuration: 200,
+          textCase: 'original' as const,
+          useMask: false,
+          maskDuration: 200
+        }
+      }));
 
-      setPatients(patients);
-      setPatientsWithExercises(patientsWithCounts);
-      setWordLists(allWordLists);
+      setWordLists(allWordLists as WordList[]);
     } catch (error) {
       console.error('Error fetching initial data:', error);
     } finally {
@@ -556,13 +563,15 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                             {exercise.word_list?.name}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
-                            {exercise.word_list?.words?.length} parole • {exercise.settings?.exposureDuration}ms • {exercise.settings?.intervalDuration}ms
+                            {exercise.word_list?.words?.length} parole • {exercise.word_list?.settings?.exposureDuration || exercise.settings?.exposureDuration}ms • {exercise.word_list?.settings?.intervalDuration || exercise.settings?.intervalDuration}ms
                           </span>
                           
                           <Select
                             value={exercise.word_list_id}
                             onValueChange={(value) => {
-                              updateExercise(dayOfWeek, value, exercise.settings as ExerciseSettings);
+                              const selectedList = wordLists.find(list => list.id === value);
+                              const settings = selectedList?.settings || exercise.settings as ExerciseSettings;
+                              updateExercise(dayOfWeek, value, settings);
                             }}
                           >
                             <SelectTrigger className="h-6 w-32 text-xs">
@@ -590,7 +599,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                         <div className="flex-1">
                           <Select
                             onValueChange={(value) => {
-                              const defaultSettings: ExerciseSettings = {
+                              const selectedList = wordLists.find(list => list.id === value);
+                              const settings = selectedList?.settings || {
                                 exposureDuration: 500,
                                 intervalDuration: 200,
                                 fontSize: 'large',
@@ -598,7 +608,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                                 useMask: false,
                                 maskDuration: 200,
                               };
-                              updateExercise(dayOfWeek, value, defaultSettings);
+                              updateExercise(dayOfWeek, value, settings);
                             }}
                           >
                             <SelectTrigger className="h-6 text-xs">
