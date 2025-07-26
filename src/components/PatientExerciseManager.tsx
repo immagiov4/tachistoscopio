@@ -49,7 +49,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   
   // Floating button state
   const [showFloatingActions, setShowFloatingActions] = useState(false);
-  const [isFloatingVisible, setIsFloatingVisible] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
   useEffect(() => {
     fetchInitialData();
@@ -60,21 +59,14 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     }
   }, [selectedPatient]);
   
-  // Show floating buttons when scrolled past patient list
+  // Show floating buttons when scrolled past patient list - using CSS transitions only
   useEffect(() => {
     const handleScroll = () => {
       const patientListCard = document.querySelector('[data-patient-list]');
       if (patientListCard) {
         const rect = patientListCard.getBoundingClientRect();
         const shouldShow = rect.bottom < window.innerHeight * 0.6;
-        
-        if (shouldShow && !isFloatingVisible) {
-          setIsFloatingVisible(true);
-          setTimeout(() => setShowFloatingActions(true), 10);
-        } else if (!shouldShow && isFloatingVisible) {
-          setShowFloatingActions(false);
-          setTimeout(() => setIsFloatingVisible(false), 300);
-        }
+        setShowFloatingActions(shouldShow);
       }
     };
 
@@ -84,7 +76,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [isFloatingVisible]);
+  }, []);
   
   const scrollToPatientList = () => {
     const patientListCard = document.querySelector('[data-patient-list]');
@@ -697,9 +689,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
           </Card>
         </div>}
         
-      {/* Floating Actions */}
-      {isFloatingVisible && (
-        <div className={`fixed bottom-6 right-6 flex flex-col gap-3 z-50 ${showFloatingActions ? 'animate-fade-in' : 'animate-fade-out'}`}>
+      {/* Floating Actions - sempre nel DOM per animazioni fluide */}
+      <div className={`fixed bottom-6 right-6 flex flex-col gap-3 z-50 transition-opacity duration-300 ${showFloatingActions ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
           <Button
             onClick={scrollToPatientList}
             size="sm"
@@ -723,6 +714,5 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
             </Button>
           )}
         </div>
-      )}
     </div>;
 };
