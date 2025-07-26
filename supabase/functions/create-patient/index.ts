@@ -63,8 +63,8 @@ serve(async (req) => {
       userId = existingUserRecord.id;
       user = { user: existingUserRecord };
     } else if (matchingProfile) {
-      // Profile exists but user doesn't exist in auth - cleanup and recreate
-      console.log(`Found orphaned profile for ${fullName}, cleaning up and recreating user`);
+      // Trova profilo orfano con lo stesso nome, pulisce e ricrea l'utente
+      console.log(`Trovato profilo orfano per ${fullName}, pulizia e ricreazione utente`);
       
       // Delete orphaned profile and related data
       await supabaseAdmin
@@ -152,7 +152,7 @@ serve(async (req) => {
     });
 
     if (resetError) {
-      console.error('Error generating reset link:', resetError);
+      console.error('Errore generazione link reset:', resetError);
     }
 
     // Send welcome email using Supabase invite system
@@ -171,14 +171,14 @@ serve(async (req) => {
       });
 
       if (inviteError) {
-        console.error('Error sending email:', inviteError);
+        console.error('Errore invio email:', inviteError);
         emailError = inviteError.message;
       } else {
-        console.log(`Welcome email sent successfully to ${email}`);
+        console.log(`Email di benvenuto inviata con successo a ${email}`);
         emailSent = true;
       }
     } catch (emailException) {
-      console.error('Failed to send email:', emailException);
+      console.error('Errore invio email:', emailException);
       emailError = emailException.message;
     }
 
@@ -208,7 +208,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error creating patient:', error);
+    console.error('Errore durante la creazione del paziente:', error);
     return new Response(
       JSON.stringify({ 
         error: `Errore durante la creazione del paziente: ${error.message}`,

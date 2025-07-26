@@ -89,47 +89,47 @@ Deno.serve(async (req) => {
     
     // Check if the error is because user doesn't exist (already deleted)
     if (deleteAuthError) {
-      console.error('Error deleting user from auth:', deleteAuthError)
+      console.error('Errore eliminazione utente dall\'auth:', deleteAuthError)
       
-      // If user not found, it's already deleted from auth - proceed with database cleanup
+      // Se l'utente non è stato trovato, è già stato eliminato dall'auth - procedi con pulizia database
       if (deleteAuthError.message?.includes('User not found') || deleteAuthError.status === 404) {
-        console.log('User already deleted from auth, proceeding with database cleanup')
-        warningMessage = ' (User was already deleted from authentication system)'
+        console.log('Utente già eliminato dall\'auth, procedo con pulizia database')
+        warningMessage = ' (Utente già eliminato dal sistema di autenticazione)'
       } else {
-        // For other errors, still fail
+        // Per altri errori, fallisci comunque
         return new Response(
-          JSON.stringify({ error: 'Failed to delete patient from authentication system' }),
+          JSON.stringify({ error: 'Errore durante l\'eliminazione del paziente dal sistema di autenticazione' }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
     }
 
-    // Delete patient profile and related data from database
-    // This ensures cleanup even if auth deletion failed due to user not found
+    // Elimina profilo paziente e dati correlati dal database
+    // Questo garantisce la pulizia anche se l'eliminazione dall'auth è fallita per utente non trovato
     const { error: deleteProfileError } = await supabaseAdmin
       .from('profiles')
       .delete()
       .eq('id', patientId)
 
     if (deleteProfileError) {
-      console.error('Error deleting patient profile:', deleteProfileError)
+      console.error('Errore eliminazione profilo paziente:', deleteProfileError)
       return new Response(
-        JSON.stringify({ error: 'Failed to delete patient profile from database' }),
+        JSON.stringify({ error: 'Errore durante l\'eliminazione del profilo paziente dal database' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     return new Response(
       JSON.stringify({ 
-        message: `Patient ${patient.full_name} deleted successfully from database${warningMessage}` 
+        message: `Paziente ${patient.full_name} eliminato con successo dal database${warningMessage}` 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
-    console.error('Error in delete-patient function:', error)
+    console.error('Errore nella funzione delete-patient:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Errore interno del server' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
