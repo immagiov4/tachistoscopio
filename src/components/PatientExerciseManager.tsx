@@ -317,12 +317,29 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     try {
       console.log(`Tentativo di rimozione esercizio per giorno ${dayOfWeek}, paziente ${selectedPatient.id}`);
       
-      // Elimina direttamente l'esercizio - le sessioni storiche verranno mantenute
+      // Prima trova l'esercizio per il giorno
+      const exercise = weeklyExercises[dayOfWeek];
+      if (!exercise) {
+        console.log('Nessun esercizio trovato per questo giorno');
+        return;
+      }
+
+      // Prima elimina tutte le sessioni dell'esercizio
+      const { error: sessionsError } = await supabase
+        .from('exercise_sessions')
+        .delete()
+        .eq('exercise_id', exercise.id);
+
+      if (sessionsError) {
+        console.error('Errore eliminazione sessioni:', sessionsError);
+        throw sessionsError;
+      }
+
+      // Poi elimina l'esercizio
       const { error: exerciseError } = await supabase
         .from('exercises')
         .delete()
-        .eq('patient_id', selectedPatient.id)
-        .eq('day_of_week', dayOfWeek);
+        .eq('id', exercise.id);
 
       if (exerciseError) {
         console.error('Errore nell\'eliminazione dell\'esercizio:', exerciseError);
@@ -335,6 +352,11 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       // Aggiorna dinamicamente il conteggio esercizi senza ricaricare tutta la pagina
       updatePatientExerciseCount();
       
+      toast({
+        title: 'Successo',
+        description: 'Esercizio eliminato con successo'
+      });
+      
     } catch (error: any) {
       console.error('Error removing exercise:', error);
       let errorMessage = 'Errore durante la rimozione dell\'esercizio';
@@ -342,6 +364,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         errorMessage = 'Esercizio non trovato o non hai i permessi per rimuoverlo.';
       } else if (error.message?.includes('network')) {
         errorMessage = 'Errore di connessione. Controlla la rete e riprova.';
+      } else if (error.message?.includes('foreign key')) {
+        errorMessage = 'Impossibile eliminare: esistono ancora sessioni collegate';
       } else if (error.message) {
         errorMessage = `Errore: ${error.message}`;
       }

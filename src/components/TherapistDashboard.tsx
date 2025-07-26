@@ -231,16 +231,22 @@ export const TherapistDashboard: React.FC = () => {
   };
 
   const deletePatient = async (patientId: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questo paziente? Verranno eliminati anche tutti i suoi esercizi.')) return;
+    if (!confirm('Sei sicuro di voler eliminare questo paziente? Verranno eliminati anche tutti i suoi esercizi e sessioni.')) return;
     
     try {
-      // Prima elimina gli esercizi del paziente
+      // Prima elimina tutte le sessioni del paziente
+      await supabase
+        .from('exercise_sessions')
+        .delete()
+        .eq('patient_id', patientId);
+
+      // Poi elimina gli esercizi del paziente
       await supabase
         .from('exercises')
         .delete()
         .eq('patient_id', patientId);
 
-      // Poi elimina il paziente
+      // Infine elimina il paziente
       const { error } = await supabase
         .from('profiles')
         .delete()
@@ -267,9 +273,16 @@ export const TherapistDashboard: React.FC = () => {
 
 
   const deleteExercise = async (exerciseId: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questo esercizio?')) return;
+    if (!confirm('Sei sicuro di voler eliminare questo esercizio e tutte le sue sessioni?')) return;
     
     try {
+      // Prima elimina tutte le sessioni dell'esercizio
+      await supabase
+        .from('exercise_sessions')
+        .delete()
+        .eq('exercise_id', exerciseId);
+
+      // Poi elimina l'esercizio
       const { error } = await supabase
         .from('exercises')
         .delete()
