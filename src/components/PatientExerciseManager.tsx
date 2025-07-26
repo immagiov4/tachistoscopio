@@ -61,28 +61,15 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   
   // Scroll listener for floating actions
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    
     const handleScroll = () => {
       const patientListCard = document.querySelector('[data-patient-list]');
       if (patientListCard) {
         const rect = patientListCard.getBoundingClientRect();
-        const shouldShow = rect.bottom < window.innerHeight * 0.5; // Made threshold less strict
-        
-        console.log('Scroll check:', { 
-          rectBottom: rect.bottom, 
-          threshold: window.innerHeight * 0.5, 
-          shouldShow,
-          currentState: showFloatingActions 
-        });
+        const shouldShow = rect.bottom < window.innerHeight * 0.5;
         
         if (shouldShow && !showFloatingActions) {
-          clearTimeout(timeoutId);
-          timeoutId = setTimeout(() => {
-            setShowFloatingActions(true);
-          }, 50);
+          setShowFloatingActions(true);
         } else if (!shouldShow && showFloatingActions) {
-          clearTimeout(timeoutId);
           setShowFloatingActions(false);
         }
       }
@@ -93,7 +80,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      clearTimeout(timeoutId);
     };
   }, [showFloatingActions]);
   
