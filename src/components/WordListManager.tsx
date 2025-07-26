@@ -308,39 +308,18 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       'culone', 'straccione', 'negro'
     ]);
 
-    // APPROCCIO INTELLIGENTE: prima pre-filtra tutto, poi randomizza
-    // Step 1: Pre-filtra TUTTO il dataset
-    
-    // Step 1: Pre-filtra TUTTO il dataset
+    // SEMPLICE filter + shuffle + slice
     const candidateWords = wordsToUse.filter(word => {
-      // Filtri base
       if (inappropriateWordsSet.has(word.toLowerCase())) return false;
       if (word.length < 2) return false;
-      
-      // Filtri opzionali
       if (generatorParams.startsWith && !word.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) return false;
       if (generatorParams.contains && !word.toLowerCase().includes(generatorParams.contains.toLowerCase())) return false;
-      
-      // Filtro sillabe
       return countSyllables(word) === syllables;
     });
     
-    // Step 2: Shuffle dell'intero set pre-filtrato
-    for (let i = candidateWords.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [candidateWords[i], candidateWords[j]] = [candidateWords[j], candidateWords[i]];
-    }
-    
-    // Step 3: Prendi solo la quantità richiesta
-    const filteredWords = candidateWords.slice(0, generatorParams.count);
-    
-    // Shuffle risultati per varietà
-    for (let i = filteredWords.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [filteredWords[i], filteredWords[j]] = [filteredWords[j], filteredWords[i]];
-    }
-    
-    return filteredWords;
+    // Shuffle e prendi la quantità richiesta
+    const shuffled = candidateWords.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, generatorParams.count);
   };
 
   const generateSyllables = (): string[] => {
