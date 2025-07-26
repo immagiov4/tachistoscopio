@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -60,24 +60,23 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   }, [selectedPatient]);
   
   // Scroll listener for floating actions
-  useEffect(() => {
-    const handleScroll = () => {
-      const patientListCard = document.querySelector('[data-patient-list]');
-      if (patientListCard) {
-        const rect = patientListCard.getBoundingClientRect();
-        const shouldShow = rect.bottom < window.innerHeight * 0.5;
-        
-        setShowFloatingActions(shouldShow);
-      }
-    };
+  const handleScroll = useCallback(() => {
+    const patientListCard = document.querySelector('[data-patient-list]');
+    if (patientListCard) {
+      const rect = patientListCard.getBoundingClientRect();
+      const shouldShow = rect.bottom < window.innerHeight * 0.5;
+      setShowFloatingActions(shouldShow);
+    }
+  }, []);
 
+  useEffect(() => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Check initial state
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []); // Rimosso showFloatingActions dalle dipendenze
+  }, [handleScroll]);
   
   const scrollToPatientList = () => {
     const patientListCard = document.querySelector('[data-patient-list]');
