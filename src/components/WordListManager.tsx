@@ -1071,8 +1071,21 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                     <p className="text-xs text-blue-600 text-center mt-2">Ricerca nel dizionario...</p>
                   </div>
                 ) : generatedWords.length > 0 ? (
-                  <div className="bg-gray-50 rounded-lg p-3 flex items-start gap-3">
-                    <div className="flex-1 flex flex-wrap gap-1">
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">Parole generate ({generatedWords.length})</span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => performWordGeneration()}
+                        disabled={isGenerating}
+                        className="h-7 text-xs"
+                      >
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                        Aggiorna
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
                       {generatedWords.map((word, index) => (
                         <Badge key={index} variant="secondary" className="text-xs">
                           {word}
