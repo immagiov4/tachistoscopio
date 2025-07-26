@@ -146,25 +146,40 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
     try {
       let finalWordListId = wordListId;
       
-      // Prima rimuovi l'esercizio esistente per questo giorno, se esiste
-      await supabase
+      // Controlla se esiste già un esercizio per questo giorno
+      const { data: existingExercise } = await supabase
         .from('exercises')
-        .delete()
+        .select('id')
         .eq('patient_id', selectedPatient.id)
-        .eq('day_of_week', dayOfWeek);
+        .eq('day_of_week', dayOfWeek)
+        .single();
 
-      // Poi inserisci il nuovo esercizio
-      const { error } = await supabase
-        .from('exercises')
-        .insert({
-          patient_id: selectedPatient.id,
-          therapist_id: therapistId,
-          word_list_id: finalWordListId,
-          day_of_week: dayOfWeek,
-          settings: settings as any,
-        });
+      if (existingExercise) {
+        // Se esiste, aggiorna l'esercizio esistente
+        const { error } = await supabase
+          .from('exercises')
+          .update({
+            word_list_id: finalWordListId,
+            settings: settings as any,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingExercise.id);
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        // Se non esiste, crea un nuovo esercizio
+        const { error } = await supabase
+          .from('exercises')
+          .insert({
+            patient_id: selectedPatient.id,
+            therapist_id: therapistId,
+            word_list_id: finalWordListId,
+            day_of_week: dayOfWeek,
+            settings: settings as any,
+          });
+
+        if (error) throw error;
+      }
 
       toast({
         title: 'Successo',
