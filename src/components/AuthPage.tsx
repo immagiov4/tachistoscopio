@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { validatePassword, sanitizeInput } from '@/utils/passwordValidation';
 import { Loader2, User, UserPlus } from 'lucide-react';
 
 export const AuthPage: React.FC = () => {
@@ -51,13 +52,19 @@ export const AuthPage: React.FC = () => {
     setError(null);
     setSuccess(null);
 
-    if (signupPassword.length < 6) {
-      setError('La password deve essere di almeno 6 caratteri');
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeInput(signupEmail, 254);
+    const sanitizedFullName = sanitizeInput(signupFullName, 100);
+
+    // Strong password validation for registration
+    const passwordValidation = validatePassword(signupPassword);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.errors.join('. '));
       setLoading(false);
       return;
     }
 
-    const { error } = await signUp(signupEmail, signupPassword, signupFullName);
+    const { error } = await signUp(sanitizedEmail, signupPassword, sanitizedFullName);
 
     if (error) {
       if (error.message.includes('already registered')) {
@@ -282,11 +289,11 @@ export const AuthPage: React.FC = () => {
                     <Input
                       id="signup-password"
                       type="password"
-                      placeholder="Almeno 6 caratteri"
+                      placeholder="Almeno 8 caratteri con maiuscole, minuscole e numeri"
                       value={signupPassword}
                       onChange={(e) => setSignupPassword(e.target.value)}
                       required
-                      minLength={6}
+                      minLength={8}
                     />
                   </div>
                   {error && (

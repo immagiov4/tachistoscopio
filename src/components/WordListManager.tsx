@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { WordList } from '@/types/tachistoscope';
 import { supabase } from '@/integrations/supabase/client';
 import { WordList as DBWordList, ExerciseSettings, DEFAULT_SETTINGS } from '@/types/database';
+import { sanitizeInput, sanitizeWordList } from '@/utils/passwordValidation';
 
 // Import the complete Italian word dataset
 import wordDatasetUrl from '@/data/parole_italiane_complete.txt?url';
@@ -376,12 +377,15 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   };
   const handleCreateCustomList = async () => {
-    const wordsToSave = activeTab === 'generator' ? generatedWords : customWords.split(/[,\n]+/).map(word => word.trim()).filter(word => word.length > 0);
+    // Sanitize input data
+    const sanitizedListName = sanitizeInput(customListName || 'Nuovo esercizio', 100);
+    const rawWords = activeTab === 'generator' ? generatedWords : customWords.split(/[,\n]+/).map(word => word.trim()).filter(word => word.length > 0);
+    const wordsToSave = sanitizeWordList(rawWords);
     if (!therapistId) {
       // For non-therapists, just create temporary list
       const tempList: WordList = {
         id: 'temp-' + Date.now(),
-        name: customListName || 'Lista temporanea',
+        name: sanitizedListName,
         description: `Lista ${activeTab === 'generator' ? 'generata' : 'personalizzata'} con ${wordsToSave.length} parole`,
         words: wordsToSave
       };
@@ -402,7 +406,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         data,
         error
       } = await supabase.from('word_lists').insert({
-        name: customListName || 'Nuovo esercizio',
+        name: sanitizedListName,
         description: `${wordsToSave.length} parole • Esp: ${exerciseSettings.exposureDuration}ms • Int: ${exerciseSettings.intervalDuration}ms${exerciseSettings.useMask ? ` • Maschera: ${exerciseSettings.maskDuration}ms` : ''}`,
         words: wordsToSave,
         settings: exerciseSettings as any,
@@ -520,7 +524,12 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   };
   const handleUpdateWordList = async () => {
     if (!therapistId || !editingList) return;
-    const words = customWords.split(/[,\n]+/).map(word => word.trim()).filter(word => word.length > 0);
+    
+    // Sanitize input data
+    const sanitizedListName = sanitizeInput(customListName, 100);
+    const rawWords = customWords.split(/[,\n]+/).map(word => word.trim()).filter(word => word.length > 0);
+    const words = sanitizeWordList(rawWords);
+    
     if (words.length === 0) {
       toast({
         title: "Nessuna parola valida",
@@ -535,7 +544,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         data,
         error
       } = await supabase.from('word_lists').update({
-        name: customListName,
+        name: sanitizedListName,
         description: `${words.length} parole • Esp: ${exerciseSettings.exposureDuration}ms • Int: ${exerciseSettings.intervalDuration}ms${exerciseSettings.useMask ? ` • Maschera: ${exerciseSettings.maskDuration}ms` : ''}`,
         words: words,
         settings: exerciseSettings as any

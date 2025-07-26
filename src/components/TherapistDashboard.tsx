@@ -15,6 +15,7 @@ import { Profile, WordList, Exercise, ExerciseSettings, DEFAULT_SETTINGS, DAYS_O
 import { toast } from '@/hooks/use-toast';
 import { PatientDashboard } from './PatientDashboard';
 import { LoadingPage } from '@/components/ui/loading';
+import { sanitizeInput } from '@/utils/passwordValidation';
 
 import { PatientExerciseManager } from '@/components/PatientExerciseManager';
 import { TutorialModal } from '@/components/TutorialModal';
@@ -129,10 +130,25 @@ export const TherapistDashboard: React.FC = () => {
   };
 
   const createPatient = async () => {
-    if (!newPatientEmail || !newPatientName) {
+    // Sanitize input data
+    const sanitizedEmail = sanitizeInput(newPatientEmail, 254);
+    const sanitizedName = sanitizeInput(newPatientName, 100);
+    
+    if (!sanitizedEmail || !sanitizedName) {
       toast({
         title: 'Errore',
-        description: 'Compila tutti i campi',
+        description: 'Compila tutti i campi con dati validi',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(sanitizedEmail)) {
+      toast({
+        title: 'Errore',
+        description: 'Formato email non valido',
         variant: 'destructive',
       });
       return;
@@ -143,8 +159,8 @@ export const TherapistDashboard: React.FC = () => {
       // Create user via edge function since admin SDK is not available in browser
       const { data, error } = await supabase.functions.invoke('create-patient', {
         body: {
-          email: newPatientEmail,
-          fullName: newPatientName,
+          email: sanitizedEmail,
+          fullName: sanitizedName,
           therapistId: profile?.id,
         },
       });
