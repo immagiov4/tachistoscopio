@@ -700,13 +700,12 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         
       {/* Floating Actions */}
       {showFloatingActions && (
-        <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50 animate-fade-in">
+        <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50 opacity-0 animate-fade-in">
           <Button
             onClick={scrollToPatientList}
             size="sm"
             variant="outline"
-            className="shadow-lg bg-white/90 hover:bg-white border-gray-300 text-gray-700 hover:text-gray-900 rounded-full h-12 px-5 font-medium transition-all duration-300 hover:scale-105 hover:shadow-xl animate-scale-in backdrop-blur-sm"
-            style={{ animationDelay: '100ms' }}
+            className="shadow-lg bg-white/90 hover:bg-white border-gray-300 text-gray-700 hover:text-gray-900 rounded-full h-12 px-5 font-medium transition-all duration-300 hover:scale-105 hover:shadow-xl backdrop-blur-sm"
             title="Torna all'elenco pazienti"
           >
             <ArrowUp className="h-4 w-4 mr-2" />
@@ -717,8 +716,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
             <Button
               onClick={enterStudioModeForSelected}
               size="sm"
-              className="shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full h-14 px-6 font-medium border-0 transition-all duration-300 hover:scale-105 hover:shadow-2xl animate-scale-in"
-              style={{ animationDelay: '200ms' }}
+              className="shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full h-14 px-6 font-medium border-0 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
               title="Entra in modalità studio per il paziente selezionato"
             >
               <UserCheck className="h-5 w-5 mr-2" />
