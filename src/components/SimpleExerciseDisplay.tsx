@@ -339,23 +339,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       <div className="flex-1 flex items-center justify-center relative z-10">
         {!session.isPaused ? (
           <>
-            {/* Sfondo decorativo giocoso con elementi del tema */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-3xl rotate-12 opacity-30 flex items-center justify-center text-2xl">
-                {currentTheme.icon}
-              </div>
-              <div className="absolute top-32 right-16 w-16 h-16 bg-white/10 rounded-full opacity-30 flex items-center justify-center text-xl">
-                {currentTheme.icon}
-              </div>
-              <div className="absolute bottom-20 left-20 w-24 h-12 bg-white/10 rounded-full rotate-45 opacity-30 flex items-center justify-center text-lg">
-                {currentTheme.icon}
-              </div>
-              <div className="absolute bottom-32 right-12 w-14 h-20 bg-white/10 rounded-3xl -rotate-12 opacity-30 flex items-center justify-center text-lg">
-                {currentTheme.icon}
-              </div>
-              <div className="absolute top-1/2 left-8 w-8 h-8 bg-white/20 rounded-lg rotate-45 opacity-40"></div>
-              <div className="absolute top-3/4 right-8 w-12 h-6 bg-white/10 rounded-full opacity-30"></div>
-            </div>
+            {/* Area pulita per la concentrazione - rimosse distrazioni */}
             
             <div className="relative z-10 text-center">
               <div className={`font-bold text-foreground ${getFontSize(session.settings.fontSize)} min-h-[200px] flex items-center justify-center`}>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight, Users, BookOpen, Calendar, BarChart3, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Users, BookOpen, Calendar, BarChart3, CheckCircle, UserCheck } from 'lucide-react';
 
 interface TutorialModalProps {
   open: boolean;
@@ -14,7 +14,7 @@ const tutorialSteps = [
     title: "Benvenuto nel Tachistoscopio!",
     description: "Questo breve tutorial ti guiderà attraverso le funzionalità principali della piattaforma per terapisti.",
     icon: CheckCircle,
-    content: "La piattaforma ti permette di gestire pazienti, creare liste di parole personalizzate e monitorare i progressi degli esercizi tachistoscopici."
+    content: "La piattaforma ti permette di gestire pazienti, creare esercizi personalizzati e monitorare i progressi della terapia tachistoscopica."
   },
   {
     title: "Gestione Pazienti",
@@ -23,22 +23,28 @@ const tutorialSteps = [
     content: "Nella sezione 'Gestione Pazienti' puoi:\n• Creare nuovi pazienti inserendo nome ed email del tutore\n• Cercare pazienti esistenti\n• Cliccare su un paziente per modificare il suo piano settimanale\n• Visualizzare le statistiche individuali di ogni paziente"
   },
   {
+    title: "Modalità Studio",
+    description: "Gestisci gli esercizi durante la terapia",
+    icon: UserCheck,
+    content: "Il pulsante 'Modalità Studio' ti permette di:\n• Entrare nella dashboard del paziente senza login\n• Gestire gli esercizi durante le sessioni in studio\n• Avviare e supervisionare gli esercizi direttamente\n• Tornare facilmente alla gestione pazienti\n\nPerfetto per le terapie in presenza!"
+  },
+  {
     title: "Piano Settimanale",
     description: "Assegna esercizi giornalieri",
-    icon: BarChart3,
-    content: "Una volta selezionato un paziente:\n• Visualizzi il piano settimanale (Lunedì-Venerdì)\n• Puoi assegnare/modificare esercizi per ogni giorno\n• Monitorare le statistiche del paziente"
-  },
-  {
-    title: "Liste Parole",
-    description: "Crea le tue liste personalizzate",
-    icon: BookOpen,
-    content: "Nella sezione 'Liste Parole' puoi:\n• Creare nuove liste di parole per gli esercizi\n• Visualizzare e gestire tutte le tue liste"
-  },
-  {
-    title: "Template Esercizi",
-    description: "Configura i parametri degli esercizi",
     icon: Calendar,
-    content: "Crea template con impostazioni personalizzate da riutilizzare nell'assegnazione degli esercizi ai pazienti."
+    content: "Una volta selezionato un paziente:\n• Visualizzi il piano settimanale (Lunedì-Domenica)\n• Puoi assegnare/modificare esercizi per ogni giorno\n• Monitorare le statistiche del paziente\n• Ogni esercizio usa le impostazioni della lista parole"
+  },
+  {
+    title: "Liste Parole & Esercizi",
+    description: "Crea esercizi personalizzati",
+    icon: BookOpen,
+    content: "Nella sezione 'Liste Parole & Esercizi' puoi:\n• Creare esercizi completi con parole e impostazioni integrate\n• Generare parole automaticamente o inserirle manualmente\n• Configurare durata esposizione, intervallo e formato testo\n• Salvare i tuoi esercizi per riutilizzarli con diversi pazienti"
+  },
+  {
+    title: "Statistiche",
+    description: "Monitora i progressi",
+    icon: BarChart3,
+    content: "Le statistiche sono integrate nell'elenco pazienti e mostrano:\n• Numero di sessioni completate\n• Precisione media del paziente\n• Durata media degli esercizi\n• Cronologia delle ultime sessioni\n\nTutte le informazioni necessarie per monitorare i progressi!"
   }
 ];
 

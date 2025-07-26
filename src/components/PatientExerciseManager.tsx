@@ -539,17 +539,17 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({ 
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">{patient.exerciseCount} esercizi</Badge>
                     <Button
-                      variant="ghost"
+                      variant="default"
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         enterStudioMode(patient.id);
                       }}
-                      className="h-8 px-3 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-                      title="Entra in modalità studio per gestire gli esercizi del paziente"
+                      className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white"
+                      title="Modalità Studio: Gestisci gli esercizi del paziente durante la terapia"
                     >
                       <UserCheck className="h-4 w-4 mr-1" />
-                      Studio
+                      Modalità Studio
                     </Button>
                     <Button
                       variant="outline"
