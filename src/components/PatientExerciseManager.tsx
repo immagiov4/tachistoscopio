@@ -668,7 +668,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         
       {/* Floating Actions */}
       {showFloatingActions && (
-        <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50 opacity-0 animate-fade-in">
+        <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50 animate-fade-in">
           <Button
             onClick={scrollToPatientList}
             size="sm"
