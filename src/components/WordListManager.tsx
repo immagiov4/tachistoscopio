@@ -326,113 +326,129 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="w-full space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BookOpen className="h-5 w-5" />
-            Word List Manager
+            Gestione Liste Parole
           </CardTitle>
           <CardDescription>
-            Create custom word lists or select from predefined options
+            Seleziona una lista esistente o crea una personalizzata
           </CardDescription>
         </CardHeader>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Liste predefinite</CardTitle>
+            <CardTitle>Selezione Lista</CardTitle>
             <CardDescription>
-              Scegli tra le liste predefinite per diversi livelli di abilità
+              Scegli tra liste predefinite o le tue liste salvate
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {PREDEFINED_WORD_LISTS.map((list) => (
-              <div key={list.id} className="border rounded-lg p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium">{list.name}</h4>
-                  <Badge variant="secondary">{list.words.length} parole</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">{list.description}</p>
-                <div className="flex flex-wrap gap-1 mb-2">
-                  {list.words.slice(0, 8).map((word, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {word}
-                    </Badge>
+            <div className="space-y-2">
+              <Label>Lista Parole</Label>
+              <Select 
+                value={currentWordList.id} 
+                onValueChange={(value) => {
+                  const predefinedList = PREDEFINED_WORD_LISTS.find(l => l.id === value);
+                  if (predefinedList) {
+                    handleLoadPredefinedList(value);
+                  } else {
+                    const savedList = savedWordLists.find(l => l.id === value);
+                    if (savedList) {
+                      onWordListChange(savedList);
+                    }
+                  }
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleziona una lista" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border z-50">
+                  <div className="p-2 text-xs font-medium text-muted-foreground">Liste predefinite</div>
+                  {PREDEFINED_WORD_LISTS.map((list) => (
+                    <SelectItem key={list.id} value={list.id} className="bg-background hover:bg-accent">
+                      <div className="flex items-center justify-between w-full">
+                        <span>{list.name}</span>
+                        <Badge variant="secondary" className="ml-2">{list.words.length}</Badge>
+                      </div>
+                    </SelectItem>
                   ))}
-                  {list.words.length > 8 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{list.words.length - 8} altre
-                    </Badge>
+                  
+                  {savedWordLists.length > 0 && (
+                    <>
+                      <div className="p-2 text-xs font-medium text-muted-foreground border-t mt-2 pt-2">Le tue liste</div>
+                      {savedWordLists.map((list) => (
+                        <SelectItem key={list.id} value={list.id} className="bg-background hover:bg-accent">
+                          <div className="flex items-center justify-between w-full">
+                            <span>{list.name}</span>
+                            <Badge variant="secondary" className="ml-2">{list.words.length}</Badge>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </>
                   )}
-                </div>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Lista attuale info */}
+            <div className="border rounded-lg p-4 bg-muted/30">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium">{currentWordList.name}</h4>
+                <Badge variant="outline">{currentWordList.words.length} parole</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">{currentWordList.description}</p>
+              <div className="flex flex-wrap gap-1">
+                {currentWordList.words.slice(0, 10).map((word, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    {word}
+                  </Badge>
+                ))}
+                {currentWordList.words.length > 10 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{currentWordList.words.length - 10} altre
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            {/* Azioni per liste salvate */}
+            {savedWordLists.some(l => l.id === currentWordList.id) && (
+              <div className="flex gap-2">
                 <Button
-                  onClick={() => handleLoadPredefinedList(list.id)}
-                  variant={currentWordList.id === list.id ? "default" : "outline"}
+                  onClick={() => handleEditWordList(currentWordList)}
+                  variant="outline"
                   size="sm"
-                  className="w-full"
                 >
-                  {currentWordList.id === list.id ? 'Attualmente selezionata' : 'Seleziona questa lista'}
+                  <Edit className="mr-2 h-4 w-4" />
+                  Modifica
+                </Button>
+                <Button
+                  onClick={() => handleDeleteWordList(currentWordList.id)}
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Elimina
+                </Button>
+                <Button onClick={handleExportList} variant="outline" size="sm">
+                  <Download className="mr-2 h-4 w-4" />
+                  Esporta
                 </Button>
               </div>
-            ))}
+            )}
 
-            {/* Saved Word Lists */}
-            {savedWordLists.length > 0 && (
-              <>
-                <Separator className="my-4" />
-                <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Le tue liste salvate</h4>
-                  {savedWordLists.map((list) => (
-                    <div key={list.id} className="border rounded-lg p-4 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium">{list.name}</h4>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary">{list.words.length} parole</Badge>
-                          <Button
-                            onClick={() => handleEditWordList(list)}
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            onClick={() => handleDeleteWordList(list.id)}
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{list.description}</p>
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {list.words.slice(0, 8).map((word, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {word}
-                          </Badge>
-                        ))}
-                        {list.words.length > 8 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{list.words.length - 8} altre
-                          </Badge>
-                        )}
-                      </div>
-                      <Button
-                        onClick={() => onWordListChange(list)}
-                        variant={currentWordList.id === list.id ? "default" : "outline"}
-                        size="sm"
-                        className="w-full"
-                      >
-                        {currentWordList.id === list.id ? 'Attualmente selezionata' : 'Seleziona questa lista'}
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </>
+            {/* Export per liste predefinite */}
+            {PREDEFINED_WORD_LISTS.some(l => l.id === currentWordList.id) && (
+              <Button onClick={handleExportList} variant="outline" size="sm" className="w-full">
+                <Download className="mr-2 h-4 w-4" />
+                Esporta lista
+              </Button>
             )}
           </CardContent>
         </Card>
@@ -550,42 +566,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista attuale</CardTitle>
-          <CardDescription>
-            {currentWordList.name} • {currentWordList.words.length} parole
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">{currentWordList.name}</p>
-              <p className="text-sm text-muted-foreground">{currentWordList.description}</p>
-            </div>
-            <Button onClick={handleExportList} variant="outline" size="sm">
-              <Download className="mr-2 h-4 w-4" />
-              Esporta
-            </Button>
-          </div>
-
-          <div className="border rounded-lg p-4 max-h-40 overflow-y-auto">
-            <div className="flex flex-wrap gap-2">
-              {currentWordList.words.map((word, index) => (
-                <Badge key={index} variant="outline" className="text-sm">
-                  {word}
-                </Badge>
-              ))}
-            </div>
-            {currentWordList.words.length === 0 && (
-              <p className="text-muted-foreground text-center py-4">
-                Nessuna parola nella lista attuale. Crea una lista personalizzata o seleziona una predefinita.
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

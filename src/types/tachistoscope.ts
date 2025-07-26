@@ -48,44 +48,44 @@ export const DEFAULT_SETTINGS: ExerciseSettings = {
 export const PREDEFINED_WORD_LISTS: WordList[] = [
   {
     id: 'high-frequency',
-    name: 'High Frequency Words',
-    description: 'Common sight words for beginning readers',
+    name: 'Parole ad Alta Frequenza',
+    description: 'Parole comuni per lettori principianti',
     words: [
-      'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'had',
-      'her', 'was', 'one', 'our', 'out', 'day', 'get', 'has', 'him', 'his',
-      'how', 'man', 'new', 'now', 'old', 'see', 'two', 'way', 'who', 'boy',
-      'did', 'its', 'let', 'put', 'say', 'she', 'too', 'use'
+      'il', 'di', 'che', 'e', 'la', 'un', 'a', 'è', 'per', 'una',
+      'sono', 'con', 'non', 'le', 'ho', 'lo', 'mi', 'si', 'ha', 'me',
+      'come', 'casa', 'sole', 'libro', 'gatto', 'cane', 'mamma', 'papà', 'bambino', 'bambina',
+      'bello', 'grande', 'piccolo', 'rosso', 'blu', 'verde', 'giallo', 'nero'
     ]
   },
   {
     id: 'three-letter',
-    name: 'Three Letter Words (CVC)',
-    description: 'Consonant-vowel-consonant patterns',
+    name: 'Parole di Tre Lettere',
+    description: 'Parole semplici con struttura consonante-vocale-consonante',
     words: [
-      'cat', 'dog', 'run', 'big', 'red', 'sun', 'hat', 'pen', 'top', 'box',
-      'leg', 'cup', 'bug', 'bag', 'sit', 'hop', 'cut', 'fun', 'win', 'yes',
-      'zip', 'jam', 'web', 'fix', 'mix', 'six', 'fox', 'tax', 'wax', 'van'
+      'can', 'bat', 'car', 'gas', 'bar', 'col', 'dal', 'fan', 'gel', 'mal',
+      'non', 'per', 'poi', 'qui', 'sei', 'sul', 'tra', 'una', 'via', 'zoo',
+      'due', 'tre', 'oro', 'lei', 'lui', 'mio', 'tuo', 'suo', 'sta', 'vai'
     ]
   },
   {
     id: 'syllables',
-    name: 'Common Syllables',
-    description: 'Two-letter syllable combinations',
+    name: 'Sillabe Comuni',
+    description: 'Combinazioni di due lettere',
     words: [
       'ba', 'be', 'bi', 'bo', 'bu', 'ca', 'ce', 'ci', 'co', 'cu',
       'da', 'de', 'di', 'do', 'du', 'fa', 'fe', 'fi', 'fo', 'fu',
-      'ga', 'ge', 'gi', 'go', 'gu', 'ha', 'he', 'hi', 'ho', 'hu',
-      'la', 'le', 'li', 'lo', 'lu', 'ma', 'me', 'mi', 'mo', 'mu'
+      'ga', 'ge', 'gi', 'go', 'gu', 'la', 'le', 'li', 'lo', 'lu',
+      'ma', 'me', 'mi', 'mo', 'mu', 'na', 'ne', 'ni', 'no', 'nu'
     ]
   },
   {
     id: 'four-letter',
-    name: 'Four Letter Words',
-    description: 'Slightly more complex words',
+    name: 'Parole di Quattro Lettere',
+    description: 'Parole leggermente più complesse',
     words: [
-      'book', 'look', 'good', 'took', 'come', 'some', 'home', 'time', 'like',
-      'make', 'take', 'over', 'very', 'what', 'when', 'they', 'will', 'with',
-      'have', 'this', 'that', 'from', 'long', 'each', 'word', 'find', 'kind'
+      'casa', 'mare', 'sole', 'luna', 'vita', 'mano', 'occhi', 'testa', 'cuore', 'amore',
+      'nome', 'paese', 'mondo', 'tempo', 'giorno', 'notte', 'donna', 'uomo', 'figlio', 'madre',
+      'padre', 'fiore', 'acqua', 'terra', 'cielo', 'alto', 'bene', 'dove', 'come', 'cosa'
     ]
   }
 ];
