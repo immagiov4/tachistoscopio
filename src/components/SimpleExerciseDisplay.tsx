@@ -420,9 +420,24 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
             {displayState === 'interval' && (
               <div className="text-center">
                 {/* Effetto di pulsazione morbida dello sfondo durante l'intervallo */}
-                <div className="absolute inset-0 bg-black/15 animate-pulse" style={{
-                  animation: 'pulse 1.5s ease-in-out infinite alternate'
-                }}></div>
+                <div 
+                  className="absolute inset-0 bg-black/15" 
+                  style={{
+                    animation: 'fadeInThenPulse 2s ease-in-out infinite',
+                    animationFillMode: 'forwards'
+                  }}
+                ></div>
+                <style dangerouslySetInnerHTML={{
+                  __html: `
+                    @keyframes fadeInThenPulse {
+                      0% { opacity: 0; }
+                      25% { opacity: 1; }
+                      50% { opacity: 0.3; }
+                      75% { opacity: 1; }
+                      100% { opacity: 0.5; }
+                    }
+                  `
+                }}></style>
               </div>
             )}
           </div>
