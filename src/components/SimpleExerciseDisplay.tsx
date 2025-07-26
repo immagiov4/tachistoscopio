@@ -432,7 +432,8 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     formatWord
   ]);
 
-  const progress = (session.currentWordIndex / session.words.length) * 100;
+  const currentWordNumber = session.currentWordIndex + 1;
+  const progress = (currentWordNumber / session.words.length) * 100;
   const accuracy = session.currentWordIndex > 0 ? 
     ((session.currentWordIndex - session.errors.length) / session.currentWordIndex) * 100 : 100;
 
@@ -562,9 +563,9 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
               <div className="flex items-center justify-center gap-4">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-                  <p className="text-sm text-gray-700 font-semibold">
-                    Progresso: {session.currentWordIndex}/{session.words.length}
-                  </p>
+                   <p className="text-sm text-gray-700 font-semibold">
+                     Progresso: {currentWordNumber}/{session.words.length}
+                   </p>
                 </div>
                 <div className="text-sm text-gray-600 font-medium">
                   Precisione: {Math.round(((session.currentWordIndex - session.errors.length) / Math.max(session.currentWordIndex, 1)) * 100)}%
