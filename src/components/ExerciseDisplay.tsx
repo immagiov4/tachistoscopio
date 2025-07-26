@@ -169,7 +169,7 @@ export const ExerciseDisplay: React.FC<ExerciseDisplayProps> = ({
     };
   }, [session, isCountingDown, formatWord, nextWord]);
 
-  const progress = ((session.currentWordIndex + 1) / session.wordList.words.length) * 100;
+  const progress = Math.min(((session.currentWordIndex + 1) / session.wordList.words.length) * 100, 100);
   const errorsCount = session.errors.length;
   const accuracy = session.currentWordIndex > 0 ? 
     ((session.currentWordIndex + 1 - errorsCount) / (session.currentWordIndex + 1)) * 100 : 100;
