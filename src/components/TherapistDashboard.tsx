@@ -60,9 +60,37 @@ export const TherapistDashboard: React.FC = () => {
   const fetchData = async () => {
     await Promise.all([
       fetchPatients(),
+      fetchWordLists(),
       fetchExercises(),
     ]);
     setLoading(false);
+  };
+
+  const fetchWordLists = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('word_lists')
+        .select('*')
+        .eq('created_by', profile?.id);
+
+      if (error) throw error;
+
+      // Combine predefined lists with custom lists
+      const predefinedAsWordList: WordList[] = PREDEFINED_WORD_LISTS.map(list => ({
+        id: list.id,
+        name: list.name,
+        description: list.description || '',
+        words: list.words,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: 'system'
+      }));
+
+      const allWordLists = [...predefinedAsWordList, ...(data || [])];
+      setWordLists(allWordLists);
+    } catch (error) {
+      console.error('Error fetching word lists:', error);
+    }
   };
 
   const fetchPatients = async () => {
@@ -319,9 +347,12 @@ export const TherapistDashboard: React.FC = () => {
                       <SelectTrigger>
                         <SelectValue placeholder="Seleziona una lista di parole" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="predefined">Lista Predefinita</SelectItem>
-                        <SelectItem value="custom">Lista Personalizzata</SelectItem>
+                      <SelectContent className="bg-background border z-50">
+                        {wordLists.map((wordList) => (
+                          <SelectItem key={wordList.id} value={wordList.id}>
+                            {wordList.name} ({wordList.words.length} parole)
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -359,27 +390,6 @@ export const TherapistDashboard: React.FC = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="fontSize">Dimensione Font</Label>
-                        <Select 
-                          value={exerciseSettings.fontSize} 
-                          onValueChange={(value) => setExerciseSettings({
-                            ...exerciseSettings,
-                            fontSize: value as any
-                          })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="small">Piccolo</SelectItem>
-                            <SelectItem value="medium">Medio</SelectItem>
-                            <SelectItem value="large">Grande</SelectItem>
-                            <SelectItem value="extra-large">Extra Grande</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div>
                         <Label htmlFor="textCase">Formato Testo</Label>
                         <Select 
                           value={exerciseSettings.textCase} 
@@ -391,12 +401,25 @@ export const TherapistDashboard: React.FC = () => {
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-background border z-50">
                             <SelectItem value="original">Originale</SelectItem>
                             <SelectItem value="uppercase">MAIUSCOLO</SelectItem>
                             <SelectItem value="lowercase">minuscolo</SelectItem>
                           </SelectContent>
                         </Select>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="maskDuration">Durata Maschera (ms)</Label>
+                        <Input
+                          id="maskDuration"
+                          type="number"
+                          value={exerciseSettings.maskDuration}
+                          onChange={(e) => setExerciseSettings({
+                            ...exerciseSettings,
+                            maskDuration: parseInt(e.target.value)
+                          })}
+                        />
                       </div>
                     </div>
 
