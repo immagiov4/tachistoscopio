@@ -9,6 +9,7 @@ import { Calendar, Clock, BookOpen, BarChart3, Search, Copy, Plus, Trash2, UserC
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, WordList, Exercise, ExerciseSettings, DAYS_OF_WEEK } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
+import { LoadingPage } from '@/components/ui/loading';
 import { PatientDashboard } from '@/components/PatientDashboard';
 interface PatientExerciseManagerProps {
   therapistId: string;
@@ -340,7 +341,12 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     setStudioMode(null);
   };
   if (loading) {
-    return <div className="p-4">Caricamento...</div>;
+    return (
+      <LoadingPage 
+        title="Caricamento Gestione Esercizi..." 
+        description="Stiamo preparando gli esercizi per i tuoi pazienti"
+      />
+    );
   }
 
   // Se in modalità studio, mostra la dashboard del paziente

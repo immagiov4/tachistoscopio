@@ -11,6 +11,7 @@ import { SimpleExerciseDisplay } from './SimpleExerciseDisplay';
 
 import { ThemeSelector, ThemeType, themes } from './ThemeSelector';
 import { toast } from '@/hooks/use-toast';
+import { LoadingPage, StatsSkeleton } from '@/components/ui/loading';
 
 interface ExerciseSession {
   words: string[];
@@ -246,7 +247,12 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
   };
 
   if (loading) {
-    return <div className="p-4">Caricamento...</div>;
+    return (
+      <LoadingPage 
+        title="Caricamento Dashboard..." 
+        description="Stiamo preparando i tuoi dati personali"
+      />
+    );
   }
 
   if (currentSession) {
@@ -468,9 +474,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
             </CardHeader>
             <CardContent>
               {statsLoading ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-600">Caricamento statistiche...</p>
-                </div>
+                <StatsSkeleton />
               ) : recentSessions.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-600">

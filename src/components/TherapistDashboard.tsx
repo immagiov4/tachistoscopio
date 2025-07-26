@@ -13,6 +13,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, WordList, Exercise, ExerciseSettings, DEFAULT_SETTINGS, DAYS_OF_WEEK } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
+import { PatientDashboard } from './PatientDashboard';
+import { LoadingPage } from '@/components/ui/loading';
 
 import { PatientExerciseManager } from '@/components/PatientExerciseManager';
 import { TutorialModal } from '@/components/TutorialModal';
@@ -279,7 +281,12 @@ export const TherapistDashboard: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="p-4">Caricamento...</div>;
+    return (
+      <LoadingPage 
+        title="Caricamento Area Terapista..." 
+        description="Stiamo preparando la dashboard per i tuoi pazienti"
+      />
+    );
   }
 
   return (
