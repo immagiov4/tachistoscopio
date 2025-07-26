@@ -48,6 +48,24 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   
   // Ref per controllare se l'esercizio è ancora in corso nei timer
   const isRunningRef = useRef(session.isRunning);
+  
+  // Ref per tracciare tutti i timer attivi e poterli cancellare
+  const activeTimersRef = useRef<NodeJS.Timeout[]>([]);
+  
+  // Funzione per aggiungere un timer da tracciare
+  const addTimer = (timerId: NodeJS.Timeout) => {
+    activeTimersRef.current.push(timerId);
+    return timerId;
+  };
+  
+  // Funzione per cancellare tutti i timer attivi
+  const clearAllTimers = () => {
+    console.log('🛑 Clearing all active timers:', activeTimersRef.current.length);
+    activeTimersRef.current.forEach(timerId => {
+      clearTimeout(timerId);
+    });
+    activeTimersRef.current = [];
+  };
 
   // Funzione per ottenere l'ombra appropriata per ogni tema
   const getThemeShadow = (themeId: ThemeType) => {
@@ -336,7 +354,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       setStimulusVisible(true);
       
       // Timer per stimolo - ridotto per essere meno invadente
-      const stimulusTimer = setTimeout(() => {
+      const stimulusTimer = addTimer(setTimeout(() => {
         if (!isRunningRef.current) {
           console.log('Session stopped during stimulus timer');
           return;
@@ -344,7 +362,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         setStimulusVisible(false);
         
         // Timer fisso per transizione - sempre 300ms
-        const transitionTimer = setTimeout(() => {
+        const transitionTimer = addTimer(setTimeout(() => {
           if (!isRunningRef.current) {
             console.log('Session stopped during transition timer');
             return;
@@ -354,7 +372,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
           setCurrentWord(formatWord(currentWordToShow));
 
           // Timer per durata parola - basato su settings
-          const wordTimer = setTimeout(() => {
+          const wordTimer = addTimer(setTimeout(() => {
             if (!isRunningRef.current) {
               console.log('Session stopped during word timer');
               return;
@@ -363,46 +381,39 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
             if (session.settings.useMask) {
               console.log('Showing mask for', session.settings.maskDuration, 'ms');
               setDisplayState('mask');
-              const maskTimer = setTimeout(() => {
+              const maskTimer = addTimer(setTimeout(() => {
                 if (!isRunningRef.current) {
                   console.log('Session stopped during mask timer');
                   return;
                 }
                 console.log('Mask timer finished, showing interval');
                 setDisplayState('interval');
-                const intervalTimer = setTimeout(() => {
+                const intervalTimer = addTimer(setTimeout(() => {
                   if (!isRunningRef.current) {
                     console.log('Session stopped during interval timer');
                     return;
                   }
                   nextWord();
-                }, session.settings.intervalDuration);
-                return () => clearTimeout(intervalTimer);
-              }, session.settings.maskDuration);
-              return () => clearTimeout(maskTimer);
+                }, session.settings.intervalDuration));
+              }, session.settings.maskDuration));
             } else {
               console.log('No mask, going directly to interval');
               setDisplayState('interval');
-              const intervalTimer = setTimeout(() => {
+              const intervalTimer = addTimer(setTimeout(() => {
                 if (!isRunningRef.current) {
                   console.log('Session stopped during interval timer (no mask)');
                   return;
                 }
                 nextWord();
-              }, session.settings.intervalDuration);
-              return () => clearTimeout(intervalTimer);
+              }, session.settings.intervalDuration));
             }
-          }, session.settings.exposureDuration);
-
-          return () => clearTimeout(wordTimer);
-        }, 300); // Timing fisso per transizione
-
-        return () => clearTimeout(transitionTimer);
-      }, 500); // Timing ridotto per stimolo
+          }, session.settings.exposureDuration));
+        }, 300)); // Timing fisso per transizione
+      }, 500)); // Timing ridotto per stimolo
 
       return () => {
-        console.log('Cleaning up timers - exercise stopped');
-        clearTimeout(stimulusTimer);
+        console.log('🧹 Cleaning up timers - exercise stopped');
+        clearAllTimers();
         setDisplayState('interval');
       };
     }
@@ -574,11 +585,14 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
               <Button 
                 onClick={() => {
                   console.log('🛑 Stop button clicked - session.isRunning:', session.isRunning);
+                  // Prima cancella tutti i timer attivi
+                  clearAllTimers();
+                  // Poi chiama onStop per aggiornare lo stato
                   onStop();
                   // Forza il reset dello stato di visualizzazione
                   setDisplayState('interval');
                   setStimulusVisible(false);
-                  console.log('🛑 Stop button processed');
+                  console.log('🛑 Stop button processed - all timers cleared');
                 }} 
                 variant="outline" 
                 size="lg" 
