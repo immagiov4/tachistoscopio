@@ -46,26 +46,43 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   const [isCountingDown, setIsCountingDown] = useState(true);
   const [stimulusVisible, setStimulusVisible] = useState(false);
   
-  // Ref per controllare se l'esercizio è ancora in corso nei timer
+  // Ref per controllare se il componente è ancora montato
+  const isMountedRef = useRef(true);
   const isRunningRef = useRef(session.isRunning);
-  
-  // Ref per tracciare tutti i timer attivi e poterli cancellare
   const activeTimersRef = useRef<NodeJS.Timeout[]>([]);
+  
+  // Funzione per controllare se possiamo aggiornare lo stato
+  const safeSetState = useCallback((fn: () => void) => {
+    if (isMountedRef.current) {
+      fn();
+    }
+  }, []);
   
   // Funzione per aggiungere un timer da tracciare
   const addTimer = (timerId: NodeJS.Timeout) => {
-    activeTimersRef.current.push(timerId);
+    if (isMountedRef.current) {
+      activeTimersRef.current.push(timerId);
+    }
     return timerId;
   };
   
   // Funzione per cancellare tutti i timer attivi
-  const clearAllTimers = () => {
+  const clearAllTimers = useCallback(() => {
     console.log('🛑 Clearing all active timers:', activeTimersRef.current.length);
     activeTimersRef.current.forEach(timerId => {
       clearTimeout(timerId);
     });
     activeTimersRef.current = [];
-  };
+  }, []);
+
+  // Cleanup al dismount del componente
+  useEffect(() => {
+    return () => {
+      console.log('🧹 Component unmounting - cleaning up all timers and state');
+      isMountedRef.current = false;
+      clearAllTimers();
+    };
+  }, [clearAllTimers]);
 
   // Funzione per ottenere l'ombra appropriata per ogni tema
   const getThemeShadow = (themeId: ThemeType) => {
@@ -268,14 +285,19 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     
     if (isCountingDown && countdown > 0) {
       const timer = setTimeout(() => {
-        console.log('Countdown decreasing:', countdown - 1);
-        setCountdown(countdown - 1);
+        safeSetState(() => {
+          console.log('Countdown decreasing:', countdown - 1);
+          setCountdown(countdown - 1);
+        });
       }, 1000);
+      addTimer(timer);
       return () => clearTimeout(timer);
     } else if (isCountingDown && countdown === 0) {
-      console.log('Countdown finished, starting exercise');
-      setIsCountingDown(false);
-      onUpdateSession({ ...session, isRunning: true });
+      safeSetState(() => {
+        console.log('Countdown finished, starting exercise');
+        setIsCountingDown(false);
+        onUpdateSession({ ...session, isRunning: true });
+      });
     }
   }, [countdown, isCountingDown, session, onUpdateSession]);
 
@@ -590,11 +612,15 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
                   console.log('🛑 Stop button clicked - session.isRunning:', session.isRunning);
                   // Prima cancella tutti i timer attivi
                   clearAllTimers();
+                  // Marca il componente come unmounted per prevenire memory leak
+                  isMountedRef.current = false;
                   // Poi chiama onStop per aggiornare lo stato
                   onStop();
                   // Forza il reset dello stato di visualizzazione
-                  setDisplayState('interval');
-                  setStimulusVisible(false);
+                  safeSetState(() => {
+                    setDisplayState('interval');
+                    setStimulusVisible(false);
+                  });
                   console.log('🛑 Stop button processed - all timers cleared');
                 }} 
                 variant="outline" 
