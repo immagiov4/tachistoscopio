@@ -419,7 +419,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
 
             {displayState === 'interval' && (
               <div className="text-center">
-                <div className="w-12 h-12 mx-auto border-4 border-white/30 border-t-blue-400 rounded-full animate-spin"></div>
+                {/* Intervallo senza caricamento visivo */}
               </div>
             )}
           </div>
