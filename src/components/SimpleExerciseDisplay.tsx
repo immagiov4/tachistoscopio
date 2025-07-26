@@ -100,42 +100,52 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   }, [session.settings.textCase]);
 
   const playErrorSound = () => {
+    console.log('playErrorSound called');
     try {
-      // Su mobile richiede interazione utente - usiamo anche il fallback vibrazione
+      // Priorità alla vibrazione su mobile
       if ('vibrate' in navigator) {
-        navigator.vibrate(100); // Vibrazione breve come feedback
+        console.log('Attempting vibration');
+        const vibrateResult = navigator.vibrate(150); // Vibrazione più lunga
+        console.log('Vibration result:', vibrateResult);
       }
       
-      // Suono molto dolce e delicato per bambini - ottimizzato per mobile
+      // Tentativo audio con gestione mobile migliorata
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      console.log('AudioContext state:', audioContext.state);
       
-      // Su mobile potrebbe essere sospeso, riattivalo
+      // Su mobile l'AudioContext potrebbe essere sospeso
+      const playAudio = () => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Suono molto più dolce
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.15);
+        
+        gainNode.gain.setValueAtTime(0.03, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.15);
+        console.log('Audio played successfully');
+      };
+      
       if (audioContext.state === 'suspended') {
-        audioContext.resume();
+        console.log('Resuming suspended AudioContext');
+        audioContext.resume().then(() => {
+          console.log('AudioContext resumed');
+          playAudio();
+        }).catch(e => console.log('Failed to resume AudioContext:', e));
+      } else {
+        playAudio();
       }
       
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      // Suono molto più dolce - tono ancora più basso e curva più morbida
-      oscillator.type = 'sine'; // Forma d'onda più dolce
-      oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // Frequenza molto più bassa e calda
-      oscillator.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.1); // Scende a frequenza molto grave
-      
-      gainNode.gain.setValueAtTime(0.02, audioContext.currentTime); // Volume ancora più basso
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1); // Fade out più veloce
-      
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.1); // Durata molto più breve
     } catch (error) {
-      console.log('Audio/vibration not available:', error);
-      // Fallback solo vibrazione se disponibile
-      if ('vibrate' in navigator) {
-        navigator.vibrate(100);
-      }
+      console.log('Audio/vibration error:', error);
     }
   };
 

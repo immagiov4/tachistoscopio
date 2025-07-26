@@ -279,7 +279,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
           backgroundSize: '2px 2px'
         }}
       ></div>
-      <div className="container mx-auto p-4 max-w-4xl">
+      <div className="container mx-auto p-2 sm:p-4 max-w-lg sm:max-w-4xl">{/* Larghezza limitata su mobile */}
         <header className="mb-8 flex justify-between items-center bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-md border border-white/20">
           <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -377,7 +377,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                           <p className="text-sm font-medium text-gray-700">
                             Dimensione Testo
                           </p>
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 sm:gap-3">
                             <Button 
                               variant="outline" 
                               size="sm"
@@ -389,11 +389,11 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                                 }
                               }}
                               disabled={accessibilitySettings.fontSize === 'small'}
-                              className="w-8 h-8 p-0 border-2 hover:scale-110 transition-transform duration-200"
+                              className="w-7 h-7 sm:w-8 sm:h-8 p-0 border-2 hover:scale-110 transition-transform duration-200 text-xs"
                             >
                               -
                             </Button>
-                            <span className="text-sm font-bold text-primary min-w-[70px] text-center px-3 py-1 bg-primary/10 rounded-lg border border-primary/20">
+                            <span className="text-xs sm:text-sm font-bold text-primary min-w-[60px] sm:min-w-[70px] text-center px-2 sm:px-3 py-1 bg-primary/10 rounded-lg border border-primary/20">
                               {accessibilitySettings.fontSize === 'small' ? 'Piccolo' :
                                accessibilitySettings.fontSize === 'medium' ? 'Medio' :
                                accessibilitySettings.fontSize === 'large' ? 'Grande' : 'XL'}
@@ -409,7 +409,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                                 }
                               }}
                               disabled={accessibilitySettings.fontSize === 'extra-large'}
-                              className="w-8 h-8 p-0 border-2 hover:scale-110 transition-transform duration-200"
+                              className="w-7 h-7 sm:w-8 sm:h-8 p-0 border-2 hover:scale-110 transition-transform duration-200 text-xs"
                             >
                               +
                             </Button>
