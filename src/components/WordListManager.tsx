@@ -162,18 +162,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   }, [therapistId]);
 
-  // Debounced effect for word generation to avoid lag from rapid parameter changes
-  useEffect(() => {
-    if (activeTab !== 'generator') return;
-    
-    // Debounce the generation to avoid multiple rapid calls
-    const timeoutId = setTimeout(() => {
-      generateWords();
-    }, 300); // Wait 300ms after last parameter change
-    
-    // Cleanup timeout if parameters change again before delay expires
-    return () => clearTimeout(timeoutId);
-  }, [generatorParams, activeTab]);
+  // Rimuovo l'effect automatico - ora genera solo su richiesta esplicita
 
   // Load dataset on component mount
   useEffect(() => {
@@ -344,18 +333,27 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       ['pane', 'bane'], ['palla', 'balla'], ['polo', 'bolo'],
       ['tana', 'dana'], ['tono', 'dono'], ['torre', 'dorre'],
       ['cane', 'gane'], ['casa', 'gasa'], ['core', 'gore'],
+      ['pino', 'bino'], ['porto', 'borto'], ['pasta', 'basta'],
+      ['tipo', 'tibo'], ['tempo', 'dembo'], ['terra', 'dera'],
+      ['cola', 'gola'], ['caldo', 'galdo'], ['come', 'gome'],
       
       // Consonanti fricative (f/v, s/z)
       ['fare', 'vare'], ['fila', 'vila'], ['fino', 'vino'], ['fede', 'vede'],
       ['sole', 'zole'], ['sera', 'zera'], ['sano', 'zano'],
+      ['foca', 'voca'], ['foto', 'voto'], ['fase', 'vase'],
+      ['sala', 'zala'], ['seta', 'zeta'], ['sogno', 'zogno'],
       
       // Consonanti liquide (l/r)
       ['lana', 'rana'], ['lotto', 'rotto'], ['lume', 'rume'],
       ['male', 'mare'], ['melo', 'mero'], ['palo', 'paro'], ['velo', 'vero'],
       ['bello', 'berro'], ['collo', 'corro'], ['valle', 'varre'],
+      ['luce', 'ruce'], ['lago', 'rago'], ['lima', 'rima'],
+      ['lato', 'rato'], ['luna', 'runa'], ['loro', 'roro'],
       
       // Consonanti nasali (m/n)
       ['mano', 'nano'], ['mono', 'nono'], ['rama', 'rana'], ['dama', 'dana'],
+      ['mare', 'nare'], ['moto', 'noto'], ['maso', 'naso'],
+      ['mimo', 'nino'], ['meta', 'neta'], ['modo', 'nodo'],
       
       // Vocali (a/e/i/o/u)
       ['pane', 'pene'], ['pane', 'pino'], ['pane', 'pone'],
@@ -363,29 +361,61 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       ['casa', 'case'], ['casa', 'cose'], ['rosa', 'rose'],
       ['vino', 'veno'], ['vino', 'vano'], ['luce', 'lace'],
       ['muro', 'mero'], ['duro', 'daro'], ['puro', 'paro'],
+      ['tela', 'tila'], ['nero', 'niro'], ['peso', 'piso'],
+      ['bene', 'bane'], ['sera', 'sira'], ['pelo', 'pulo'],
+      ['meta', 'mita'], ['neve', 'niva'], ['leva', 'liva'],
       
       // Consonanti doppie vs singole (verificate)
       ['cane', 'canne'], ['pala', 'palla'], ['casa', 'cassa'], ['rosa', 'rossa'],
       ['papa', 'pappa'], ['gala', 'galla'], ['cola', 'colla'], ['bela', 'bella'],
       ['pena', 'penna'], ['sano', 'sanno'], ['fato', 'fatto'], ['note', 'notte'],
       ['moto', 'motto'], ['caro', 'carro'], ['sera', 'serra'],
+      ['nono', 'nonno'], ['coro', 'corro'], ['foro', 'forro'],
+      ['tela', 'tella'], ['buco', 'bucco'], ['eco', 'ecco'],
+      ['grano', 'granno'], ['piano', 'pianno'], ['mono', 'monno'],
       
       // Gruppi consonantici (verificati)
       ['prato', 'pato'], ['fronte', 'fonte'], ['spazio', 'sazio'],
       ['grande', 'garde'], ['presto', 'pesto'], ['bravo', 'bavo'],
       ['plico', 'pico'], ['blusa', 'busa'],
+      ['trave', 'tave'], ['classe', 'case'], ['franco', 'fanco'],
+      ['grasso', 'gasso'], ['primo', 'pimo'], ['brutto', 'butto'],
+      ['altro', 'alto'], ['fresco', 'fesco'], ['spina', 'sina'],
       
       // Consonanti palatali
       ['bagno', 'banno'], ['sogno', 'sonno'], ['legno', 'lenno'],
       ['pesce', 'pece'], ['bosco', 'boco'], ['mosca', 'moca'],
+      ['foglia', 'folia'], ['famiglia', 'familia'], ['figlia', 'filia'],
+      ['maggio', 'maio'], ['aggio', 'aio'], ['baggio', 'baio'],
       
       // Contrasti semantici comuni (verificati)
       ['bene', 'benne'], ['mele', 'melle'], ['sole', 'solle'],
       ['filo', 'fillo'], ['dito', 'ditto'],
+      ['toro', 'torre'], ['foro', 'forre'], ['moro', 'morre'],
+      ['oro', 'orre'], ['coro', 'corre'], ['loro', 'lorre'],
+      
+      // Consonanti sibilanti e affricate
+      ['pezzo', 'peso'], ['mezzo', 'meso'], ['prezzo', 'presso'],
+      ['cioè', 'ciò'], ['già', 'gia'], ['più', 'piu'],
+      ['chiesa', 'chesa'], ['chilo', 'kilo'], ['che', 'ke'],
+      
+      // Contrasti vocalici complessi
+      ['fiume', 'fiame'], ['piume', 'piame'], ['buone', 'boane'],
+      ['cuore', 'care'], ['fuori', 'fari'], ['suoi', 'sai'],
+      ['tuoi', 'tai'], ['nuovi', 'navi'], ['ruote', 'rate'],
       
       // Plurali e forme flesse (verificate)
       ['ferro', 'ferri'], ['vetro', 'vetri'], ['centro', 'centri'],
-      ['numero', 'numeri'], ['studio', 'studi']
+      ['numero', 'numeri'], ['studio', 'studi'],
+      ['libro', 'libri'], ['quadro', 'quadri'], ['teatro', 'teatri'],
+      ['metro', 'metri'], ['filtro', 'filtri'], ['altro', 'altri'],
+      
+      // Coppie con consonanti aspirate
+      ['hotel', 'otel'], ['hobby', 'obbi'], ['hockey', 'occhei'],
+      
+      // Consonanti retroflesse e palatali
+      ['sciare', 'siare'], ['scienza', 'sienza'], ['scenario', 'senario'],
+      ['gnocchi', 'nocchi'], ['gnomo', 'nomo'], ['gnu', 'nu']
     ];
     
     // Filter pairs based on all criteria, including syllable count
@@ -1003,12 +1033,21 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                       className="h-8 text-xs"
                     >
                       <RefreshCw className="h-3 w-3 mr-1" />
-                      Rigenera Parole
+                      Aggiorna
                     </Button>
                   </div>
                 ) : (
-                  <div className="text-center py-3 text-gray-500 text-sm">
-                    Nessuna parola trovata
+                  <div className="text-center py-3 space-y-2">
+                    <p className="text-gray-500 text-sm">Genera parole con i parametri sopra</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={generateWords}
+                      className="h-8 text-xs"
+                    >
+                      <Wand2 className="h-3 w-3 mr-1" />
+                      Genera Parole
+                    </Button>
                   </div>
                 )}
               </div>
@@ -1031,25 +1070,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                   </p>
                 </div>
                 
-                {/* Importa file - compatto */}
-                <div className="flex items-center gap-2">
-                  <input
-                    type="file"
-                    accept=".txt,.csv"
-                    onChange={handleImportFile}
-                    className="hidden"
-                    id="file-import"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => document.getElementById('file-import')?.click()}
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    Importa file
-                  </Button>
-                  <span className="text-xs text-gray-500">txt, csv</span>
-                </div>
               </div>
             )}
 

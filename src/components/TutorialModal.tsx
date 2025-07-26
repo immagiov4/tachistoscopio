@@ -26,7 +26,7 @@ const tutorialSteps = [
     title: "Modalità Studio",
     description: "Gestisci gli esercizi durante la terapia",
     icon: UserCheck,
-    content: "Il pulsante 'Modalità Studio' ti permette di:\n• Entrare nella dashboard del paziente senza login\n• Gestire gli esercizi durante le sessioni in studio\n• Avviare e supervisionare gli esercizi direttamente\n• Tornare facilmente alla gestione pazienti\n\nPerfetto per le terapie in presenza!"
+    content: "Il pulsante 'Modalità Studio' ti permette di:\n• Entrare nella dashboard del paziente senza login\n• Gestire gli esercizi durante le sessioni in studio\n• Avviare e supervisionare gli esercizi direttamente\n\nPerfetto per le terapie in presenza!"
   },
   {
     title: "Piano Settimanale",
