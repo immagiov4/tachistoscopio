@@ -458,7 +458,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                     <div className="text-center p-3 rounded-lg border-l-4 border-green-500" style={{
                       background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.6) 100%)',
                       backdropFilter: 'blur(8px) saturate(1.2)',
-                      boxShadow: 'inset rgba(0, 0, 0, 0.2) 0px 2px 1px'
+                      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px'
                     }}>
                       <div className="text-2xl font-bold text-green-700">
                         {Math.round(recentSessions.reduce((acc, s) => acc + s.accuracy, 0) / recentSessions.length)}%
@@ -468,7 +468,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ studioPatien
                     <div className="text-center p-3 rounded-lg border-l-4 border-orange-500" style={{
                       background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.6) 100%)',
                       backdropFilter: 'blur(8px) saturate(1.2)',
-                      boxShadow: 'inset rgba(0, 0, 0, 0.2) 0px 2px 1px'
+                      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px'
                     }}>
                       <div className="text-2xl font-bold text-orange-700">
                         {recentSessions.reduce((acc, s) => acc + s.total_words, 0)}
