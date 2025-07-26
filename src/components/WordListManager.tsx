@@ -349,12 +349,15 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         ascending: false
       });
       if (error) throw error;
-      const wordLists: WordList[] = data.map(dbList => ({
-        id: dbList.id,
-        name: dbList.name,
-        description: dbList.description || `Lista personalizzata con ${dbList.words.length} parole`,
-        words: dbList.words
-      }));
+      const wordLists: WordList[] = data.map(dbList => {
+        const settings = (dbList.settings as unknown as ExerciseSettings) || DEFAULT_SETTINGS;
+        return {
+          id: dbList.id,
+          name: dbList.name,
+          description: dbList.description || `${dbList.words.length} parole • Esp: ${settings.exposureDuration}ms • Int: ${settings.intervalDuration}ms${settings.useMask ? ` • Maschera: ${settings.maskDuration}ms` : ''}`,
+          words: dbList.words
+        };
+      });
       setSavedWordLists(wordLists);
     } catch (error) {
       console.error('Error loading word lists:', error);
@@ -395,7 +398,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         error
       } = await supabase.from('word_lists').insert({
         name: customListName || 'Nuovo esercizio',
-        description: `Lista ${activeTab === 'generator' ? 'generata' : 'personalizzata'} con ${wordsToSave.length} parole`,
+        description: `${wordsToSave.length} parole • Esp: ${exerciseSettings.exposureDuration}ms • Int: ${exerciseSettings.intervalDuration}ms${exerciseSettings.useMask ? ` • Maschera: ${exerciseSettings.maskDuration}ms` : ''}`,
         words: wordsToSave,
         settings: exerciseSettings as any,
         created_by: therapistId
@@ -404,7 +407,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       const customList: WordList = {
         id: data.id,
         name: data.name,
-        description: data.description || `Lista personalizzata con ${wordsToSave.length} parole`,
+        description: data.description || `${wordsToSave.length} parole • Esp: ${exerciseSettings.exposureDuration}ms • Int: ${exerciseSettings.intervalDuration}ms${exerciseSettings.useMask ? ` • Maschera: ${exerciseSettings.maskDuration}ms` : ''}`,
         words: data.words
       };
       await loadSavedWordLists();
@@ -536,7 +539,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         error
       } = await supabase.from('word_lists').update({
         name: customListName,
-        description: `Lista personalizzata con ${words.length} parole`,
+        description: `${words.length} parole • Esp: ${exerciseSettings.exposureDuration}ms • Int: ${exerciseSettings.intervalDuration}ms${exerciseSettings.useMask ? ` • Maschera: ${exerciseSettings.maskDuration}ms` : ''}`,
         words: words,
         settings: exerciseSettings as any
       }).eq('id', editingList).eq('created_by', therapistId).select().single();
@@ -544,7 +547,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       const updatedList: WordList = {
         id: data.id,
         name: data.name,
-        description: data.description || `Lista personalizzata con ${words.length} parole`,
+        description: data.description || `${words.length} parole • Esp: ${exerciseSettings.exposureDuration}ms • Int: ${exerciseSettings.intervalDuration}ms${exerciseSettings.useMask ? ` • Maschera: ${exerciseSettings.maskDuration}ms` : ''}`,
         words: data.words
       };
 
