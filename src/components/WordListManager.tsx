@@ -1004,25 +1004,25 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                   </div>
                 </div>
 
-                <div>
-                  <Label className="text-xs font-medium text-gray-700">Sillabe</Label>
-                  <Select
-                    value={generatorParams.syllableCount}
-                    onValueChange={(value) => setGeneratorParams({...generatorParams, syllableCount: value})}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="2">2 sillabe</SelectItem>
-                      <SelectItem value="3">3 sillabe</SelectItem>
-                      <SelectItem value="4">4 sillabe</SelectItem>
-                      <SelectItem value="5">5 sillabe</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label className="text-xs font-medium text-gray-700">Sillabe</Label>
+                    <Select
+                      value={generatorParams.syllableCount}
+                      onValueChange={(value) => setGeneratorParams({...generatorParams, syllableCount: value})}
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="2">2 sillabe</SelectItem>
+                        <SelectItem value="3">3 sillabe</SelectItem>
+                        <SelectItem value="4">4 sillabe</SelectItem>
+                        <SelectItem value="5">5 sillabe</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="text-xs font-medium text-gray-700">Inizia con</Label>
                     <Input
@@ -1059,28 +1059,10 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                         </Badge>
                       ))}
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={generateWords}
-                      className="h-8 text-xs flex-shrink-0"
-                    >
-                      <RefreshCw className="h-3 w-3 mr-1" />
-                      Aggiorna
-                    </Button>
                   </div>
                 ) : (
-                  <div className="text-center py-3 space-y-2">
-                    <p className="text-gray-500 text-sm">Genera parole con i parametri sopra</p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={generateWords}
-                      className="h-8 text-xs"
-                    >
-                      <Wand2 className="h-3 w-3 mr-1" />
-                      Genera Parole
-                    </Button>
+                  <div className="text-center py-3">
+                    <p className="text-gray-500 text-sm">Modifica i parametri sopra per generare automaticamente le parole</p>
                   </div>
                 )}
               </div>
