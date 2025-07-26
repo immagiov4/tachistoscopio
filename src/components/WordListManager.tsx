@@ -47,8 +47,15 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   const [generatedWords, setGeneratedWords] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   
-  // Exercise settings state
-  const [exerciseSettings, setExerciseSettings] = useState<ExerciseSettings>(DEFAULT_SETTINGS);
+  // Exercise settings state - Impostazioni ottimizzate per logopedia/dislessia
+  const [exerciseSettings, setExerciseSettings] = useState<ExerciseSettings>({
+    exposureDuration: 150,    // 150ms: ottimale per dislessia
+    intervalDuration: 800,    // 800ms: permette elaborazione
+    textCase: 'original' as const,
+    useMask: false,
+    maskDuration: 100,        // 100ms: breve per non interferire
+    fontSize: 'large' as const
+  });
   
   // State for complete Italian words dataset
   const [allWords, setAllWords] = useState<string[]>([]);
@@ -781,6 +788,30 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
+                            // Export singolo esercizio con settings
+                            const dataToExport = {
+                              name: list.name,
+                              description: list.description,
+                              words: list.words,
+                              settings: exerciseSettings
+                            };
+                            const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `${list.name.toLowerCase().replace(/\s+/g, '_')}_esercizio.json`;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                          }}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Download className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
                             handleDeleteWordList(list.id);
                           }}
                           className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
@@ -794,16 +825,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
               </div>
             )}
             
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="w-full"
-              onClick={handleExportList}
-              disabled={savedWordLists.length === 0}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Esporta
-            </Button>
+            {/* Rimuovo il bottone export generale */}
           </CardContent>
         </Card>
 
@@ -957,13 +979,11 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                        setCustomWords(generatedWords.join(', '));
-                        setActiveTab('manual');
-                      }}
+                      onClick={generateWords}
                       className="h-8 text-xs"
                     >
-                      Usa queste parole
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      Rigenera Parole
                     </Button>
                   </div>
                 ) : (
@@ -1016,7 +1036,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
             {/* Impostazioni Esercizio - Ridotte e raggruppate */}
             <details className="border rounded-lg">
               <summary className="p-3 cursor-pointer hover:bg-gray-50 text-sm font-medium">
-                Impostazioni avanzate
+                Impostazioni frequenza parola
               </summary>
               <div className="p-3 pt-0 border-t">
                 <div className="grid grid-cols-2 gap-3">
@@ -1024,27 +1044,29 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                     <Label className="text-xs">Esposizione (ms)</Label>
                     <Input
                       type="number"
-                      min="100"
-                      max="5000"
+                      min="50"
+                      max="1000"
+                      step="25"
                       value={exerciseSettings.exposureDuration}
                       onChange={(e) => setExerciseSettings({
                         ...exerciseSettings,
-                        exposureDuration: parseInt(e.target.value) || 500
+                        exposureDuration: parseInt(e.target.value) || 150
                       })}
                       className="h-8 text-sm"
                     />
                   </div>
                   
                   <div>
-                    <Label className="text-xs">Intervallo (ms)</Label>
+                    <Label className="text-xs">Pausa (ms)</Label>
                     <Input
                       type="number"
-                      min="50"
+                      min="200"
                       max="2000"
+                      step="100"
                       value={exerciseSettings.intervalDuration}
                       onChange={(e) => setExerciseSettings({
                         ...exerciseSettings,
-                        intervalDuration: parseInt(e.target.value) || 200
+                        intervalDuration: parseInt(e.target.value) || 800
                       })}
                       className="h-8 text-sm"
                     />
