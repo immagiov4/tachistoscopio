@@ -228,7 +228,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
       window.removeEventListener('keydown', handleKeyPress);
       window.removeEventListener('click', handleClick);
     };
-  }, [session.isRunning, session.isPaused, isCountingDown, markError, onStop]);
+  }, [session.isRunning, session.isPaused, isCountingDown, displayState, markError, onStop]);
 
   useEffect(() => {
     const currentWordToShow = session.words[session.currentWordIndex];
