@@ -365,30 +365,30 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
 
       // Lista di parole inappropriate da evitare (per bambini)
       const inappropriateWords = new Set([
-      'pene', 'ano', 'culo', 'merda', 'cacca', 'pipi', 'popo',
-      'stupido', 'idiota', 'cretino', 'scemo', 'deficiente',
-      'stronzo', 'troia', 'puttana', 'figa', 'fica', 'vaffanculo',
-      'cazzo', 'fottiti', 'inculare', 'mignotta', 'bastardo',
-      'bastardissimo', 'zoccola', 'cornuto', 'coglione',
-      'stronza', 'cogliona', 'rompipalle', 'mado', 'puttanella',
-      'fichetto', 'pischello', 'pischella', 'merdoso', 'babbeo',
-      'imbecille', 'scassacazzo', 'baldracca', 'cagna', 'ficco',
-      'troione', 'bastardone', 'ficcona', 'puzzone', 'zzozzo',
-      'caccone', 'pennuto', 'pezzente', 'zingaro', 'paccottiglia',
-      'lurido', 'ciuccio', 'schifoso', 'brutto', 'schifo', 'lurida',
-      'str*nza', 'schifosa', 'cafone', 'duro', 'cretina', 'cornuta',
-      'mignotta', 'ficaginosa', 'pippone', 'pirla', 'babbuino',
-      'merdone', 'zoccola', 'frocione', 'checca', 'frocio', 'omosessuale',
-      'froci', 'patacca', 'minkia', 'minkione', 'scemoide',
-      'fesso', 'troione', 'tamarro', 'ubriacone', 'cogliona',
-      'merdaccia', 'scemi', 'scemotti', 'frocetto', 'swaghetto',
-      'sfigato', 'zigomo', 'vaffangulo', 'puttanella', 'vaffanculo',
-      'strunz', 'ricchione', 'stronza', 'piscio', 'pisciare', 'pisciatoio',
-      'ricchioni', 'schifosa', 'puzzone', 'cazzone', 'affanculo',
-      'porco', 'maiale', 'bischero', 'cafone', 'stregone', 'marcio',
-      'cornetta', 'zoccoletta', 'minkietta', 'culattone', 'frocetto',
-      'culone', 'straccione', 'negro'
-    ]);
+        'pene', 'ano', 'culo', 'merda', 'cacca', 'pipi', 'popo',
+        'stupido', 'idiota', 'cretino', 'scemo', 'deficiente',
+        'stronzo', 'troia', 'puttana', 'figa', 'fica', 'vaffanculo',
+        'cazzo', 'fottiti', 'inculare', 'mignotta', 'bastardo',
+        'bastardissimo', 'zoccola', 'cornuto', 'coglione',
+        'stronza', 'cogliona', 'rompipalle', 'mado', 'puttanella',
+        'fichetto', 'pischello', 'pischella', 'merdoso', 'babbeo',
+        'imbecille', 'scassacazzo', 'baldracca', 'cagna', 'ficco',
+        'troione', 'bastardone', 'ficcona', 'puzzone', 'zzozzo',
+        'caccone', 'pennuto', 'pezzente', 'zingaro', 'paccottiglia',
+        'lurido', 'ciuccio', 'schifoso', 'brutto', 'schifo', 'lurida',
+        'str*nza', 'schifosa', 'cafone', 'duro', 'cretina', 'cornuta',
+        'mignotta', 'ficaginosa', 'pippone', 'pirla', 'babbuino',
+        'merdone', 'zoccola', 'frocione', 'checca', 'frocio', 'omosessuale',
+        'froci', 'patacca', 'minkia', 'minkione', 'scemoide',
+        'fesso', 'troione', 'tamarro', 'ubriacone', 'cogliona',
+        'merdaccia', 'scemi', 'scemotti', 'frocetto', 'swaghetto',
+        'sfigato', 'zigomo', 'vaffangulo', 'puttanella', 'vaffanculo',
+        'strunz', 'ricchione', 'stronza', 'piscio', 'pisciare', 'pisciatoio',
+        'ricchioni', 'schifosa', 'puzzone', 'cazzone', 'affanculo',
+        'porco', 'maiale', 'bischero', 'cafone', 'stregone', 'marcio',
+        'cornetta', 'zoccoletta', 'minkietta', 'culattone', 'frocetto',
+        'culone', 'straccione', 'negro'
+      ]);
 
 
       // Filtra le parole inappropriate
