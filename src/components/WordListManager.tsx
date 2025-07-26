@@ -274,7 +274,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     return Math.max(1, syllables);
   };
 
-  const generateRealWords = useCallback((): string[] => {
+  const generateRealWords = (): string[] => {
     // Use complete dataset
     const wordsToUse = allWords.length > 0 ? allWords : ITALIAN_WORDS;
     const syllables = parseInt(generatorParams.syllableCount) || 2;
@@ -315,7 +315,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     // Algoritmo ottimizzato con early exit
     const filteredWords: string[] = [];
     let examined = 0;
-    const maxExamine = Math.min(wordsToUse.length, 2000); // Ridotto per evitare freeze
+    const maxExamine = Math.min(wordsToUse.length, 1000); // Ulteriormente ridotto
     
     for (let i = 0; i < wordsToUse.length && filteredWords.length < generatorParams.count && examined < maxExamine; i++) {
       const word = wordsToUse[i];
@@ -339,7 +339,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
     
     return filteredWords.slice(0, generatorParams.count);
-  }, [allWords, generatorParams.syllableCount, generatorParams.startsWith, generatorParams.contains, generatorParams.count]);
+  };
 
   const generateSyllables = (): string[] => {
     const syllables: string[] = [];
