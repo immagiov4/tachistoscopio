@@ -58,6 +58,12 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       fetchPatientData();
     }
   }, [selectedPatient]);
+
+  // Reset pagination when searching
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+  
   
   // Show floating buttons when scrolled past patient list - using CSS transitions only
   useEffect(() => {
