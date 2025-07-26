@@ -74,7 +74,7 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ open, onOpenChange
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl z-50">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Icon className="h-6 w-6 text-primary" />
