@@ -116,7 +116,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     } else {
       toast({
         title: 'Nessun paziente selezionato',
-        description: 'Seleziona un paziente dall\'elenco prima di entrare in modalità studio',
+        description: 'Seleziona un paziente dall\'elenco prima di entrare in modalità allenamento',
         variant: 'destructive'
       });
     }
@@ -494,7 +494,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
               <UserCheck className="h-5 w-5 text-blue-600" />
               <div>
                 <h3 className="font-medium text-blue-900 dark:text-blue-100">
-                  Modalità Studio - {studioPatient.full_name}
+                  Modalità Allenamento - {studioPatient.full_name}
                 </h3>
                 <p className="text-sm text-blue-700 dark:text-blue-300">
                   Stai gestendo gli esercizi come se fossi il paziente
@@ -789,7 +789,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
               onClick={enterStudioModeForSelected}
               size="sm"
               className="shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full h-14 px-6 font-medium border-0 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-              title="Entra in modalità studio per il paziente selezionato"
+              title="Entra in modalità allenamento per il paziente selezionato"
             >
               <BookOpen className="h-5 w-5 mr-2" />
               Modalità Allenamento
