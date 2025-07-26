@@ -59,21 +59,61 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   ];
 
   const ITALIAN_WORDS = [
+    // Parole di 1 sillaba
+    'blu', 'tre', 'sei', 'qui', 'qua', 'poi', 'per', 'fra', 'tra', 'pro', 'pre', 'sub', 'sud',
+    'nord', 'est', 'ovest', 'su', 'giù', 'più', 'già', 'mai', 'qui', 'là', 'sì', 'no',
+    
     // Parole di 2 sillabe
     'casa', 'mare', 'sole', 'luna', 'vita', 'mano', 'testa', 'cuore', 'nome', 'pace',
     'mondo', 'tempo', 'giorno', 'notte', 'donna', 'uomo', 'madre', 'padre', 'figlio', 'figlia',
     'fiore', 'acqua', 'terra', 'cielo', 'libro', 'tavolo', 'sedia', 'porta', 'finestra', 'strada',
-    'scuola', 'amico', 'bambino', 'bambina', 'cane', 'gatto', 'uccello', 'pesce', 'albero', 'erba',
+    'scuola', 'amico', 'cane', 'gatto', 'uccello', 'pesce', 'albero', 'erba', 'bello', 'grande',
+    'piccolo', 'rosso', 'verde', 'giallo', 'nero', 'bianco', 'nuovo', 'vecchio', 'buono', 'cattivo',
+    'alto', 'basso', 'lungo', 'corto', 'caldo', 'freddo', 'dolce', 'amaro', 'salato', 'aspro',
+    'forte', 'debole', 'veloce', 'lento', 'facile', 'difficile', 'aperto', 'chiuso', 'pieno', 'vuoto',
+    'ricco', 'povero', 'felice', 'triste', 'giovane', 'anziano', 'magro', 'grasso', 'pulito', 'sporco',
+    'piano', 'forte', 'primo', 'ultimo', 'dentro', 'fuori', 'sopra', 'sotto', 'davanti', 'dietro',
+    'destra', 'sinistra', 'centro', 'lato', 'parte', 'tutto', 'niente', 'molto', 'poco', 'tanto',
+    'quanto', 'come', 'dove', 'quando', 'perché', 'cosa', 'chi', 'quale', 'quale', 'altro',
+    'stesso', 'vero', 'falso', 'giusto', 'sbagliato', 'bene', 'male', 'sempre', 'mai', 'spesso',
+    'oggi', 'ieri', 'domani', 'ora', 'dopo', 'prima', 'presto', 'tardi', 'subito', 'piano',
+    'festa', 'regalo', 'gioco', 'sport', 'musica', 'danza', 'teatro', 'cinema', 'museo', 'parco',
+    'ponte', 'torre', 'chiesa', 'palazzo', 'castello', 'villa', 'giardino', 'campo', 'bosco', 'lago',
+    'fiume', 'monte', 'valle', 'isola', 'costa', 'spiaggia', 'sabbia', 'roccia', 'pietra', 'ferro',
+    'oro', 'argento', 'rame', 'legno', 'vetro', 'carta', 'stoffa', 'lana', 'seta', 'cotone',
+    'pane', 'pasta', 'riso', 'carne', 'pesce', 'uovo', 'latte', 'burro', 'olio', 'sale',
+    'zucchero', 'miele', 'vino', 'birra', 'caffè', 'tè', 'succo', 'frutta', 'verdura', 'pollo',
+    'manzo', 'maiale', 'agnello', 'prosciutto', 'salame', 'formaggio', 'gelato', 'torta', 'dolce', 'biscotto',
     
     // Parole di 3 sillabe
-    'famiglia', 'bambino', 'ragazzo', 'ragazza', 'macchina', 'telefono', 'computer', 'medicina',
-    'ospedale', 'università', 'ristorante', 'automobile', 'bicicletta', 'motorino', 'televisore',
-    'frigorifero', 'lavastoviglie', 'aspirapolvere', 'calendario', 'biblioteca', 'farmacia',
-    'montagna', 'collina', 'pianura', 'oceano', 'continente', 'nazione', 'regione', 'provincia',
+    'famiglia', 'bambino', 'bambina', 'ragazzo', 'ragazza', 'persona', 'gente', 'amicizia', 'amore', 'matrimonio',
+    'macchina', 'autobus', 'treno', 'aereo', 'barca', 'bicicletta', 'motorino', 'camion', 'taxi', 'pullman',
+    'telefono', 'computer', 'televisore', 'radio', 'giornale', 'rivista', 'dizionario', 'quaderno', 'matita', 'penna',
+    'medicina', 'dottore', 'infermiere', 'paziente', 'malattia', 'febbre', 'dolore', 'raffreddore', 'tosse', 'influenza',
+    'ospedale', 'farmacia', 'clinica', 'ambulanza', 'pronto soccorso', 'dentista', 'oculista', 'pediatra', 'chirurgo', 'medico',
+    'università', 'professore', 'studente', 'esame', 'diploma', 'laurea', 'lezione', 'compito', 'voto', 'pagella',
+    'ristorante', 'pizzeria', 'trattoria', 'osteria', 'taverna', 'bar', 'caffetteria', 'gelateria', 'pasticceria', 'panetteria',
+    'frigorifero', 'lavastoviglie', 'lavatrice', 'asciugatrice', 'aspirapolvere', 'forno', 'microonde', 'tostapane', 'frullatore', 'mixer',
+    'calendario', 'orologio', 'sveglia', 'agenda', 'diario', 'lettera', 'pacchetto', 'busta', 'francobollo', 'posta',
+    'biblioteca', 'libreria', 'cartoleria', 'edicola', 'supermercato', 'negozio', 'mercato', 'centro', 'periferia', 'quartiere',
+    'montagna', 'collina', 'pianura', 'deserto', 'oceano', 'continente', 'nazione', 'regione', 'provincia', 'comune',
+    'capitale', 'città', 'paese', 'villaggio', 'frazione', 'borgata', 'sobborgo', 'centro', 'periferia', 'zona',
+    'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre',
+    'novembre', 'dicembre', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato', 'domenica', 'mattina',
+    'pomeriggio', 'sera', 'notte', 'mezzogiorno', 'mezzanotte', 'aurora', 'tramonto', 'alba', 'crepuscolo', 'buio',
+    'animale', 'mammifero', 'uccello', 'pesce', 'rettile', 'insetto', 'farfalla', 'ape', 'mosca', 'zanzara',
+    'cavallo', 'mucca', 'pecora', 'capra', 'maiale', 'gallina', 'anatra', 'tacchino', 'coniglio', 'criceto',
+    'tigre', 'leone', 'elefante', 'giraffa', 'zebra', 'scimmia', 'orso', 'lupo', 'volpe', 'cervo',
     
-    // Parole di 4+ sillabe
-    'università', 'ospedale', 'automobile', 'bicicletta', 'televisore', 'frigorifero',
-    'aspirapolvere', 'metropolitana', 'supermercato', 'panetteria', 'pasticceria', 'pizzeria'
+    // Parole di 4+ sillabe  
+    'automobile', 'metropolitana', 'motocicletta', 'elicottero', 'sottomarino', 'astronave', 'automobile', 'locomotiva', 'funicolare', 'seggiovia',
+    'televisione', 'videocamera', 'registratore', 'altoparlante', 'microfono', 'amplificatore', 'sintetizzatore', 'pianoforte', 'chitarra', 'violino',
+    'ospedaliero', 'universitario', 'elementare', 'superiore', 'professionale', 'tecnico', 'scientifico', 'letterario', 'artistico', 'musicale',
+    'ristoratore', 'pasticciere', 'panettiere', 'macellaio', 'pescivendolo', 'fruttivendolo', 'verduraio', 'salumiere', 'farmacista', 'benzina',
+    'supermercato', 'ipermercato', 'minimarket', 'tabaccheria', 'erboristeria', 'profumeria', 'gioielleria', 'orologeria', 'ottica', 'ferramenta',
+    'parrucchiere', 'estetista', 'massaggiatore', 'fisioterapista', 'psicologo', 'avvocato', 'notaio', 'commercialista', 'ingegnere', 'architetto',
+    'matematica', 'geometria', 'algebra', 'aritmetica', 'statistica', 'informatica', 'biologia', 'chimica', 'fisica', 'geografia',
+    'meteorologia', 'astronomia', 'geologia', 'archeologia', 'antropologia', 'sociologia', 'psicologia', 'filosofia', 'teologia', 'letteratura'
   ];
 
   // Load saved word lists from database
@@ -132,18 +172,11 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       return true;
     });
     
-    // Se non ci sono abbastanza parole che soddisfano i criteri, aggiungi parole casuali dalla lista
+    // Mescola le parole filtrate e restituisci solo quelle che rispettano i criteri
     const shuffled = [...filteredWords].sort(() => Math.random() - 0.5);
     
-    // Se non abbiamo abbastanza parole filtrate, riempi con parole casuali
-    if (shuffled.length < generatorParams.count) {
-      const remainingWords = ITALIAN_WORDS
-        .filter(word => !shuffled.includes(word))
-        .sort(() => Math.random() - 0.5);
-      shuffled.push(...remainingWords);
-    }
-    
-    return shuffled.slice(0, generatorParams.count);
+    // Restituisci solo le parole che soddisfano i criteri, al massimo il numero richiesto
+    return shuffled.slice(0, Math.min(generatorParams.count, shuffled.length));
   };
 
   const generateSyllables = (): string[] => {
