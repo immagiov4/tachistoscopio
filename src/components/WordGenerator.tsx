@@ -329,7 +329,6 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-background border z-50">
-                    <SelectItem value="1">1 sillaba</SelectItem>
                     <SelectItem value="2">2 sillabe</SelectItem>
                     <SelectItem value="3">3 sillabe</SelectItem>
                     <SelectItem value="4">4 sillabe</SelectItem>

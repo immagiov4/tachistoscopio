@@ -962,7 +962,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1">1 sillaba</SelectItem>
                       <SelectItem value="2">2 sillabe</SelectItem>
                       <SelectItem value="3">3 sillabe</SelectItem>
                       <SelectItem value="4">4 sillabe</SelectItem>
