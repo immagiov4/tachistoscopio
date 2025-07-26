@@ -67,15 +67,22 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       const patientListCard = document.querySelector('[data-patient-list]');
       if (patientListCard) {
         const rect = patientListCard.getBoundingClientRect();
-        const shouldShow = rect.bottom < window.innerHeight * 0.3;
+        const shouldShow = rect.bottom < window.innerHeight * 0.5; // Made threshold less strict
         
-        clearTimeout(timeoutId);
+        console.log('Scroll check:', { 
+          rectBottom: rect.bottom, 
+          threshold: window.innerHeight * 0.5, 
+          shouldShow,
+          currentState: showFloatingActions 
+        });
         
-        if (shouldShow) {
+        if (shouldShow && !showFloatingActions) {
+          clearTimeout(timeoutId);
           timeoutId = setTimeout(() => {
             setShowFloatingActions(true);
           }, 50);
-        } else {
+        } else if (!shouldShow && showFloatingActions) {
+          clearTimeout(timeoutId);
           setShowFloatingActions(false);
         }
       }
@@ -88,7 +95,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(timeoutId);
     };
-  }, []);
+  }, [showFloatingActions]);
   
   const scrollToPatientList = () => {
     const patientListCard = document.querySelector('[data-patient-list]');
