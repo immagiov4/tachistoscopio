@@ -438,17 +438,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       setIsLoading(false);
     }
   };
-  const handleImportFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      const content = e.target?.result as string;
-      setCustomWords(content);
-      setCustomListName(file.name.replace(/\.[^/.]+$/, "") || 'Imported List');
-    };
-    reader.readAsText(file);
-  };
   const handleExportList = () => {
     if (currentWordList.words.length === 0) {
       toast({
@@ -905,6 +894,13 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
                     <Upload className="h-4 w-4 mr-2" />
                     Importa
                   </Button>
+                  <input
+                    id="file-import"
+                    type="file"
+                    accept=".txt,text/plain"
+                    onChange={handleFileImport}
+                    style={{ display: 'none' }}
+                  />
                 </>}
             </div>
 
