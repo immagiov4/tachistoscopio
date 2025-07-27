@@ -8,6 +8,7 @@ export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialCheck, setInitialCheck] = useState(false);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -52,6 +53,7 @@ export const useAuth = () => {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      setInitialCheck(true);
       if (session?.user) {
         setSession(session);
         setUser(session.user);
@@ -59,7 +61,7 @@ export const useAuth = () => {
           const profileData = await fetchProfile(session.user.id);
           setProfile(profileData);
           setLoading(false);
-        }, 100);
+        }, 200); // Aumento il delay per vedere meglio il loading
       } else {
         setSession(null);
         setUser(null);
