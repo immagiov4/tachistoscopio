@@ -42,7 +42,7 @@ export const useAuth = () => {
             const profileData = await fetchProfile(session.user.id);
             setProfile(profileData);
             setLoading(false);
-          }, 100); // Leggero ritardo per mostrare il loading
+          }, 100);
         } else {
           setProfile(null);
           setLoading(false);
@@ -52,16 +52,18 @@ export const useAuth = () => {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
       if (session?.user) {
+        setSession(session);
+        setUser(session.user);
         setTimeout(async () => {
           const profileData = await fetchProfile(session.user.id);
           setProfile(profileData);
           setLoading(false);
-        }, 100); // Leggero ritardo per mostrare il loading
+        }, 100);
       } else {
+        setSession(null);
+        setUser(null);
+        setProfile(null);
         setLoading(false);
       }
     });
