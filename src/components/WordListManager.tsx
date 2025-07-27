@@ -65,9 +65,67 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   // State for complete Italian words dataset
   const [allWords, setAllWords] = useState<string[]>([]);
   const [isLoadingWords, setIsLoadingWords] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
+  // Handle file import
+  const handleFileImport = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.includes('text') && !file.name.endsWith('.txt')) {
+      toast({
+        title: "Formato file non supportato",
+        description: "Puoi importare solo file di testo (.txt)",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const words = content
+          .split(/\r?\n/)
+          .map(word => word.trim())
+          .filter(word => word.length > 0);
+
+        if (words.length === 0) {
+          toast({
+            title: "File vuoto",
+            description: "Il file non contiene parole valide",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        setCustomWords(words.join('\n'));
+        setActiveTab('manual');
+        toast({
+          title: "File importato",
+          description: `Importate ${words.length} parole con successo`
+        });
+      } catch (error) {
+        toast({
+          title: "Errore nell'importazione",
+          description: "Impossibile leggere il file",
+          variant: "destructive"
+        });
+      }
+    };
+
+    reader.onerror = () => {
+      toast({
+        title: "Errore nella lettura",
+        description: "Impossibile leggere il file",
+        variant: "destructive"
+      });
+    };
+
+    reader.readAsText(file);
+    // Reset input per permettere di importare lo stesso file di nuovo
+    event.target.value = '';
+  }, [toast]);
 
   // Sillabe italiane comuni per il generatore
   const ITALIAN_SYLLABLES = ['ba', 'be', 'bi', 'bo', 'bu', 'ca', 'ce', 'ci', 'co', 'cu', 'da', 'de', 'di', 'do', 'du', 'fa', 'fe', 'fi', 'fo', 'fu', 'ga', 'ge', 'gi', 'go', 'gu', 'la', 'le', 'li', 'lo', 'lu', 'ma', 'me', 'mi', 'mo', 'mu', 'na', 'ne', 'ni', 'no', 'nu', 'pa', 'pe', 'pi', 'po', 'pu', 'ra', 're', 'ri', 'ro', 'ru', 'sa', 'se', 'si', 'so', 'su', 'ta', 'te', 'ti', 'to', 'tu', 'va', 've', 'vi', 'vo', 'vu', 'za', 'ze', 'zi', 'zo', 'zu'];
