@@ -42,7 +42,7 @@ export const useAuth = () => {
             const profileData = await fetchProfile(session.user.id);
             setProfile(profileData);
             setLoading(false);
-          }, 0);
+          }, 100); // Leggero ritardo per mostrare il loading
         } else {
           setProfile(null);
           setLoading(false);
@@ -60,7 +60,7 @@ export const useAuth = () => {
           const profileData = await fetchProfile(session.user.id);
           setProfile(profileData);
           setLoading(false);
-        }, 0);
+        }, 100); // Leggero ritardo per mostrare il loading
       } else {
         setLoading(false);
       }
