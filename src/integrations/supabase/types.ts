@@ -231,6 +231,23 @@ export type Database = {
           email: string
         }[]
       }
+      get_students_with_emails: {
+        Args: { coach_profile_id: string }
+        Returns: {
+          id: string
+          user_id: string
+          role: string
+          full_name: string
+          created_at: string
+          updated_at: string
+          created_by: string
+          email: string
+        }[]
+      }
+      is_coach: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_therapist: {
         Args: Record<PropertyKey, never>
         Returns: boolean
