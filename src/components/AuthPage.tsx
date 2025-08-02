@@ -111,10 +111,10 @@ export const AuthPage: React.FC = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Tachistoscopio
+            Allenatore di Lettura Veloce
           </h1>
           <p className="text-muted-foreground">
-            Piattaforma per l'allenamento della lettura rapida
+            Piattaforma per il potenziamento della performance visiva
           </p>
         </div>
 
@@ -132,7 +132,7 @@ export const AuthPage: React.FC = () => {
               className="text-sm font-semibold py-2 px-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border flex items-center gap-2 h-auto"
             >
               <UserPlus className="w-4 h-4 flex-shrink-0" />
-              <span className="hidden sm:inline">Registrati come Terapista</span>
+              <span className="hidden sm:inline">Registrati come Coach</span>
               <span className="sm:hidden">Registrati</span>
             </TabsTrigger>
           </TabsList>
@@ -256,9 +256,9 @@ export const AuthPage: React.FC = () => {
           <TabsContent value="signup">
             <Card>
               <CardHeader>
-                <CardTitle>Registrazione Terapista</CardTitle>
+                <CardTitle>Registrazione Coach</CardTitle>
                 <CardDescription>
-                  Crea il tuo account da terapista per gestire pazienti ed esercizi
+                  Crea il tuo account da coach per gestire studenti ed allenamenti
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -314,7 +314,7 @@ export const AuthPage: React.FC = () => {
                         Registrazione in corso...
                       </>
                     ) : (
-                      'Registrati come Terapista'
+                      'Registrati come Coach'
                     )}
                   </Button>
                   
@@ -328,9 +328,9 @@ export const AuthPage: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex-1">
-                        <h4 className="text-sm font-medium text-blue-900 mb-1">Per i pazienti</h4>
+                        <h4 className="text-sm font-medium text-blue-900 mb-1">Per gli studenti</h4>
                         <p className="text-sm text-blue-700">
-                          I pazienti ricevono le credenziali di accesso direttamente dal loro terapista. 
+                          Gli studenti ricevono le credenziali di accesso direttamente dal loro coach. 
                           Non è possibile registrarsi autonomamente.
                         </p>
                       </div>

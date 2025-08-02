@@ -1,19 +1,19 @@
-# Tachistoscopio Digitale
+# Allenatore di Lettura Veloce
 
-Un'applicazione web avanzata per il training tachistoscopico sviluppata per logopedisti e terapisti della riabilitazione.
+Un'applicazione web avanzata per l'allenamento della lettura veloce e il potenziamento della performance visiva, sviluppata per reading coach e allenatori specializzati.
 
 ## Caratteristiche Principali
 
-### Per Terapisti
-- **Gestione Pazienti**: Creazione e gestione completa dei profili pazienti
+### Per Coach
+- **Gestione Studenti**: Creazione e gestione completa dei profili studenti
 - **Liste di Parole Personalizzate**: Creazione di liste con parole reali o non-parole
 - **Generatore di Parole**: Sistema automatico per generare parole basate su parametri specifici
-- **Assegnazione Esercizi**: Pianificazione settimanale degli esercizi per ogni paziente
-- **Monitoraggio Progressi**: Analisi dettagliata delle performance dei pazienti
+- **Assegnazione Esercizi**: Pianificazione settimanale degli allenamenti per ogni studente
+- **Monitoraggio Progressi**: Analisi dettagliata delle performance degli studenti
 
-### Per Pazienti
-- **Dashboard Personale**: Accesso sicuro ai propri esercizi giornalieri
-- **Training Tachistoscopico**: Esercizi con controllo preciso di:
+### Per Studenti
+- **Dashboard Personale**: Accesso sicuro ai propri allenamenti giornalieri
+- **Training di Lettura Veloce**: Esercizi con controllo preciso di:
   - Durata di esposizione (50-2000ms)
   - Intervalli tra stimoli
   - Mascheramento opzionale
@@ -22,7 +22,7 @@ Un'applicazione web avanzata per il training tachistoscopico sviluppata per logo
 - **Accessibilità**: Supporto per diverse dimensioni di testo e temi
 
 ### Caratteristiche Tecniche
-- **Sistema di Autenticazione**: Gestione sicura di terapisti e pazienti
+- **Sistema di Autenticazione**: Gestione sicura di coach e studenti
 - **Database Relazionale**: Archiviazione strutturata di esercizi e risultati
 - **Responsive Design**: Ottimizzato per desktop, tablet e mobile
 - **Real-time Updates**: Sincronizzazione automatica dei dati
@@ -40,7 +40,7 @@ Un'applicazione web avanzata per il training tachistoscopico sviluppata per logo
 
 - **RLS (Row Level Security)**: Controllo granulare degli accessi ai dati
 - **Autenticazione Email**: Sistema sicuro di login e registrazione
-- **Separazione Dati**: Ogni terapista accede solo ai propri pazienti
+- **Separazione Dati**: Ogni coach accede solo ai propri studenti
 - **GDPR Compliant**: Gestione conforme dei dati personali
 
 ## Deploy
@@ -63,7 +63,7 @@ L'applicazione è pronta per il deploy su qualsiasi piattaforma cloud moderna.
 Il database include:
 - Tabelle per profili utente, liste di parole, esercizi e sessioni
 - Politiche RLS complete per la sicurezza
-- Funzioni automatiche per la gestione dei pazienti
+- Funzioni automatiche per la gestione degli studenti
 - Edge functions per operazioni avanzate
 
 ## Domini Personalizzati
@@ -94,4 +94,4 @@ Per supporto tecnico o domande sull'utilizzo dell'applicazione, contattare il te
 
 ---
 
-© 2025 Tachistoscopio Digitale - Piattaforma per la riabilitazione logopedica
+© 2025 Allenatore di Lettura Veloce - Piattaforma per il potenziamento della performance visiva
