@@ -24,7 +24,7 @@ export type Database = {
           id: string
           incorrect_words: number
           missed_words: string[] | null
-          patient_id: string
+          student_id: string
           total_words: number
         }
         Insert: {
@@ -36,7 +36,7 @@ export type Database = {
           id?: string
           incorrect_words: number
           missed_words?: string[] | null
-          patient_id: string
+          student_id: string
           total_words: number
         }
         Update: {
@@ -48,7 +48,7 @@ export type Database = {
           id?: string
           incorrect_words?: number
           missed_words?: string[] | null
-          patient_id?: string
+          student_id?: string
           total_words?: number
         }
         Relationships: [
@@ -61,7 +61,7 @@ export type Database = {
           },
           {
             foreignKeyName: "exercise_sessions_patient_id_fkey"
-            columns: ["patient_id"]
+            columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -70,46 +70,46 @@ export type Database = {
       }
       exercises: {
         Row: {
+          coach_id: string
           created_at: string
           day_of_week: number
           id: string
-          patient_id: string
           settings: Json
-          therapist_id: string
+          student_id: string
           updated_at: string
           word_list_id: string
         }
         Insert: {
+          coach_id: string
           created_at?: string
           day_of_week: number
           id?: string
-          patient_id: string
           settings: Json
-          therapist_id: string
+          student_id: string
           updated_at?: string
           word_list_id: string
         }
         Update: {
+          coach_id?: string
           created_at?: string
           day_of_week?: number
           id?: string
-          patient_id?: string
           settings?: Json
-          therapist_id?: string
+          student_id?: string
           updated_at?: string
           word_list_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "exercises_patient_id_fkey"
-            columns: ["patient_id"]
+            columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "exercises_therapist_id_fkey"
-            columns: ["therapist_id"]
+            columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
