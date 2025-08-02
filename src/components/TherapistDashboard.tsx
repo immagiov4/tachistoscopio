@@ -118,9 +118,9 @@ export const TherapistDashboard: React.FC = () => {
         .select(`
           *,
           word_list:word_lists(*),
-          patient:profiles!exercises_patient_id_fkey(*)
+          student:profiles!exercises_student_id_fkey(*)
         `)
-        .eq('therapist_id', profile?.id)
+        .eq('coach_id', profile?.id)
         .order('day_of_week', { ascending: true });
 
       if (error) throw error;
@@ -171,7 +171,7 @@ export const TherapistDashboard: React.FC = () => {
       // Mostra il risultato con eventuali warning
       if (data.warning) {
         toast({
-          title: 'Paziente creato con warning',
+          title: 'Studente creato con warning',
           description: data.warning,
           variant: 'destructive',
         });
@@ -189,7 +189,7 @@ export const TherapistDashboard: React.FC = () => {
       console.error('Error creating patient:', error);
       toast({
         title: 'Errore',
-        description: error.message || 'Errore durante la creazione del paziente',
+        description: error.message || 'Errore durante la creazione dello studente',
         variant: 'destructive',
       });
     } finally {
@@ -213,7 +213,7 @@ export const TherapistDashboard: React.FC = () => {
       // Salva solo le impostazioni come template globale
       toast({
         title: 'Successo',
-        description: 'Template di esercizio salvato. Puoi ora assegnarlo ai pazienti tramite Gestione Pazienti.',
+        description: 'Template di esercizio salvato. Puoi ora assegnarlo agli studenti tramite Gestione Studenti.',
       });
 
       setSelectedWordList('');
@@ -231,22 +231,22 @@ export const TherapistDashboard: React.FC = () => {
   };
 
   const deletePatient = async (patientId: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questo paziente? Verranno eliminati anche tutti i suoi esercizi e sessioni.')) return;
+    if (!confirm('Sei sicuro di voler eliminare questo studente? Verranno eliminati anche tutti i suoi esercizi e sessioni.')) return;
     
     try {
-      // Prima elimina tutte le sessioni del paziente
+      // Prima elimina tutte le sessioni dello studente
       await supabase
         .from('exercise_sessions')
         .delete()
-        .eq('patient_id', patientId);
+        .eq('student_id', patientId);
 
-      // Poi elimina gli esercizi del paziente
+      // Poi elimina gli esercizi dello studente
       await supabase
         .from('exercises')
         .delete()
-        .eq('patient_id', patientId);
+        .eq('student_id', patientId);
 
-      // Infine elimina il paziente
+      // Infine elimina lo studente
       const { error } = await supabase
         .from('profiles')
         .delete()
@@ -256,7 +256,7 @@ export const TherapistDashboard: React.FC = () => {
 
       toast({
         title: 'Successo',
-        description: 'Paziente eliminato con successo',
+        description: 'Studente eliminato con successo',
       });
 
       await fetchPatients();
@@ -265,7 +265,7 @@ export const TherapistDashboard: React.FC = () => {
       console.error('Error deleting patient:', error);
       toast({
         title: 'Errore',
-        description: 'Errore durante l\'eliminazione del paziente',
+        description: 'Errore durante l\'eliminazione dello studente',
         variant: 'destructive',
       });
     }
@@ -313,8 +313,8 @@ export const TherapistDashboard: React.FC = () => {
   if (loading) {
     return (
       <LoadingPage 
-        title="Caricamento Area Terapista..." 
-        description="Stiamo preparando la dashboard per i tuoi pazienti"
+        title="Caricamento Area Coach..." 
+        description="Stiamo preparando la dashboard per i tuoi studenti"
       />
     );
   }
@@ -326,7 +326,7 @@ export const TherapistDashboard: React.FC = () => {
           <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">
-                Dashboard Terapista
+                Dashboard Coach
               </h1>
               <p className="text-lg text-muted-foreground">
                 Benvenuto, {profile?.full_name}
@@ -348,9 +348,9 @@ export const TherapistDashboard: React.FC = () => {
               className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-xs sm:text-sm font-semibold py-2 px-2 sm:px-3 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:border-2 data-[state=active]:border-primary/30 transition-all duration-200 h-auto"
             >
               <UserCog className="h-4 w-4 shrink-0" />
-              <span className="hidden sm:inline">Gestione Pazienti</span>
-              <span className="sm:hidden text-center">Pazienti</span>
-              <Badge variant="secondary" className="text-xs ml-0 sm:ml-1 hidden sm:inline-flex">Pazienti, Esercizi e Monitoraggio</Badge>
+              <span className="hidden sm:inline">Gestione Studenti</span>
+              <span className="sm:hidden text-center">Studenti</span>
+              <Badge variant="secondary" className="text-xs ml-0 sm:ml-1 hidden sm:inline-flex">Studenti, Esercizi e Monitoraggio</Badge>
             </TabsTrigger>
             <TabsTrigger 
               value="wordlists" 

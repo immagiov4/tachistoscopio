@@ -115,8 +115,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       enterStudioMode(selectedPatient.id);
     } else {
       toast({
-        title: 'Nessun paziente selezionato',
-        description: 'Seleziona un paziente dall\'elenco prima di entrare in modalità allenamento',
+        title: 'Nessuno studente selezionato',
+        description: 'Seleziona uno studente dall\'elenco prima di entrare in modalità allenamento',
         variant: 'destructive'
       });
     }
@@ -204,7 +204,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     }
   };
 
-  // Funzione per aggiornare dinamicamente il conteggio esercizi di un paziente
+  // Funzione per aggiornare dinamicamente il conteggio esercizi di uno studente
   const updatePatientExerciseCount = useCallback(async () => {
     if (!selectedPatient) return;
     
@@ -291,7 +291,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       let errorMessage = 'Errore durante l\'aggiornamento dell\'esercizio';
       if (error.code === '23503') {
         if (error.message?.includes('exercises_patient_id_fkey')) {
-          errorMessage = 'Impossibile aggiornare: il paziente selezionato non esiste più. Ricarica la pagina.';
+          errorMessage = 'Impossibile aggiornare: lo studente selezionato non esiste più. Ricarica la pagina.';
         } else if (error.message?.includes('word_list')) {
           errorMessage = 'Impossibile aggiornare: la lista di parole selezionata non esiste più.';
         } else {
@@ -315,7 +315,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     if (!selectedPatient) return;
     
     try {
-      console.log(`Tentativo di rimozione esercizio per giorno ${dayOfWeek}, paziente ${selectedPatient.id}`);
+      console.log(`Tentativo di rimozione esercizio per giorno ${dayOfWeek}, studente ${selectedPatient.id}`);
       
       // Prima trova l'esercizio per il giorno
       const exercise = weeklyExercises[dayOfWeek];
@@ -402,7 +402,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       // Mostra il risultato con eventuali warning
       if (data.warning) {
         toast({
-          title: 'Paziente creato con warning',
+          title: 'Studente creato con warning',
           description: data.warning,
           variant: 'destructive'
         });
@@ -419,11 +419,11 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       await fetchInitialData();
     } catch (error: any) {
       console.error('Error creating patient:', error);
-      let errorMessage = 'Errore durante la creazione del paziente';
+      let errorMessage = 'Errore durante la creazione dello studente';
       if (error.message?.includes('email')) {
         errorMessage = 'Email non valida o già utilizzata da un altro utente.';
       } else if (error.message?.includes('already exists')) {
-        errorMessage = 'Un paziente con questa email esiste già.';
+        errorMessage = 'Uno studente con questa email esiste già.';
       } else if (error.message?.includes('network')) {
         errorMessage = 'Errore di connessione. Controlla la rete e riprova.';
       } else if (error.message) {
@@ -441,7 +441,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   const deletePatient = async (patientId: string) => {
     const patient = patients.find(p => p.id === patientId);
     if (!patient) return;
-    if (!confirm(`Sei sicuro di voler eliminare il paziente ${patient.full_name}? Verranno eliminati anche tutti i suoi esercizi e sessioni, e l'account verrà rimosso completamente dal sistema.`)) return;
+    if (!confirm(`Sei sicuro di voler eliminare lo studente ${patient.full_name}? Verranno eliminati anche tutti i suoi esercizi e sessioni, e l'account verrà rimosso completamente dal sistema.`)) return;
     try {
       // Use the edge function to delete patient from both database and auth
       const {
@@ -455,7 +455,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       if (error) throw error;
       toast({
         title: 'Successo',
-        description: data.message || 'Paziente eliminato con successo dal sistema'
+        description: data.message || 'Studente eliminato con successo dal sistema'
       });
 
       // Refresh data and clear selection if it was the deleted patient
@@ -465,13 +465,13 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       await fetchInitialData();
     } catch (error: any) {
       console.error('Error deleting patient:', error);
-      let errorMessage = 'Errore durante l\'eliminazione del paziente';
+      let errorMessage = 'Errore durante l\'eliminazione dello studente';
       if (error.message?.includes('network')) {
         errorMessage = 'Errore di connessione. Controlla la rete e riprova.';
       } else if (error.message?.includes('Unauthorized')) {
-        errorMessage = 'Non hai i permessi per eliminare questo paziente.';
+        errorMessage = 'Non hai i permessi per eliminare questo studente.';
       } else if (error.message?.includes('not found')) {
-        errorMessage = 'Paziente non trovato.';
+        errorMessage = 'Studente non trovato.';
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -503,12 +503,12 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     return (
       <LoadingPage 
         title="Caricamento Gestione Esercizi..." 
-        description="Stiamo preparando gli esercizi per i tuoi pazienti"
+        description="Stiamo preparando gli esercizi per i tuoi studenti"
       />
     );
   }
 
-  // Se in modalità studio, mostra la dashboard del paziente
+  // Se in modalità studio, mostra la dashboard dello studente
   if (studioMode) {
     const studioPatient = patients.find(p => p.id === studioMode);
     if (studioPatient) {
@@ -521,7 +521,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
                   Modalità Allenamento - {studioPatient.full_name}
                 </h3>
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Stai gestendo gli esercizi come se fossi il paziente
+                  Stai gestendo gli esercizi come se fossi lo studente
                 </p>
               </div>
             </div>
@@ -532,7 +532,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
           
           {/* Importa e usa il PatientDashboard con iframe stondato */}
           <div className="rounded-2xl overflow-hidden border-2 border-gray-200 shadow-lg">
-            <PatientDashboard studioPatientId={studioMode} />
+            <PatientDashboard studioStudentId={selectedPatient.id} />
           </div>
         </div>;
     }
@@ -541,9 +541,9 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       {/* Create new patient */}
       <Card>
         <CardHeader>
-          <CardTitle className="mb-4">Crea Nuovo Paziente</CardTitle>
+          <CardTitle className="mb-4">Crea Nuovo Studente</CardTitle>
           <CardDescription className="leading-relaxed space-y-1">
-            Aggiungi un nuovo paziente al tuo gruppo. Verrà inviata automaticamente un'email al genitore/tutore con:
+            Aggiungi un nuovo studente al tuo gruppo. Verrà inviata automaticamente un'email al genitore/tutore con:
             <br />• <strong>Link di accesso rapido</strong> (magic link) per entrare immediatamente
             <br />• <strong>Password temporanea</strong> come alternativa per l'accesso manuale
           </CardDescription>
@@ -552,7 +552,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="patient-name">Nome Completo</Label>
-              <Input id="patient-name" placeholder="Nome del paziente" value={newPatientName} onChange={e => setNewPatientName(e.target.value)} />
+              <Input id="patient-name" placeholder="Nome dello studente" value={newPatientName} onChange={e => setNewPatientName(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="patient-email">Email (genitore/tutore) *</Label>
@@ -563,7 +563,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
             </div>
           </div>
           <Button className="w-full md:w-auto" onClick={createPatient} disabled={createPatientLoading}>
-            {createPatientLoading ? 'Creazione...' : 'Crea Paziente'}
+            {createPatientLoading ? 'Creazione...' : 'Crea Studente'}
           </Button>
         </CardContent>
       </Card>
@@ -573,17 +573,17 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 mb-4">
             <Search className="h-5 w-5" />
-            Elenco Pazienti ({filteredPatients.length})
+            Elenco Studenti ({filteredPatients.length})
           </CardTitle>
           <CardDescription>
-            Clicca su un paziente per modificare il suo piano settimanale e visualizzare le statistiche
+            Clicca su uno studente per modificare il suo piano settimanale e visualizzare le statistiche
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-4">
             <div className="flex-1">
-              <Label htmlFor="search">Cerca paziente</Label>
-              <Input id="search" placeholder="Nome o email del paziente..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+              <Label htmlFor="search">Cerca studente</Label>
+              <Input id="search" placeholder="Nome o email dello studente..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
             </div>
           </div>
           
@@ -604,12 +604,12 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
                       handlePatientSelection(patient);
                     }} className="h-8 px-3 bg-gray-600 hover:bg-gray-700 text-white">
                       <UserCog className="h-4 w-4 mr-1" />
-                      Gestisci Paziente
+                      Gestisci Studente
                     </Button>
                     <Button variant="default" size="sm" onClick={e => {
                   e.stopPropagation();
                   enterStudioMode(patient.id);
-                }} className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white" title="Modalità Allenamento: Gestisci gli esercizi del paziente durante la terapia">
+                }} className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white" title="Modalità Allenamento: Gestisci gli esercizi dello studente durante l'allenamento">
                       <BookOpen className="h-4 w-4 mr-1" />
                       Modalità Allenamento
                     </Button>
@@ -639,14 +639,14 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       </Card>
 
       {selectedPatient && <div className="space-y-6">
-          {/* Indicatore paziente selezionato */}
+          {/* Indicatore studente selezionato */}
           <div data-patient-indicator className="flex items-center gap-3 p-3 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
             <UserCheck className="h-5 w-5 text-blue-600" />
             <div>
               <p className="text-sm font-medium text-blue-900">
                 Stai gestendo: <span className="font-semibold">{selectedPatient.full_name}</span>
               </p>
-              <p className="text-xs text-blue-700">Tutti i pannelli sottostanti si riferiscono a questo paziente</p>
+              <p className="text-xs text-blue-700">Tutti i pannelli sottostanti si riferiscono a questo studente</p>
             </div>
           </div>
 
@@ -742,12 +742,12 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
-                Statistiche Paziente
+                Statistiche Studente
               </CardTitle>
             </CardHeader>
             <CardContent>
               {patientSessions.length === 0 ? <p className="text-muted-foreground text-center py-8">
-                  Il paziente non ha ancora completato nessun esercizio
+                  Lo studente non ha ancora completato nessun esercizio
                 </p> : <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="text-center p-4 border rounded-lg">
@@ -801,10 +801,10 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
             size="sm"
             variant="outline"
             className="shadow-lg bg-white/90 hover:bg-white border-gray-300 text-gray-700 hover:text-gray-900 rounded-full h-12 px-5 font-medium transition-all duration-300 hover:scale-105 hover:shadow-xl backdrop-blur-sm"
-            title="Torna all'elenco pazienti"
+            title="Torna all'elenco studenti"
           >
             <ArrowUp className="h-4 w-4 mr-2" />
-            Torna ai pazienti
+            Torna agli studenti
           </Button>
 
           {selectedPatient && (
@@ -812,7 +812,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
               onClick={enterStudioModeForSelected}
               size="sm"
               className="shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full h-14 px-6 font-medium border-0 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-              title="Entra in modalità allenamento per il paziente selezionato"
+              title="Entra in modalità allenamento per lo studente selezionato"
             >
               <BookOpen className="h-5 w-5 mr-2" />
               Modalità Allenamento

@@ -30,10 +30,10 @@ interface SessionResult {
   settings: any;
 }
 interface PatientDashboardProps {
-  studioPatientId?: string; // Per modalità studio del terapista
+  studioStudentId?: string; // Per modalità studio del coach
 }
 export const PatientDashboard: React.FC<PatientDashboardProps> = ({
-  studioPatientId
+  studioStudentId
 }) => {
   const {
     user,
@@ -54,8 +54,8 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
   const [statsLoading, setStatsLoading] = useState(true);
   const [studioPatientProfile, setStudioPatientProfile] = useState<any>(null);
 
-  // Usa il patientId dalla modalità studio o dal profilo corrente
-  const effectivePatientId = studioPatientId || profile?.id;
+  // Usa lo studentId dalla modalità studio o dal profilo corrente
+  const effectiveStudentId = studioStudentId || profile?.id;
 
   // Carica le preferenze salvate
   useEffect(() => {
@@ -82,23 +82,23 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
     localStorage.setItem('tachistoscope-theme', selectedTheme);
   }, [selectedTheme]);
   useEffect(() => {
-    if (effectivePatientId) {
+    if (effectiveStudentId) {
       fetchTodayExercise();
       fetchRecentSessions();
       
-      // Se in modalità studio, carica il profilo del paziente
-      if (studioPatientId) {
+      // Se in modalità studio, carica il profilo dello studente
+      if (studioStudentId) {
         fetchStudioPatientProfile();
       }
     }
-  }, [effectivePatientId, studioPatientId]);
+  }, [effectiveStudentId, studioStudentId]);
   
   const fetchStudioPatientProfile = async () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', studioPatientId)
+        .eq('id', studioStudentId)
         .single();
       
       if (error) {
@@ -121,7 +121,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
       } = await supabase.from('exercises').select(`
           *,
           word_list:word_lists(*)
-        `).eq('student_id', effectivePatientId).eq('day_of_week', today).single();
+        `).eq('student_id', effectiveStudentId).eq('day_of_week', today).single();
       if (exerciseError && exerciseError.code !== 'PGRST116') {
         console.error('Error fetching today exercise:', exerciseError);
         setLoading(false);
@@ -137,7 +137,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
         const {
           data: sessions,
           error: sessionsError
-        } = await supabase.from('exercise_sessions').select('*').eq('exercise_id', exercise.id).eq('student_id', effectivePatientId).gte('completed_at', startOfDay.toISOString()).lte('completed_at', endOfDay.toISOString());
+        } = await supabase.from('exercise_sessions').select('*').eq('exercise_id', exercise.id).eq('student_id', effectiveStudentId).gte('completed_at', startOfDay.toISOString()).lte('completed_at', endOfDay.toISOString());
         if (sessionsError) {
           console.error('Error checking today sessions:', sessionsError);
         } else {
@@ -158,7 +158,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
       const {
         data: sessions,
         error
-      } = await supabase.from('exercise_sessions').select('*').eq('student_id', effectivePatientId).order('completed_at', {
+      } = await supabase.from('exercise_sessions').select('*').eq('student_id', effectiveStudentId).order('completed_at', {
         ascending: false
       }).limit(10);
       if (error) {
@@ -186,7 +186,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
       settings: {
         ...todayExercise.settings,
         fontSize: accessibilitySettings.fontSize,
-        // Usa le preferenze del paziente
+        // Usa le preferenze dello studente
         theme: selectedTheme // Aggiungi il tema
       },
       startTime: Date.now(),
@@ -200,9 +200,9 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
   const handleExerciseComplete = async (result: SessionResult) => {
     try {
       // Check if we have the required data
-      if (!effectivePatientId || !todayExercise) {
+      if (!effectiveStudentId || !todayExercise) {
         console.error('Missing required data:', {
-          effectivePatientId,
+          effectiveStudentId,
           todayExercise
         });
         toast({
@@ -213,21 +213,21 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
         return;
       }
 
-      // Verifica che abbiamo un patient_id valido
-      if (!effectivePatientId) {
+      // Verifica che abbiamo uno student_id valido
+      if (!effectiveStudentId) {
         toast({
           title: 'Errore',
-          description: 'ID paziente non trovato',
+          description: 'ID studente non trovato',
           variant: 'destructive'
         });
         return;
       }
 
-      // Save session to database - use effectivePatientId (the actual patient)
+      // Save session to database - use effectiveStudentId (the actual student)
       const sessionData = {
         exercise_id: todayExercise.id,
-        student_id: effectivePatientId,
-        // Use the patient ID, not the therapist profile ID
+        student_id: effectiveStudentId,
+        // Use the student ID, not the coach profile ID
         total_words: result.totalWords,
         correct_words: result.correctWords,
         incorrect_words: result.incorrectWords,
@@ -241,7 +241,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
         userProfile: profile,
         isStudent: profile?.role === 'student',
         isCoach: profile?.role === 'coach',
-        studioMode: !!studioPatientId
+        studioMode: !!studioStudentId
       });
       
       const {
@@ -250,7 +250,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
       if (error) {
         console.error('Error saving session:', error);
         console.error('Session data:', sessionData);
-        console.error('Patient ID:', effectivePatientId);
+        console.error('Student ID:', effectiveStudentId);
         console.error('Exercise ID:', todayExercise?.id);
         toast({
           title: 'Errore nel salvare i risultati',
@@ -299,10 +299,10 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
               La Mia Area
             </h1>
             <p className="text-lg text-gray-600">
-              Benvenuto, {studioPatientId ? studioPatientProfile?.full_name : profile?.full_name}
+              Benvenuto, {studioStudentId ? studioPatientProfile?.full_name : profile?.full_name}
             </p>
           </div>
-          {!studioPatientId && (
+          {!studioStudentId && (
             <Button onClick={handleSignOut} variant="outline" className="bg-white/40 border-gray-600 text-gray-800 hover:bg-white/60 hover:border-gray-800 hover:text-gray-900 backdrop-blur-sm transition-all duration-200">
               <LogOut className="h-4 w-4 mr-2" />
               Esci

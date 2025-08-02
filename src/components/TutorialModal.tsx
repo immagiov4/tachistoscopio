@@ -20,31 +20,31 @@ const tutorialSteps = [
     title: "Gestione Pazienti",
     description: "Crea e gestisci i tuoi pazienti",
     icon: Users,
-    content: "Nella sezione 'Gestione Pazienti' puoi:\n• Creare nuovi pazienti inserendo nome ed email del tutore\n• Cercare pazienti esistenti\n• Cliccare su un paziente per modificare il suo piano settimanale\n• Visualizzare le statistiche individuali di ogni paziente"
+    content: "Nella sezione 'Gestione Studenti' puoi:\n• Creare nuovi studenti inserendo nome ed email del tutore\n• Cercare studenti esistenti\n• Cliccare su uno studente per modificare il suo piano settimanale\n• Visualizzare le statistiche individuali di ogni studente"
   },
   {
     title: "Modalità Allenamento",
     description: "Gestisci gli esercizi durante la terapia",
     icon: UserCheck,
-    content: "Il pulsante 'Modalità Allenamento' ti permette di:\n• Entrare nella dashboard del paziente senza login\n• Gestire gli esercizi durante le sessioni in studio\n• Avviare e supervisionare gli esercizi direttamente\n\nPerfetto per le terapie in presenza!"
+    content: "Il pulsante 'Modalità Allenamento' ti permette di:\n• Entrare nella dashboard dello studente senza login\n• Gestire gli esercizi durante le sessioni in studio\n• Avviare e supervisionare gli esercizi direttamente\n\nPerfetto per gli allenamenti in presenza!"
   },
   {
     title: "Piano Settimanale",
     description: "Assegna esercizi giornalieri",
     icon: Calendar,
-    content: "Una volta selezionato un paziente:\n• Visualizzi il piano settimanale (Lunedì-Domenica)\n• Puoi assegnare/modificare esercizi per ogni giorno\n• Monitorare le statistiche del paziente\n• Ogni esercizio usa le impostazioni della lista parole"
+    content: "Una volta selezionato uno studente:\n• Visualizzi il piano settimanale (Lunedì-Domenica)\n• Puoi assegnare/modificare esercizi per ogni giorno\n• Monitorare le statistiche dello studente\n• Ogni esercizio usa le impostazioni della lista parole"
   },
   {
     title: "Liste Parole & Esercizi",
     description: "Crea esercizi personalizzati",
     icon: BookOpen,
-    content: "Nella sezione 'Liste Parole & Esercizi' puoi:\n• Creare esercizi completi con parole e impostazioni integrate\n• Generare parole automaticamente o inserirle manualmente\n• Configurare durata esposizione, intervallo e formato testo\n• Salvare i tuoi esercizi per riutilizzarli con diversi pazienti\n\nUsa il pulsante 'Crea nuovo esercizio' dal Piano Settimanale per accesso rapido!"
+    content: "Nella sezione 'Liste Parole & Esercizi' puoi:\n• Creare esercizi completi con parole e impostazioni integrate\n• Generare parole automaticamente o inserirle manualmente\n• Configurare durata esposizione, intervallo e formato testo\n• Salvare i tuoi esercizi per riutilizzarli con diversi studenti\n\nUsa il pulsante 'Crea nuovo esercizio' dal Piano Settimanale per accesso rapido!"
   },
   {
     title: "Statistiche",
     description: "Monitora i progressi",
     icon: BarChart3,
-    content: "Le statistiche sono integrate nell'elenco pazienti e mostrano:\n• Numero di sessioni completate\n• Precisione media del paziente\n• Durata media degli esercizi\n• Cronologia delle ultime sessioni\n\nTutte le informazioni necessarie per monitorare i progressi!"
+    content: "Le statistiche sono integrate nell'elenco studenti e mostrano:\n• Numero di sessioni completate\n• Precisione media dello studente\n• Durata media degli esercizi\n• Cronologia delle ultime sessioni\n\nTutte le informazioni necessarie per monitorare i progressi!"
   }
 ];
 
