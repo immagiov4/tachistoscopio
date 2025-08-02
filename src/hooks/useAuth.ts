@@ -103,7 +103,7 @@ export const useAuth = () => {
         .from('profiles')
         .insert({
           user_id: data.user.id,
-          role: 'therapist',
+          role: 'coach',
           full_name: fullName,
         });
 
@@ -120,9 +120,9 @@ export const useAuth = () => {
     return { error };
   };
 
-  const createPatient = async (email: string, password: string, fullName: string) => {
-    if (!profile || profile.role !== 'therapist') {
-      return { error: new Error('Solo i terapisti possono creare pazienti') };
+  const createStudent = async (email: string, password: string, fullName: string) => {
+    if (!profile || profile.role !== 'coach') {
+      return { error: new Error('Solo i coach possono creare studenti') };
     }
 
     const redirectUrl = `${window.location.origin}/`;
@@ -144,7 +144,7 @@ export const useAuth = () => {
         .from('profiles')
         .insert({
           user_id: data.user.id,
-          role: 'patient',
+          role: 'student',
           full_name: fullName,
           created_by: profile.id,
         });
@@ -166,6 +166,6 @@ export const useAuth = () => {
     signIn,
     signUp,
     signOut,
-    createPatient,
+    createStudent,
   };
 };

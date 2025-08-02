@@ -36,11 +36,11 @@ const Index = () => {
     return <AuthPage />;
   }
 
-  if (profile.role === 'therapist') {
+  if (profile.role === 'coach') {
     return <TherapistDashboard />;
   }
 
-  if (profile.role === 'patient') {
+  if (profile.role === 'student') {
     return <PatientDashboard />;
   }
 

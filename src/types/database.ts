@@ -5,7 +5,7 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
-          role: 'therapist' | 'patient';
+          role: 'coach' | 'student';
           full_name: string;
           created_by: string | null;
           created_at: string;
@@ -14,7 +14,7 @@ export interface Database {
         Insert: {
           id?: string;
           user_id: string;
-          role: 'therapist' | 'patient';
+          role: 'coach' | 'student';
           full_name: string;
           created_by?: string | null;
           created_at?: string;
@@ -23,7 +23,7 @@ export interface Database {
         Update: {
           id?: string;
           user_id?: string;
-          role?: 'therapist' | 'patient';
+          role?: 'coach' | 'student';
           full_name?: string;
           created_by?: string | null;
           created_at?: string;
@@ -62,8 +62,8 @@ export interface Database {
       exercises: {
         Row: {
           id: string;
-          patient_id: string;
-          therapist_id: string;
+          student_id: string;
+          coach_id: string;
           word_list_id: string;
           day_of_week: number;
           settings: ExerciseSettings;
@@ -72,8 +72,8 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          patient_id: string;
-          therapist_id: string;
+          student_id: string;
+          coach_id: string;
           word_list_id: string;
           day_of_week: number;
         settings: ExerciseSettings;
@@ -82,8 +82,8 @@ export interface Database {
         };
         Update: {
           id?: string;
-          patient_id?: string;
-          therapist_id?: string;
+          student_id?: string;
+          coach_id?: string;
           word_list_id?: string;
           day_of_week?: number;
           settings?: ExerciseSettings;
@@ -95,7 +95,7 @@ export interface Database {
         Row: {
           id: string;
           exercise_id: string;
-          patient_id: string;
+          student_id: string;
           total_words: number;
           correct_words: number;
           incorrect_words: number;
@@ -107,7 +107,7 @@ export interface Database {
         Insert: {
           id?: string;
           exercise_id: string;
-          patient_id: string;
+          student_id: string;
           total_words: number;
           correct_words: number;
           incorrect_words: number;
@@ -119,7 +119,7 @@ export interface Database {
         Update: {
           id?: string;
           exercise_id?: string;
-          patient_id?: string;
+          student_id?: string;
           total_words?: number;
           correct_words?: number;
           incorrect_words?: number;
@@ -133,7 +133,7 @@ export interface Database {
   };
 }
 
-export type UserRole = 'therapist' | 'patient';
+export type UserRole = 'coach' | 'student';
 
 export interface Profile {
   id: string;
@@ -158,21 +158,21 @@ export interface WordList {
 
 export interface Exercise {
   id: string;
-  patient_id: string;
-  therapist_id: string;
+  student_id: string;
+  coach_id: string;
   word_list_id: string;
   day_of_week: number;
   settings: ExerciseSettings;
   created_at: string;
   updated_at: string;
   word_list?: WordList;
-  patient?: Profile;
+  student?: Profile;
 }
 
 export interface ExerciseSession {
   id: string;
   exercise_id: string;
-  patient_id: string;
+  student_id: string;
   total_words: number;
   correct_words: number;
   incorrect_words: number;
