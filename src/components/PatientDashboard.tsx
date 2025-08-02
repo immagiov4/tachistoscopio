@@ -121,7 +121,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
       } = await supabase.from('exercises').select(`
           *,
           word_list:word_lists(*)
-        `).eq('patient_id', effectivePatientId).eq('day_of_week', today).single();
+        `).eq('student_id', effectivePatientId).eq('day_of_week', today).single();
       if (exerciseError && exerciseError.code !== 'PGRST116') {
         console.error('Error fetching today exercise:', exerciseError);
         setLoading(false);
@@ -137,7 +137,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
         const {
           data: sessions,
           error: sessionsError
-        } = await supabase.from('exercise_sessions').select('*').eq('exercise_id', exercise.id).eq('patient_id', effectivePatientId).gte('completed_at', startOfDay.toISOString()).lte('completed_at', endOfDay.toISOString());
+        } = await supabase.from('exercise_sessions').select('*').eq('exercise_id', exercise.id).eq('student_id', effectivePatientId).gte('completed_at', startOfDay.toISOString()).lte('completed_at', endOfDay.toISOString());
         if (sessionsError) {
           console.error('Error checking today sessions:', sessionsError);
         } else {
@@ -158,7 +158,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
       const {
         data: sessions,
         error
-      } = await supabase.from('exercise_sessions').select('*').eq('patient_id', effectivePatientId).order('completed_at', {
+      } = await supabase.from('exercise_sessions').select('*').eq('student_id', effectivePatientId).order('completed_at', {
         ascending: false
       }).limit(10);
       if (error) {
@@ -226,7 +226,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
       // Save session to database - use effectivePatientId (the actual patient)
       const sessionData = {
         exercise_id: todayExercise.id,
-        patient_id: effectivePatientId,
+        student_id: effectivePatientId,
         // Use the patient ID, not the therapist profile ID
         total_words: result.totalWords,
         correct_words: result.correctWords,
@@ -239,8 +239,8 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
       console.log('Attempting to save session:', {
         sessionData,
         userProfile: profile,
-        isPatient: profile?.role === 'patient',
-        isTherapist: profile?.role === 'therapist',
+        isStudent: profile?.role === 'student',
+        isCoach: profile?.role === 'coach',
         studioMode: !!studioPatientId
       });
       

@@ -100,7 +100,7 @@ export const TherapistDashboard: React.FC = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('role', 'patient')
+        .eq('role', 'student')
         .eq('created_by', profile?.id);
 
       if (error) throw error;

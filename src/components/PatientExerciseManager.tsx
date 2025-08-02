@@ -166,7 +166,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     try {
       const [patientsData, wordListsData, exercisesData] = await Promise.all([supabase.rpc('get_patients_with_emails', {
         therapist_profile_id: therapistId
-      }), supabase.from('word_lists').select('*').eq('created_by', therapistId), supabase.from('exercises').select('patient_id').eq('therapist_id', therapistId)]);
+      }), supabase.from('word_lists').select('*').eq('created_by', therapistId), supabase.from('exercises').select('student_id').eq('coach_id', therapistId)]);
       const patients = (patientsData.data || []).map(p => ({
         ...p,
         role: p.role as any // Force type conversion from string to UserRole
@@ -177,7 +177,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       const exerciseCounts = exercises.reduce((acc: {
         [key: string]: number;
       }, exercise) => {
-        acc[exercise.patient_id] = (acc[exercise.patient_id] || 0) + 1;
+        acc[exercise.student_id] = (acc[exercise.student_id] || 0) + 1;
         return acc;
       }, {});
       const patientsWithCounts = patients.map(patient => ({
@@ -211,8 +211,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     try {
       const { data: exercises } = await supabase
         .from('exercises')
-        .select('patient_id')
-        .eq('patient_id', selectedPatient.id);
+        .select('student_id')
+        .eq('student_id', selectedPatient.id);
         
       const newCount = exercises?.length || 0;
       
@@ -233,7 +233,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       const [exercisesData, sessionsData] = await Promise.all([supabase.from('exercises').select(`
             *,
             word_list:word_lists(*)
-          `).eq('patient_id', selectedPatient.id), supabase.from('exercise_sessions').select('*').eq('patient_id', selectedPatient.id).order('completed_at', {
+          `).eq('student_id', selectedPatient.id), supabase.from('exercise_sessions').select('*').eq('student_id', selectedPatient.id).order('completed_at', {
         ascending: false
       }).limit(10)]);
       setPatientExercises(exercisesData.data as any || []);
@@ -259,7 +259,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       // Controlla se esiste già un esercizio per questo giorno
       const {
         data: existingExercise
-      } = await supabase.from('exercises').select('id').eq('patient_id', selectedPatient.id).eq('day_of_week', dayOfWeek).single();
+      } = await supabase.from('exercises').select('id').eq('student_id', selectedPatient.id).eq('day_of_week', dayOfWeek).single();
       if (existingExercise) {
         // Se esiste, aggiorna l'esercizio esistente
         const {
@@ -275,8 +275,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         const {
           error
         } = await supabase.from('exercises').insert({
-          patient_id: selectedPatient.id,
-          therapist_id: therapistId,
+          student_id: selectedPatient.id,
+          coach_id: therapistId,
           word_list_id: finalWordListId,
           day_of_week: dayOfWeek,
           settings: settings as any
