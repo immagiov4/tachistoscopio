@@ -543,7 +543,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         <CardHeader>
           <CardTitle className="mb-4">Crea Nuovo Studente</CardTitle>
           <CardDescription className="leading-relaxed space-y-1">
-            Aggiungi un nuovo studente al tuo gruppo. Verrà inviata automaticamente un'email al genitore/tutore con:
+            Aggiungi un nuovo studente al tuo gruppo. Verrà inviata automaticamente un'email con:
             <br />• <strong>Link di accesso rapido</strong> (magic link) per entrare immediatamente
             <br />• <strong>Password temporanea</strong> come alternativa per l'accesso manuale
           </CardDescription>
@@ -555,7 +555,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
               <Input id="patient-name" placeholder="Nome dello studente" value={newPatientName} onChange={e => setNewPatientName(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="patient-email">Email (genitore/tutore) *</Label>
+              <Label htmlFor="patient-email">Email *</Label>
               <Input id="patient-email" type="email" placeholder="email@esempio.it" value={newPatientEmail} onChange={e => setNewPatientEmail(e.target.value)} />
               <p className="text-xs text-muted-foreground">
                 L'email verrà inviata a questo indirizzo con le credenziali di accesso

@@ -20,7 +20,7 @@ const tutorialSteps = [
     title: "Gestione Pazienti",
     description: "Crea e gestisci i tuoi pazienti",
     icon: Users,
-    content: "Nella sezione 'Gestione Studenti' puoi:\n• Creare nuovi studenti inserendo nome ed email del tutore\n• Cercare studenti esistenti\n• Cliccare su uno studente per modificare il suo piano settimanale\n• Visualizzare le statistiche individuali di ogni studente"
+    content: "Nella sezione 'Gestione Studenti' puoi:\n• Creare nuovi studenti inserendo nome ed email\n• Cercare studenti esistenti\n• Cliccare su uno studente per modificare il suo piano settimanale\n• Visualizzare le statistiche individuali di ogni studente"
   },
   {
     title: "Modalità Allenamento",
