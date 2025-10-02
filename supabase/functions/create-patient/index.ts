@@ -5,7 +5,9 @@ import {
   generateSecurePassword, 
   checkRateLimit, 
   sanitizeErrorMessage,
-  validateEmail 
+  validateEmail,
+  findOrphanedProfile,
+  cleanOrphanedData
 } from "./securityHelpers.ts";
 
 const corsHeaders = {
@@ -63,6 +65,48 @@ const sendWelcomeEmail = async (supabaseAdmin: any, email: string, fullName: str
   }
 };
 
+const handleUserCreation = async (
+  supabaseAdmin: any,
+  sanitizedEmail: string,
+  sanitizedFullName: string,
+  password: string,
+  therapistId: string
+) => {
+  const { data: existingUser } = await supabaseAdmin.auth.admin.listUsers();
+  const existingUserRecord = existingUser?.users?.find((u: any) => u.email === sanitizedEmail);
+  
+  if (existingUserRecord) {
+    return { userId: existingUserRecord.id, userRecreated: false };
+  }
+  
+  const matchingProfile = await findOrphanedProfile(supabaseAdmin, sanitizedFullName, therapistId);
+  
+  if (matchingProfile) {
+    console.log(`Trovato profilo orfano per ${sanitizedFullName}, pulizia e ricreazione utente`);
+    await cleanOrphanedData(supabaseAdmin, matchingProfile.id);
+    
+    const { data: newUser, error } = await createUserAuth(
+      supabaseAdmin,
+      sanitizedEmail,
+      password,
+      sanitizedFullName
+    );
+    
+    if (error) throw new Error(sanitizeErrorMessage(error));
+    return { userId: newUser.user.id, userRecreated: true };
+  }
+  
+  const { data: newUser, error } = await createUserAuth(
+    supabaseAdmin,
+    sanitizedEmail,
+    password,
+    sanitizedFullName
+  );
+  
+  if (error) throw new Error(sanitizeErrorMessage(error));
+  return { userId: newUser.user.id, userRecreated: false };
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -73,16 +117,12 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
       {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
+        auth: { autoRefreshToken: false, persistSession: false }
       }
     );
 
     const { email, fullName, therapistId } = await req.json();
     
-    // Input validation and sanitization
     if (!email || !fullName || !therapistId) {
       throw new Error('Parametri mancanti');
     }
@@ -90,124 +130,26 @@ serve(async (req) => {
     const sanitizedEmail = sanitizeInput(email, 254);
     const sanitizedFullName = sanitizeInput(fullName, 100);
     
-    // Email format validation with safer regex
-    const emailRegex = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
-    if (!emailRegex.test(sanitizedEmail)) {
+    if (!validateEmail(sanitizedEmail)) {
       throw new Error('Formato email non valido');
     }
     
-    // Rate limiting check
     if (!checkRateLimit(therapistId)) {
       throw new Error('Troppi tentativi di creazione studenti. Riprova tra qualche minuto.');
     }
     
     const password = generateSecurePassword();
-
-    // Check if user already exists in auth
-    const { data: existingUser, error: userLookupError } = await supabaseAdmin.auth.admin.listUsers();
-    
-    let user;
-    let userId;
-    let userRecreated = false;
-    
-    const existingUserRecord = existingUser?.users?.find(u => u.email === sanitizedEmail);
-    
-    // Check if there's an existing student profile with this email
-    const { data: existingPatientProfile } = await supabaseAdmin
-      .from('profiles')
-      .select('id, user_id, full_name')
-      .eq('role', 'student')
-      .eq('created_by', therapistId);
-    
-    // Find profile by matching the full name
-    const matchingProfile = existingPatientProfile?.find(p => 
-      p.full_name.toLowerCase() === sanitizedFullName.toLowerCase()
+    const { userId, userRecreated } = await handleUserCreation(
+      supabaseAdmin,
+      sanitizedEmail,
+      sanitizedFullName,
+      password,
+      therapistId
     );
-    
-    if (existingUserRecord) {
-      // User exists in auth, use existing user ID
-      userId = existingUserRecord.id;
-      user = { user: existingUserRecord };
-    } else if (matchingProfile) {
-      // Found orphaned profile with same name, clean and recreate user
-      console.log(`Trovato profilo orfano per ${sanitizedFullName}, pulizia e ricreazione utente`);
-      
-      // Delete orphaned profile and related data
-      await supabaseAdmin
-        .from('exercise_sessions')
-        .delete()
-        .eq('patient_id', matchingProfile.id);
-        
-      await supabaseAdmin
-        .from('exercises')
-        .delete()
-        .eq('patient_id', matchingProfile.id);
-        
-      await supabaseAdmin
-        .from('profiles')
-        .delete()
-        .eq('id', matchingProfile.id);
-      
-      userRecreated = true;
-      
-      // Create new user
-      const { data: newUser, error: userError } = await supabaseAdmin.auth.admin.createUser({
-        email: sanitizedEmail,
-        password,
-        email_confirm: false,
-        user_metadata: {
-          full_name: sanitizedFullName
-        }
-      });
 
-      if (userError) {
-        throw new Error(sanitizeErrorMessage(userError));
-      }
-      
-      user = newUser;
-      userId = newUser.user.id;
-    } else {
-      // Create completely new user
-      const { data: newUser, error: userError } = await supabaseAdmin.auth.admin.createUser({
-        email: sanitizedEmail,
-        password,
-        email_confirm: false,
-        user_metadata: {
-          full_name: sanitizedFullName
-        }
-      });
+    await createStudentProfile(supabaseAdmin, userId, sanitizedFullName, therapistId);
 
-      if (userError) {
-        throw new Error(sanitizeErrorMessage(userError));
-      }
-      
-      user = newUser;
-      userId = newUser.user.id;
-    }
-
-    // Create patient profile (delete existing profile if needed)
-    // First, delete any existing profile (in case trigger created one)
-    await supabaseAdmin
-      .from('profiles')
-      .delete()
-      .eq('user_id', userId);
-
-    // Now create the correct student profile
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .insert({
-        user_id: userId,
-        role: 'student',
-        full_name: sanitizedFullName,
-        created_by: therapistId,
-      });
-
-    if (profileError) {
-      throw new Error(sanitizeErrorMessage(profileError));
-    }
-
-    // Generate password reset link that works properly
-    const { data: resetData, error: resetError } = await supabaseAdmin.auth.admin.generateLink({
+    const { data: resetData } = await supabaseAdmin.auth.admin.generateLink({
       type: 'recovery',
       email: sanitizedEmail,
       options: {
@@ -215,60 +157,27 @@ serve(async (req) => {
       }
     });
 
-    if (resetError) {
-      console.error('Errore generazione link reset:', resetError);
-    }
+    const emailResult = await sendWelcomeEmail(supabaseAdmin, sanitizedEmail, sanitizedFullName, password);
 
-    // Send welcome email using Supabase invite system
-    let emailSent = false;
-    let emailError = null;
-    
-    try {
-      // Use the same invite system that works from Supabase dashboard
-      const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(sanitizedEmail, {
-        redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/`,
-        data: {
-          full_name: sanitizedFullName,
-          welcome_message: `Ciao ${sanitizedFullName}! Le tue credenziali: Email: ${sanitizedEmail}, Password: ${password}`
-        }
-      });
-
-      if (inviteError) {
-        console.error('Errore invio email:', inviteError);
-        emailError = sanitizeErrorMessage(inviteError);
-      } else {
-        console.log(`Email di benvenuto inviata con successo a ${sanitizedEmail}`);
-        emailSent = true;
-      }
-    } catch (emailException) {
-      console.error('Errore invio email:', emailException);
-      emailError = sanitizeErrorMessage(emailException);
-    }
-
-    // Log security event
     console.log(`SECURITY_LOG: Student created - Coach: ${therapistId}, Student: ${sanitizedEmail}, Timestamp: ${new Date().toISOString()}`);
 
-    // Prepare response message
     let message = userRecreated 
       ? `Studente ${sanitizedFullName} ricreato con successo (dati precedenti eliminati).`
       : `Studente ${sanitizedFullName} creato con successo.`;
-    let warning = null;
     
-    if (emailSent) {
+    if (emailResult.success) {
       message += ` Email di benvenuto inviata a ${sanitizedEmail} con credenziali di accesso.`;
-    } else {
-      warning = `ATTENZIONE: Lo studente è stato creato ma l'email non è stata inviata. Fornisci manualmente le credenziali allo studente.`;
     }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        password: password,
+        password,
         magic_link: resetData?.properties?.action_link,
-        message: message,
-        warning: warning,
-        emailSent: emailSent,
-        emailError: emailError
+        message,
+        warning: !emailResult.success ? `ATTENZIONE: Lo studente è stato creato ma l'email non è stata inviata. Fornisci manualmente le credenziali allo studente.` : null,
+        emailSent: emailResult.success,
+        emailError: emailResult.error
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

@@ -13,6 +13,14 @@ import { WordList } from '@/types/tachistoscope';
 import { supabase } from '@/integrations/supabase/client';
 import { WordList as DBWordList, ExerciseSettings, DEFAULT_SETTINGS } from '@/types/database';
 import { sanitizeInput, sanitizeWordList } from '@/utils/passwordValidation';
+import { 
+  countSyllables, 
+  inappropriateWordsSet,
+  generateMinimalPairsFromDictionary,
+  generateSyllables as generateSyllablesHelper,
+  generateNonWords as generateNonWordsHelper,
+  ITALIAN_SYLLABLES 
+} from './WordListManager/wordGenerators';
 
 // Import the complete Italian word dataset
 import wordDatasetUrl from '@/data/parole_italiane_complete.txt?url';
@@ -334,73 +342,12 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   };
   const generateMinimalPairs = (): string[] => {
     const syllables = parseInt(generatorParams.syllableCount) || 2;
-
-    // Algoritmo efficiente per trovare coppie minime dal dizionario interno
-    const findMinimalPairsFromDictionary = (): string[] => {
-      // Parole comuni italiane verificate (subset del dizionario per prestazioni)
-      // FILTRATE per essere appropriate per bambini
-      const commonWords = ['casa', 'cassa', 'cane', 'canne', 'male', 'mare', 'mele', 'sole', 'suole', 'filo', 'fino', 'vino', 'pino', 'lana', 'rana', 'mano', 'nano', 'polo', 'bolo', 'tana', 'dana', 'pala', 'palla', 'cola', 'colla', 'gala', 'galla', 'caro', 'carro', 'nero', 'loro', 'oro', 'foro', 'moro', 'coro', 'toro', 'sera', 'serra', 'terra', 'cera', 'peso', 'pezzo', 'mese', 'messe', 'base', 'basse', 'rosa', 'rossa', 'massa', 'mazza', 'pazzo', 'passo', 'tasso', 'tazza', 'razzo', 'note', 'notte', 'botte', 'moto', 'motto', 'foto', 'fatto', 'gatto', 'lago', 'carta', 'casta', 'pasta', 'basta', 'vasta', 'fede', 'sede', 'vede', 'cede', 'bene', 'gene', 'rene', 'meta', 'beta', 'zeta', 'seta', 'vita', 'dita', 'buco', 'bucco', 'eco', 'ecco', 'sano', 'sanno', 'papa', 'pappa', 'bella', 'torre', 'borre', 'corre', 'forre', 'dorme', 'forme', 'norme', 'luce', 'duce', 'sale', 'tale', 'vale', 'pale', 'cale', 'male', 'dale', 'bale', 'lato', 'nato', 'gato', 'dato', 'rato', 'pato', 'mato', 'fiume', 'piume', 'muro', 'duro', 'puro', 'curo', 'euro', 'lago', 'rago', 'pago', 'mago', 'sago', 'vago', 'coda', 'soda', 'loda', 'moda', 'noda', 'roda', 'luna', 'runa', 'duna', 'tuna', 'puna', 'cuna', 'pino', 'sino', 'fino', 'lino', 'mino', 'dino', 'tino', 'dado', 'fado', 'nado', 'rado', 'sado', 'vado'];
-
-      // Lista di parole inappropriate da evitare (per bambini)
-      const inappropriateWords = new Set(['pene', 'ano', 'culo', 'merda', 'cacca', 'pipi', 'popo', 'stupido', 'idiota', 'cretino', 'scemo', 'deficiente', 'stronzo', 'troia', 'puttana', 'figa', 'fica', 'vaffanculo', 'cazzo', 'fottiti', 'inculare', 'mignotta', 'bastardo', 'bastardissimo', 'zoccola', 'cornuto', 'coglione', 'stronza', 'cogliona', 'rompipalle', 'mado', 'puttanella', 'fichetto', 'pischello', 'pischella', 'merdoso', 'babbeo', 'imbecille', 'scassacazzo', 'baldracca', 'cagna', 'ficco', 'troione', 'bastardone', 'ficcona', 'puzzone', 'zzozzo', 'caccone', 'pennuto', 'pezzente', 'zingaro', 'paccottiglia', 'lurido', 'ciuccio', 'schifoso', 'brutto', 'schifo', 'lurida', 'str*nza', 'schifosa', 'cafone', 'duro', 'cretina', 'cornuta', 'mignotta', 'ficaginosa', 'pippone', 'pirla', 'babbuino', 'merdone', 'zoccola', 'frocione', 'checca', 'frocio', 'omosessuale', 'froci', 'patacca', 'minkia', 'minkione', 'scemoide', 'fesso', 'troione', 'tamarro', 'ubriacone', 'cogliona', 'merdaccia', 'scemi', 'scemotti', 'frocetto', 'swaghetto', 'sfigato', 'zigomo', 'vaffangulo', 'puttanella', 'vaffanculo', 'strunz', 'ricchione', 'stronza', 'piscio', 'pisciare', 'pisciatoio', 'ricchioni', 'schifosa', 'puzzone', 'cazzone', 'affanculo', 'porco', 'maiale', 'bischero', 'cafone', 'stregone', 'marcio', 'cornetta', 'zoccoletta', 'minkietta', 'culattone', 'frocetto', 'culone', 'straccione', 'negro']);
-
-      // Filtra le parole inappropriate
-      const safeWords = commonWords.filter(word => !inappropriateWords.has(word.toLowerCase()));
-
-      // Mescola l'array per randomicità ogni volta
-      const shuffledWords = [...safeWords].sort(() => Math.random() - 0.5);
-      const dictionary = new Set(shuffledWords);
-      const foundPairs: Set<string> = new Set();
-      const result: string[] = [];
-
-      // Per ogni parola (in ordine casuale), genera varianti con sostituzione di un carattere
-      for (const word of shuffledWords) {
-        if (result.length >= generatorParams.count) break;
-
-        // Controlla se la parola soddisfa i criteri
-        const syllables = countSyllables(word);
-        const validSyllables = syllables === syllables; // Ora usiamo valore singolo
-        const validFilters = (!generatorParams.startsWith || word.startsWith(generatorParams.startsWith.toLowerCase())) && (!generatorParams.contains || word.includes(generatorParams.contains.toLowerCase()));
-        if (!validSyllables || !validFilters) continue;
-
-        // Genera varianti in ordine casuale delle posizioni
-        const positions = Array.from({
-          length: word.length
-        }, (_, i) => i).sort(() => Math.random() - 0.5);
-        for (const i of positions) {
-          // Sostituisci carattere i con ogni lettera dell'alfabeto (in ordine casuale)
-          const letters = 'abcdefghijklmnopqrstuvwxyz'.split('').sort(() => Math.random() - 0.5);
-          for (const letter of letters) {
-            if (letter === word[i]) continue; // Salta se è lo stesso carattere
-
-              const variant = word.slice(0, i) + letter + word.slice(i + 1);
-
-            // Controlla se la variante esiste nel dizionario ed è appropriata
-            if (dictionary.has(variant) && !inappropriateWords.has(variant.toLowerCase())) {
-              const pair = [word, variant].sort((a, b) => a.localeCompare(b)).join('-');
-              if (!foundPairs.has(pair)) {
-                foundPairs.add(pair);
-
-                // Aggiungi entrambe le parole se non ci sono già e soddisfano i criteri
-                const variantSyllables = countSyllables(variant);
-                const variantValidSyllables = variantSyllables === syllables;
-                const variantValidFilters = (!generatorParams.startsWith || variant.startsWith(generatorParams.startsWith.toLowerCase())) && (!generatorParams.contains || variant.includes(generatorParams.contains.toLowerCase()));
-                if (!result.includes(word) && result.length < generatorParams.count) {
-                  result.push(word);
-                }
-                if (!result.includes(variant) && result.length < generatorParams.count && variantValidSyllables && variantValidFilters) {
-                  result.push(variant);
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // Mescola anche il risultato finale per maggiore varietà
-      return result.sort(() => Math.random() - 0.5);
-    };
-    return findMinimalPairsFromDictionary();
+    return generateMinimalPairsFromDictionary({
+      syllableCount: syllables,
+      startsWith: generatorParams.startsWith,
+      contains: generatorParams.contains,
+      count: generatorParams.count
+    });
   };
   const loadSavedWordLists = async () => {
     if (!therapistId) return;

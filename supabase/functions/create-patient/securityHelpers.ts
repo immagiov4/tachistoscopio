@@ -69,3 +69,25 @@ export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
   return emailRegex.test(email);
 };
+
+export const findOrphanedProfile = async (
+  supabaseAdmin: any,
+  fullName: string,
+  therapistId: string
+) => {
+  const { data: existingPatientProfile } = await supabaseAdmin
+    .from('profiles')
+    .select('id, user_id, full_name')
+    .eq('role', 'student')
+    .eq('created_by', therapistId);
+  
+  return existingPatientProfile?.find((p: any) => 
+    p.full_name.toLowerCase() === fullName.toLowerCase()
+  );
+};
+
+export const cleanOrphanedData = async (supabaseAdmin: any, profileId: string) => {
+  await supabaseAdmin.from('exercise_sessions').delete().eq('patient_id', profileId);
+  await supabaseAdmin.from('exercises').delete().eq('patient_id', profileId);
+  await supabaseAdmin.from('profiles').delete().eq('id', profileId);
+};

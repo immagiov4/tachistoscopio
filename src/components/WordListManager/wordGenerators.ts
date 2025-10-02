@@ -17,6 +17,26 @@ export const ITALIAN_SYLLABLES = [
   'za', 'ze', 'zi', 'zo', 'zu'
 ];
 
+const COMMON_SAFE_WORDS = [
+  'casa', 'cassa', 'cane', 'canne', 'male', 'mare', 'mele', 'sole', 'suole',
+  'filo', 'fino', 'vino', 'pino', 'lana', 'rana', 'mano', 'nano', 'polo',
+  'bolo', 'tana', 'dana', 'pala', 'palla', 'cola', 'colla', 'gala', 'galla',
+  'caro', 'carro', 'nero', 'loro', 'oro', 'foro', 'moro', 'coro', 'toro',
+  'sera', 'serra', 'terra', 'cera', 'peso', 'pezzo', 'mese', 'messe', 'base',
+  'basse', 'rosa', 'rossa', 'massa', 'mazza', 'pazzo', 'passo', 'tasso',
+  'tazza', 'razzo', 'note', 'notte', 'botte', 'moto', 'motto', 'foto',
+  'fatto', 'gatto', 'lago', 'carta', 'casta', 'pasta', 'basta', 'vasta',
+  'fede', 'sede', 'vede', 'cede', 'bene', 'gene', 'rene', 'meta', 'beta',
+  'zeta', 'seta', 'vita', 'dita', 'buco', 'bucco', 'eco', 'ecco', 'sano',
+  'sanno', 'papa', 'pappa', 'bella', 'torre', 'borre', 'corre', 'forre',
+  'dorme', 'forme', 'norme', 'luce', 'sale', 'tale', 'vale', 'pale', 'cale',
+  'dale', 'bale', 'lato', 'nato', 'dato', 'rato', 'pato', 'mato', 'fiume',
+  'piume', 'muro', 'puro', 'curo', 'euro', 'rago', 'pago', 'mago', 'sago',
+  'vago', 'coda', 'soda', 'loda', 'moda', 'noda', 'roda', 'luna', 'runa',
+  'duna', 'tuna', 'puna', 'cuna', 'sino', 'lino', 'mino', 'dino', 'tino',
+  'dado', 'fado', 'nado', 'rado', 'sado', 'vado'
+];
+
 // Function to count syllables in Italian words
 export const countSyllables = (word: string): number => {
   if (!word) return 0;
@@ -64,6 +84,113 @@ export const inappropriateWordsSet = new Set([
   'stronzo', 'troia', 'puttana', 'figa', 'fica', 'vaffanculo',
   'cazzo', 'fottiti', 'inculare', 'mignotta', 'bastardo'
 ]);
+
+const checkWordValidity = (
+  word: string,
+  targetSyllables: number,
+  startsWith: string,
+  contains: string
+): boolean => {
+  const syllables = countSyllables(word);
+  const validSyllables = syllables === targetSyllables;
+  const validFilters = 
+    (!startsWith || word.startsWith(startsWith.toLowerCase())) &&
+    (!contains || word.includes(contains.toLowerCase()));
+  
+  return validSyllables && validFilters;
+};
+
+const findVariants = (
+  word: string,
+  dictionary: Set<string>,
+  inappropriateWords: Set<string>,
+  targetSyllables: number,
+  startsWith: string,
+  contains: string,
+  maxCount: number,
+  currentResults: string[]
+): string[] => {
+  const results: string[] = [];
+  const positions = Array.from({ length: word.length }, (_, i) => i)
+    .sort(() => Math.random() - 0.5);
+  
+  for (const i of positions) {
+    if (results.length + currentResults.length >= maxCount) break;
+    
+    const letters = 'abcdefghijklmnopqrstuvwxyz'.split('')
+      .sort(() => Math.random() - 0.5);
+    
+    for (const letter of letters) {
+      if (letter === word[i]) continue;
+      
+      const variant = word.slice(0, i) + letter + word.slice(i + 1);
+      
+      if (dictionary.has(variant) && 
+          !inappropriateWords.has(variant.toLowerCase()) &&
+          !currentResults.includes(variant) &&
+          !results.includes(variant)) {
+        
+        if (checkWordValidity(variant, targetSyllables, startsWith, contains)) {
+          results.push(variant);
+          if (results.length + currentResults.length >= maxCount) break;
+        }
+      }
+    }
+  }
+  
+  return results;
+};
+
+export const generateMinimalPairsFromDictionary = (params: {
+  syllableCount: number;
+  startsWith: string;
+  contains: string;
+  count: number;
+}): string[] => {
+  const shuffledWords = [...COMMON_SAFE_WORDS].sort(() => Math.random() - 0.5);
+  const dictionary = new Set(shuffledWords);
+  const inappropriateWords = inappropriateWordsSet;
+  const foundPairs = new Set<string>();
+  const result: string[] = [];
+  
+  for (const word of shuffledWords) {
+    if (result.length >= params.count) break;
+    
+    if (!checkWordValidity(word, params.syllableCount, params.startsWith, params.contains)) {
+      continue;
+    }
+    
+    const variants = findVariants(
+      word,
+      dictionary,
+      inappropriateWords,
+      params.syllableCount,
+      params.startsWith,
+      params.contains,
+      params.count,
+      result
+    );
+    
+    for (const variant of variants) {
+      const pair = [word, variant].sort((a, b) => a.localeCompare(b)).join('-');
+      
+      if (!foundPairs.has(pair)) {
+        foundPairs.add(pair);
+        
+        if (!result.includes(word) && result.length < params.count) {
+          result.push(word);
+        }
+        if (!result.includes(variant) && result.length < params.count) {
+          result.push(variant);
+        }
+      }
+      
+      if (result.length >= params.count) break;
+    }
+  }
+  
+  return result.sort(() => Math.random() - 0.5);
+};
 
 export const generateSyllables = (params: {
   startsWith: string;
@@ -118,20 +245,4 @@ export const generateNonWords = (params: {
   }
   
   return nonWords;
-};
-
-export const generateMinimalPairs = (params: { count: number }): string[] => {
-  const pairs: string[] = [];
-  const minimalPairPatterns = [
-    ['casa', 'cassa'], ['pane', 'pene'], ['cane', 'canne'],
-    ['pala', 'palla'], ['nono', 'nonno'], ['papa', 'pappa']
-  ];
-
-  let pairIndex = 0;
-  while (pairs.length < params.count && pairIndex < minimalPairPatterns.length) {
-    pairs.push(...minimalPairPatterns[pairIndex]);
-    pairIndex++;
-  }
-
-  return pairs.slice(0, params.count);
 };
