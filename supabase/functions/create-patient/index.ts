@@ -9,7 +9,7 @@ const corsHeaders = {
 // Rate limiting storage
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
 const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes
-const RATE_LIMIT_MAX_REQUESTS = 10; // Max 10 patient creations per 5 minutes per therapist
+const RATE_LIMIT_MAX_REQUESTS = 10; // Max 10 student creations per 5 minutes per coach
 
 // Security utilities
 const sanitizeInput = (input: string, maxLength: number = 255): string => {
@@ -112,7 +112,7 @@ serve(async (req) => {
     
     // Rate limiting check
     if (!checkRateLimit(therapistId)) {
-      throw new Error('Troppi tentativi di creazione pazienti. Riprova tra qualche minuto.');
+      throw new Error('Troppi tentativi di creazione studenti. Riprova tra qualche minuto.');
     }
     
     const password = generateSecurePassword();
@@ -126,11 +126,11 @@ serve(async (req) => {
     
     const existingUserRecord = existingUser?.users?.find(u => u.email === sanitizedEmail);
     
-    // Check if there's an existing patient profile with this email
+    // Check if there's an existing student profile with this email
     const { data: existingPatientProfile } = await supabaseAdmin
       .from('profiles')
       .select('id, user_id, full_name')
-      .eq('role', 'patient')
+      .eq('role', 'student')
       .eq('created_by', therapistId);
     
     // Find profile by matching the full name
@@ -170,8 +170,7 @@ serve(async (req) => {
         password,
         email_confirm: false,
         user_metadata: {
-          full_name: sanitizedFullName,
-          password: password
+          full_name: sanitizedFullName
         }
       });
 
@@ -188,8 +187,7 @@ serve(async (req) => {
         password,
         email_confirm: false,
         user_metadata: {
-          full_name: sanitizedFullName,
-          password: password
+          full_name: sanitizedFullName
         }
       });
 
@@ -208,12 +206,12 @@ serve(async (req) => {
       .delete()
       .eq('user_id', userId);
 
-    // Now create the correct patient profile
+    // Now create the correct student profile
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .insert({
         user_id: userId,
-        role: 'patient',
+        role: 'student',
         full_name: sanitizedFullName,
         created_by: therapistId,
       });
@@ -245,7 +243,6 @@ serve(async (req) => {
         redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/`,
         data: {
           full_name: sanitizedFullName,
-          password: password,
           welcome_message: `Ciao ${sanitizedFullName}! Le tue credenziali: Email: ${sanitizedEmail}, Password: ${password}`
         }
       });
@@ -263,18 +260,18 @@ serve(async (req) => {
     }
 
     // Log security event
-    console.log(`SECURITY_LOG: Patient created - Therapist: ${therapistId}, Patient: ${sanitizedEmail}, Timestamp: ${new Date().toISOString()}`);
+    console.log(`SECURITY_LOG: Student created - Coach: ${therapistId}, Student: ${sanitizedEmail}, Timestamp: ${new Date().toISOString()}`);
 
     // Prepare response message
     let message = userRecreated 
-      ? `Paziente ${sanitizedFullName} ricreato con successo (dati precedenti eliminati).`
-      : `Paziente ${sanitizedFullName} creato con successo.`;
+      ? `Studente ${sanitizedFullName} ricreato con successo (dati precedenti eliminati).`
+      : `Studente ${sanitizedFullName} creato con successo.`;
     let warning = null;
     
     if (emailSent) {
       message += ` Email di benvenuto inviata a ${sanitizedEmail} con credenziali di accesso.`;
     } else {
-      warning = `ATTENZIONE: Il paziente è stato creato ma l'email non è stata inviata. Fornisci manualmente le credenziali al paziente.`;
+      warning = `ATTENZIONE: Lo studente è stato creato ma l'email non è stata inviata. Fornisci manualmente le credenziali allo studente.`;
     }
 
     return new Response(
@@ -291,7 +288,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('SECURITY_LOG: Patient creation failed:', error.message);
+    console.error('SECURITY_LOG: Student creation failed:', error.message);
     return new Response(
       JSON.stringify({ 
         error: sanitizeErrorMessage(error),
