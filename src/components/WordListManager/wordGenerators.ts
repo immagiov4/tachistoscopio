@@ -100,6 +100,27 @@ const checkWordValidity = (
   return validSyllables && validFilters;
 };
 
+const isValidVariant = (
+  variant: string,
+  dictionary: Set<string>,
+  inappropriateWords: Set<string>,
+  currentResults: string[],
+  results: string[]
+): boolean => {
+  return dictionary.has(variant) && 
+    !inappropriateWords.has(variant.toLowerCase()) &&
+    !currentResults.includes(variant) &&
+    !results.includes(variant);
+};
+
+const canContinueSearching = (
+  resultsLength: number,
+  currentResultsLength: number,
+  maxCount: number
+): boolean => {
+  return resultsLength + currentResultsLength < maxCount;
+};
+
 const findVariants = (
   word: string,
   dictionary: Set<string>,
@@ -115,7 +136,7 @@ const findVariants = (
     .sort(() => Math.random() - 0.5);
   
   for (const i of positions) {
-    if (results.length + currentResults.length >= maxCount) break;
+    if (!canContinueSearching(results.length, currentResults.length, maxCount)) break;
     
     const letters = 'abcdefghijklmnopqrstuvwxyz'.split('')
       .sort(() => Math.random() - 0.5);
@@ -125,20 +146,65 @@ const findVariants = (
       
       const variant = word.slice(0, i) + letter + word.slice(i + 1);
       
-      if (dictionary.has(variant) && 
-          !inappropriateWords.has(variant.toLowerCase()) &&
-          !currentResults.includes(variant) &&
-          !results.includes(variant)) {
-        
+      if (isValidVariant(variant, dictionary, inappropriateWords, currentResults, results)) {
         if (checkWordValidity(variant, targetSyllables, startsWith, contains)) {
           results.push(variant);
-          if (results.length + currentResults.length >= maxCount) break;
+          if (!canContinueSearching(results.length, currentResults.length, maxCount)) break;
         }
       }
     }
   }
   
   return results;
+};
+
+const addWordToResult = (word: string, result: string[], maxCount: number): boolean => {
+  if (!result.includes(word) && result.length < maxCount) {
+    result.push(word);
+    return true;
+  }
+  return false;
+};
+
+const processPair = (
+  word: string,
+  variant: string,
+  foundPairs: Set<string>,
+  result: string[],
+  maxCount: number
+): void => {
+  const pair = [word, variant].sort((a, b) => a.localeCompare(b)).join('-');
+  
+  if (foundPairs.has(pair)) return;
+  
+  foundPairs.add(pair);
+  addWordToResult(word, result, maxCount);
+  addWordToResult(variant, result, maxCount);
+};
+
+const processWord = (
+  word: string,
+  dictionary: Set<string>,
+  inappropriateWords: Set<string>,
+  params: { syllableCount: number; startsWith: string; contains: string; count: number },
+  foundPairs: Set<string>,
+  result: string[]
+): void => {
+  const variants = findVariants(
+    word,
+    dictionary,
+    inappropriateWords,
+    params.syllableCount,
+    params.startsWith,
+    params.contains,
+    params.count,
+    result
+  );
+  
+  for (const variant of variants) {
+    processPair(word, variant, foundPairs, result, params.count);
+    if (result.length >= params.count) break;
+  }
 };
 
 export const generateMinimalPairsFromDictionary = (params: {
@@ -160,33 +226,7 @@ export const generateMinimalPairsFromDictionary = (params: {
       continue;
     }
     
-    const variants = findVariants(
-      word,
-      dictionary,
-      inappropriateWords,
-      params.syllableCount,
-      params.startsWith,
-      params.contains,
-      params.count,
-      result
-    );
-    
-    for (const variant of variants) {
-      const pair = [word, variant].sort((a, b) => a.localeCompare(b)).join('-');
-      
-      if (!foundPairs.has(pair)) {
-        foundPairs.add(pair);
-        
-        if (!result.includes(word) && result.length < params.count) {
-          result.push(word);
-        }
-        if (!result.includes(variant) && result.length < params.count) {
-          result.push(variant);
-        }
-      }
-      
-      if (result.length >= params.count) break;
-    }
+    processWord(word, dictionary, inappropriateWords, params, foundPairs, result);
   }
   
   return result.sort(() => Math.random() - 0.5);

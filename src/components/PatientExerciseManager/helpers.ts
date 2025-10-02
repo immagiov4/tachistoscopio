@@ -192,43 +192,84 @@ export const deletePatientAccount = async (patientId: string) => {
   return data;
 };
 
+const ERROR_MESSAGES = {
+  update: {
+    '23503_patient': 'Impossibile aggiornare: lo studente selezionato non esiste più. Ricarica la pagina.',
+    '23503_word_list': 'Impossibile aggiornare: la lista di parole selezionata non esiste più.',
+    '23503_default': 'Errore di vincolo del database. Controlla che tutti i dati siano validi.',
+    'PGRST116': 'Non hai i permessi per modificare questo esercizio.'
+  },
+  remove: {
+    'PGRST116': 'Esercizio non trovato o non hai i permessi per rimuoverlo.',
+    'foreign_key': 'Impossibile eliminare: esistono ancora sessioni collegate'
+  },
+  create: {
+    'email': 'Email non valida o già utilizzata da un altro utente.',
+    'exists': 'Uno studente con questa email esiste già.'
+  },
+  delete: {
+    'unauthorized': 'Non hai i permessi per eliminare questo studente.',
+    'not_found': 'Studente non trovato.'
+  }
+} as const;
+
+const getUpdateError = (error: any): string => {
+  if (error.code === '23503') {
+    if (error.message?.includes('exercises_patient_id_fkey')) {
+      return ERROR_MESSAGES.update['23503_patient'];
+    }
+    if (error.message?.includes('word_list')) {
+      return ERROR_MESSAGES.update['23503_word_list'];
+    }
+    return ERROR_MESSAGES.update['23503_default'];
+  }
+  if (error.code === 'PGRST116') {
+    return ERROR_MESSAGES.update.PGRST116;
+  }
+  return '';
+};
+
+const getRemoveError = (error: any): string => {
+  if (error.code === 'PGRST116') {
+    return ERROR_MESSAGES.remove.PGRST116;
+  }
+  if (error.message?.includes('foreign key')) {
+    return ERROR_MESSAGES.remove.foreign_key;
+  }
+  return '';
+};
+
+const getCreateError = (error: any): string => {
+  if (error.message?.includes('email')) {
+    return ERROR_MESSAGES.create.email;
+  }
+  if (error.message?.includes('already exists')) {
+    return ERROR_MESSAGES.create.exists;
+  }
+  return '';
+};
+
+const getDeleteError = (error: any): string => {
+  if (error.message?.includes('Unauthorized')) {
+    return ERROR_MESSAGES.delete.unauthorized;
+  }
+  if (error.message?.includes('not found')) {
+    return ERROR_MESSAGES.delete.not_found;
+  }
+  return '';
+};
+
 export const getErrorMessage = (error: any, context: 'update' | 'remove' | 'create' | 'delete'): string => {
-  if (context === 'update') {
-    if (error.code === '23503') {
-      if (error.message?.includes('exercises_patient_id_fkey')) {
-        return 'Impossibile aggiornare: lo studente selezionato non esiste più. Ricarica la pagina.';
-      } else if (error.message?.includes('word_list')) {
-        return 'Impossibile aggiornare: la lista di parole selezionata non esiste più.';
-      }
-      return 'Errore di vincolo del database. Controlla che tutti i dati siano validi.';
-    } else if (error.code === 'PGRST116') {
-      return 'Non hai i permessi per modificare questo esercizio.';
-    }
-  }
+  const contextHandlers = {
+    update: getUpdateError,
+    remove: getRemoveError,
+    create: getCreateError,
+    delete: getDeleteError
+  };
 
-  if (context === 'remove') {
-    if (error.code === 'PGRST116') {
-      return 'Esercizio non trovato o non hai i permessi per rimuoverlo.';
-    } else if (error.message?.includes('foreign key')) {
-      return 'Impossibile eliminare: esistono ancora sessioni collegate';
-    }
-  }
-
-  if (context === 'create') {
-    if (error.message?.includes('email')) {
-      return 'Email non valida o già utilizzata da un altro utente.';
-    } else if (error.message?.includes('already exists')) {
-      return 'Uno studente con questa email esiste già.';
-    }
-  }
-
-  if (context === 'delete') {
-    if (error.message?.includes('Unauthorized')) {
-      return 'Non hai i permessi per eliminare questo studente.';
-    } else if (error.message?.includes('not found')) {
-      return 'Studente non trovato.';
-    }
-  }
+  const handler = contextHandlers[context];
+  const contextError = handler(error);
+  if (contextError) return contextError;
 
   if (error.message?.includes('network')) {
     return 'Errore di connessione. Controlla la rete e riprova.';
