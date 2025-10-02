@@ -121,6 +121,63 @@ const canContinueSearching = (
   return resultsLength + currentResultsLength < maxCount;
 };
 
+const tryLetterAtPosition = (
+  word: string,
+  position: number,
+  letter: string,
+  dictionary: Set<string>,
+  inappropriateWords: Set<string>,
+  targetSyllables: number,
+  startsWith: string,
+  contains: string,
+  currentResults: string[],
+  results: string[]
+): boolean => {
+  if (letter === word[position]) return false;
+  
+  const variant = word.slice(0, position) + letter + word.slice(position + 1);
+  
+  if (!isValidVariant(variant, dictionary, inappropriateWords, currentResults, results)) {
+    return false;
+  }
+  
+  if (!checkWordValidity(variant, targetSyllables, startsWith, contains)) {
+    return false;
+  }
+  
+  results.push(variant);
+  return true;
+};
+
+const findVariantsAtPosition = (
+  word: string,
+  position: number,
+  dictionary: Set<string>,
+  inappropriateWords: Set<string>,
+  targetSyllables: number,
+  startsWith: string,
+  contains: string,
+  maxCount: number,
+  currentResults: string[],
+  results: string[]
+): boolean => {
+  const letters = 'abcdefghijklmnopqrstuvwxyz'.split('')
+    .sort(() => Math.random() - 0.5);
+  
+  for (const letter of letters) {
+    const added = tryLetterAtPosition(
+      word, position, letter, dictionary, inappropriateWords,
+      targetSyllables, startsWith, contains, currentResults, results
+    );
+    
+    if (added && !canContinueSearching(results.length, currentResults.length, maxCount)) {
+      return false;
+    }
+  }
+  
+  return true;
+};
+
 const findVariants = (
   word: string,
   dictionary: Set<string>,
@@ -135,24 +192,15 @@ const findVariants = (
   const positions = Array.from({ length: word.length }, (_, i) => i)
     .sort(() => Math.random() - 0.5);
   
-  for (const i of positions) {
+  for (const position of positions) {
     if (!canContinueSearching(results.length, currentResults.length, maxCount)) break;
     
-    const letters = 'abcdefghijklmnopqrstuvwxyz'.split('')
-      .sort(() => Math.random() - 0.5);
+    const shouldContinue = findVariantsAtPosition(
+      word, position, dictionary, inappropriateWords,
+      targetSyllables, startsWith, contains, maxCount, currentResults, results
+    );
     
-    for (const letter of letters) {
-      if (letter === word[i]) continue;
-      
-      const variant = word.slice(0, i) + letter + word.slice(i + 1);
-      
-      if (isValidVariant(variant, dictionary, inappropriateWords, currentResults, results)) {
-        if (checkWordValidity(variant, targetSyllables, startsWith, contains)) {
-          results.push(variant);
-          if (!canContinueSearching(results.length, currentResults.length, maxCount)) break;
-        }
-      }
-    }
+    if (!shouldContinue) break;
   }
   
   return results;
