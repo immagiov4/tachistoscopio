@@ -135,8 +135,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     event.target.value = '';
   }, [toast]);
 
-  // Sillabe italiane comuni per il generatore
-  const ITALIAN_SYLLABLES = ['ba', 'be', 'bi', 'bo', 'bu', 'ca', 'ce', 'ci', 'co', 'cu', 'da', 'de', 'di', 'do', 'du', 'fa', 'fe', 'fi', 'fo', 'fu', 'ga', 'ge', 'gi', 'go', 'gu', 'la', 'le', 'li', 'lo', 'lu', 'ma', 'me', 'mi', 'mo', 'mu', 'na', 'ne', 'ni', 'no', 'nu', 'pa', 'pe', 'pi', 'po', 'pu', 'ra', 're', 'ri', 'ro', 'ru', 'sa', 'se', 'si', 'so', 'su', 'ta', 'te', 'ti', 'to', 'tu', 'va', 've', 'vi', 'vo', 'vu', 'za', 'ze', 'zi', 'zo', 'zu'];
   const ITALIAN_WORDS = [
   // Parole di 1 sillaba
   'blu', 'tre', 'sei', 'qui', 'qua', 'poi', 'per', 'fra', 'tra', 'pro', 'pre', 'sub', 'sud', 'nord', 'est', 'ovest', 'su', 'giù', 'più', 'già', 'mai', 'qui', 'là', 'sì', 'no',
@@ -233,60 +231,12 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       performWordGeneration();
     }, 300);
     return () => clearTimeout(timeoutId);
-  }, [generatorParams.type, generatorParams.syllableCount, generatorParams.startsWith, generatorParams.contains, generatorParams.count]); // Rimossa activeTab dalle dipendenze per evitare loop
+  }, [generatorParams.type, generatorParams.syllableCount, generatorParams.startsWith, generatorParams.contains, generatorParams.count]);
 
-  // Function to count syllables in Italian words (improved)
-  const countSyllables = (word: string): number => {
-    if (!word) return 0;
-
-    // Convert to lowercase and remove accents for better processing
-    const cleanWord = word.toLowerCase().replace(/[àáâãä]/g, 'a').replace(/[èéêë]/g, 'e').replace(/[ìíîï]/g, 'i').replace(/[òóôõö]/g, 'o').replace(/[ùúûü]/g, 'u');
-
-    // Remove non-alphabetic characters
-    const letters = cleanWord.replace(/[^a-z]/g, '');
-    if (letters.length === 0) return 0;
-    if (letters.length <= 2) return 1;
-
-    // Simple vowel counting approach - more reliable for Italian
-    const vowels = letters.match(/[aeiou]/g);
-    if (!vowels) return 1;
-    let syllables = vowels.length;
-
-    // Adjust for common diphthongs that should count as one syllable
-    // But only when they are truly together in pronunciation
-    const diphthongs = ['ia', 'ie', 'io', 'iu',
-    // i + vowel
-    'ua', 'ue', 'ui', 'uo',
-    // u + vowel  
-    'ai', 'au', 'ei', 'eu', 'oi', 'ou' // vowel + i/u
-    ];
-    for (const diphthong of diphthongs) {
-      const regex = new RegExp(diphthong, 'g');
-      const matches = letters.match(regex);
-      if (matches) {
-        // Each diphthong reduces syllable count by 1 (since we counted 2 vowels but it's 1 syllable)
-        syllables -= matches.length;
-      }
-    }
-
-    // Special cases for common Italian patterns
-    // Words ending in -zione, -sione should have the correct count
-    if (letters.match(/(zione|sione)$/)) {
-      syllables += 1; // These endings add complexity
-    }
-
-    // Minimum of 1 syllable
-    return Math.max(1, syllables);
-  };
   const generateRealWords = (): string[] => {
-    // Use complete dataset - safe fallback to avoid empty results
     const wordsToUse = allWords.length > 1000 ? allWords : ITALIAN_WORDS;
     const syllables = parseInt(generatorParams.syllableCount) || 2;
 
-    // Pre-filtro più efficiente delle parole inappropriate
-    const inappropriateWordsSet = new Set(['pene', 'ano', 'culo', 'merda', 'cacca', 'pipi', 'popo', 'stupido', 'idiota', 'cretino', 'scemo', 'deficiente', 'stronzo', 'troia', 'puttana', 'figa', 'fica', 'vaffanculo', 'cazzo', 'fottiti', 'inculare', 'mignotta', 'bastardo', 'bastardissimo', 'zoccola', 'cornuto', 'coglione', 'stronza', 'cogliona', 'rompipalle', 'mado', 'puttanella', 'fichetto', 'pischello', 'pischella', 'merdoso', 'babbeo', 'imbecille', 'scassacazzo', 'baldracca', 'cagna', 'ficco', 'troione', 'bastardone', 'ficcona', 'puzzone', 'zzozzo', 'caccone', 'pennuto', 'pezzente', 'zingaro', 'paccottiglia', 'lurido', 'ciuccio', 'schifoso', 'brutto', 'schifo', 'lurida', 'str*nza', 'schifosa', 'cafone', 'duro', 'cretina', 'cornuta', 'mignotta', 'ficaginosa', 'pippone', 'pirla', 'babbuino', 'merdone', 'zoccola', 'frocione', 'checca', 'frocio', 'omosessuale', 'froci', 'patacca', 'minkia', 'minkione', 'scemoide', 'fesso', 'troione', 'tamarro', 'ubriacone', 'cogliona', 'merdaccia', 'scemi', 'scemotti', 'frocetto', 'swaghetto', 'sfigato', 'zigomo', 'vaffangulo', 'puttanella', 'vaffanculo', 'strunz', 'ricchione', 'stronza', 'piscio', 'pisciare', 'pisciatoio', 'ricchioni', 'schifosa', 'puzzone', 'cazzone', 'affanculo', 'porco', 'maiale', 'bischero', 'cafone', 'stregone', 'marcio', 'cornetta', 'zoccoletta', 'minkietta', 'culattone', 'frocetto', 'culone', 'straccione', 'negro']);
-
-    // SEMPLICE filter + shuffle + slice
     const candidateWords = wordsToUse.filter(word => {
       if (inappropriateWordsSet.has(word.toLowerCase())) return false;
       if (word.length < 2) return false;
@@ -295,51 +245,27 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       return countSyllables(word) === syllables;
     });
 
-    // Shuffle e prendi la quantità richiesta
     const shuffled = candidateWords.sort(() => Math.random() - 0.5);
     return shuffled.slice(0, generatorParams.count);
   };
+
   const generateSyllables = (): string[] => {
-    const syllables: string[] = [];
-    let attempts = 0;
-    const maxAttempts = generatorParams.count * 100; // Limite per evitare infinite loop
-
-    while (syllables.length < generatorParams.count && attempts < maxAttempts) {
-      attempts++;
-      const syllable = ITALIAN_SYLLABLES[Math.floor(Math.random() * ITALIAN_SYLLABLES.length)];
-      if (generatorParams.startsWith && !syllable.startsWith(generatorParams.startsWith.toLowerCase())) continue;
-      if (generatorParams.contains && !syllable.includes(generatorParams.contains.toLowerCase())) continue;
-      if (!syllables.includes(syllable)) {
-        syllables.push(syllable);
-      }
-    }
-    return syllables;
+    return generateSyllablesHelper({
+      startsWith: generatorParams.startsWith,
+      contains: generatorParams.contains,
+      count: generatorParams.count
+    });
   };
+
   const generateNonWords = (): string[] => {
-    const nonWords: string[] = [];
-    const consonants = ['b', 'c', 'd', 'f', 'g', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'z'];
-    const vowels = ['a', 'e', 'i', 'o', 'u'];
-    let attempts = 0;
-    const maxAttempts = generatorParams.count * 100; // Limite per evitare infinite loop
-
-    while (nonWords.length < generatorParams.count && attempts < maxAttempts) {
-      attempts++;
-      let word = '';
-      const syllables = parseInt(generatorParams.syllableCount) || 2;
-      const syllablesToGenerate = syllables;
-      for (let i = 0; i < syllablesToGenerate; i++) {
-        const consonant = consonants[Math.floor(Math.random() * consonants.length)];
-        const vowel = vowels[Math.floor(Math.random() * vowels.length)];
-        word += consonant + vowel;
-      }
-      if (generatorParams.startsWith && !word.startsWith(generatorParams.startsWith.toLowerCase())) continue;
-      if (generatorParams.contains && !word.includes(generatorParams.contains.toLowerCase())) continue;
-      if (!nonWords.includes(word)) {
-        nonWords.push(word);
-      }
-    }
-    return nonWords;
+    return generateNonWordsHelper({
+      syllableCount: parseInt(generatorParams.syllableCount) || 2,
+      startsWith: generatorParams.startsWith,
+      contains: generatorParams.contains,
+      count: generatorParams.count
+    });
   };
+
   const generateMinimalPairs = (): string[] => {
     const syllables = parseInt(generatorParams.syllableCount) || 2;
     return generateMinimalPairsFromDictionary({
