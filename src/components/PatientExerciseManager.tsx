@@ -42,8 +42,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   const [patientsWithExercises, setPatientsWithExercises] = useState<PatientWithExerciseCount[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<PatientWithEmail | null>(null);
   const [wordLists, setWordLists] = useState<WordList[]>([]);
-  const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [patientExercises, setPatientExercises] = useState<Exercise[]>([]);
   const [patientSessions, setPatientSessions] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -223,7 +221,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         fetchPatientSessions(selectedPatient.id)
       ]);
 
-      setPatientExercises(exercises);
       setPatientSessions(sessions);
 
       const weeklyData = buildWeeklyExercisesMap(exercises);
@@ -350,17 +347,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         variant: 'destructive'
       });
     }
-  };
-  const copyExerciseToDay = (fromDay: number, toDay: number) => {
-    const sourceExercise = weeklyExercises[fromDay];
-    if (!sourceExercise) return;
-    setWeeklyExercises(prev => ({
-      ...prev,
-      [toDay]: {
-        ...sourceExercise,
-        day_of_week: toDay
-      }
-    }));
   };
   const filteredPatients = filterPatients(patientsWithExercises, searchTerm);
   const { paginatedPatients, totalPages } = paginatePatients(filteredPatients, currentPage, patientsPerPage);

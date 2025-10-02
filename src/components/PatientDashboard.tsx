@@ -115,7 +115,6 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
   studioStudentId
 }) => {
   const {
-    user,
     profile,
     signOut
   } = useAuth();
