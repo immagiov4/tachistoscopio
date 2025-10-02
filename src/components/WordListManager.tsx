@@ -31,8 +31,12 @@ import {
 import {
   filterWordsBySyllables,
   shuffleAndLimit,
-  selectWordSource
+  selectWordSource,
+  GeneratorParams
 } from './WordListManager/generatorHelpers';
+import { WordListItem } from './WordListManager/WordListItem';
+import { GeneratorTab } from './WordListManager/GeneratorTab';
+import { ExerciseSettings as ExerciseSettingsComponent } from './WordListManager/ExerciseSettings';
 
 // Import the complete Italian word dataset
 import wordDatasetUrl from '@/data/parole_italiane_complete.txt?url';
@@ -54,8 +58,8 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   const [activeTab, setActiveTab] = useState<'manual' | 'generator'>('generator');
 
   // Generator state
-  const [generatorParams, setGeneratorParams] = useState({
-    type: 'words' as 'words' | 'syllables' | 'nonwords' | 'minimal-pairs',
+  const [generatorParams, setGeneratorParams] = useState<GeneratorParams>({
+    type: 'words',
     syllableCount: '2',
     startsWith: '',
     contains: '',
@@ -564,52 +568,26 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
             <CardDescription>Clicca su un esercizio per modificarlo</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-1 flex flex-col min-h-0 overflow-y-auto">
-            {savedWordLists.length === 0 ? <div className="text-center py-6 text-gray-500">
+            {savedWordLists.length === 0 ? (
+              <div className="text-center py-6 text-gray-500">
                 <BookOpen className="h-10 w-10 mx-auto mb-2 opacity-50" />
                 <p className="text-sm font-medium">Nessun esercizio</p>
                 <p className="text-xs">Crea il tuo primo esercizio</p>
-              </div> : <div className="space-y-3 flex-1 overflow-y-auto max-h-[500px]">
-                 {savedWordLists.map(list => <div key={list.id} className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${editingList === list.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`} onClick={() => handleEditWordList(list)}>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm text-gray-900 truncate">{list.name}</h4>
-                        <p className="text-xs text-gray-500">{list.words.length} parole</p>
-                        {list.description && <p className="text-xs text-gray-400 mt-1 line-clamp-2">{list.description}</p>}
-                      </div>
-                      <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                        <Button variant="ghost" size="sm" onClick={e => {
-                    e.stopPropagation();
-                    // Export singolo esercizio con settings
-                    const dataToExport = {
-                      name: list.name,
-                      description: list.description,
-                      words: list.words,
-                      settings: exerciseSettings
-                    };
-                    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], {
-                      type: 'application/json'
-                    });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${list.name.toLowerCase().replace(/\s+/g, '_')}_esercizio.json`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                  }} className="h-6 w-6 p-0">
-                          <Download className="h-3 w-3" />
-                        </Button>
-                        <Button variant="delete" size="sm" onClick={e => {
-                    e.stopPropagation();
-                    handleDeleteWordList(list.id);
-                  }} className="h-6 w-6 p-0">
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>)}
-              </div>}
-            
-            {/* Rimuovo il bottone export generale */}
+              </div>
+            ) : (
+              <div className="space-y-3 flex-1 overflow-y-auto max-h-[500px]">
+                {savedWordLists.map((list) => (
+                  <WordListItem
+                    key={list.id}
+                    list={list}
+                    isEditing={editingList === list.id}
+                    exerciseSettings={exerciseSettings}
+                    onEdit={handleEditWordList}
+                    onDelete={handleDeleteWordList}
+                  />
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -644,101 +622,15 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
               </div>}
 
             {/* Contenuto Generator */}
-            {activeTab === 'generator' && !editingList && <div className="space-y-4">
-                {/* Controlli compatti in griglia */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs font-medium text-gray-700">Tipo</Label>
-                    <Select value={generatorParams.type} onValueChange={value => setGeneratorParams(prev => ({
-                  ...prev,
-                  type: value as any
-                }))}>
-                      <SelectTrigger className="h-9">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="words">Parole</SelectItem>
-                        <SelectItem value="syllables">Sillabe</SelectItem>
-                        <SelectItem value="nonwords">Non-parole</SelectItem>
-                        <SelectItem value="minimal-pairs">Coppie minime</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label className="text-xs font-medium text-gray-700">Quantità</Label>
-                    <Input type="number" min="5" max="50" value={generatorParams.count} onChange={e => setGeneratorParams(prev => ({
-                  ...prev,
-                  count: parseInt(e.target.value) || 10
-                }))} className="h-9" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <Label className="text-xs font-medium text-gray-700">Sillabe</Label>
-                    <Select value={generatorParams.syllableCount} onValueChange={value => setGeneratorParams(prev => ({
-                  ...prev,
-                  syllableCount: value
-                }))}>
-                      <SelectTrigger className="h-9">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="2">2 sillabe</SelectItem>
-                        <SelectItem value="3">3 sillabe</SelectItem>
-                        <SelectItem value="4">4 sillabe</SelectItem>
-                        <SelectItem value="5">5 sillabe</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-xs font-medium text-gray-700">Inizia con</Label>
-                    <Input placeholder="es. ca" value={generatorParams.startsWith} onChange={e => setGeneratorParams(prev => ({
-                  ...prev,
-                  startsWith: e.target.value
-                }))} className="h-9" />
-                  </div>
-                  
-                  <div>
-                    <Label className="text-xs font-medium text-gray-700">Contiene</Label>
-                    <Input placeholder="es. ar" value={generatorParams.contains} onChange={e => setGeneratorParams(prev => ({
-                  ...prev,
-                  contains: e.target.value
-                }))} className="h-9" />
-                  </div>
-                </div>
-
-                {/* Anteprima parole generate */}
-                {isGenerating ? <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                    <div className="flex items-center justify-center mb-3">
-                      <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />
-                      <span className="ml-3 text-sm font-medium text-blue-700">Generazione parole in corso...</span>
-                    </div>
-                    <div className="w-full bg-blue-100 rounded-full h-2">
-                      <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{
-                  width: '100%'
-                }}></div>
-                    </div>
-                    <p className="text-xs text-blue-600 text-center mt-2">Ricerca nel dizionario...</p>
-                  </div> : generatedWords.length > 0 ? <div className="bg-gray-50 rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-gray-700">Parole generate ({generatedWords.length})</span>
-                      <Button size="sm" variant="outline" onClick={() => performWordGeneration()} disabled={isGenerating} className="h-7 text-xs">
-                        <RefreshCw className="h-3 w-3 mr-1" />
-                        Aggiorna
-                      </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-1 w-full">
-                      {generatedWords.map((word, index) => <Badge key={index} variant="secondary" className="text-xs">
-                          {word}
-                        </Badge>)}
-                    </div>
-                  </div> : <div className="text-center py-3">
-                    <p className="text-gray-500 text-sm">Modifica i parametri sopra per generare automaticamente le parole</p>
-                  </div>}
-              </div>}
+            {activeTab === 'generator' && !editingList && (
+              <GeneratorTab
+                generatorParams={generatorParams}
+                generatedWords={generatedWords}
+                isGenerating={isGenerating}
+                onParamsChange={setGeneratorParams}
+                onRegenerate={performWordGeneration}
+              />
+            )}
 
             {/* Contenuto Manual */}
             {(activeTab === 'manual' || editingList) && <div className="space-y-4">
@@ -753,68 +645,10 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
               </div>}
 
             {/* Impostazioni Esercizio - Ridotte e raggruppate */}
-            <details className="border rounded-lg">
-              <summary className="p-3 cursor-pointer hover:bg-gray-50 text-sm font-medium">
-                Impostazioni frequenza parola
-              </summary>
-              <div className="p-3 pt-0 border-t">
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <Label className="text-xs">Esposizione (ms)</Label>
-                    <Input type="number" min="50" max="1000" step="25" value={exerciseSettings.exposureDuration} onChange={e => setExerciseSettings({
-                    ...exerciseSettings,
-                    exposureDuration: parseInt(e.target.value) || 150
-                  })} className="h-8 text-sm" />
-                  </div>
-                  
-                  <div>
-                    <Label className="text-xs">Pausa (ms)</Label>
-                    <Input type="number" min="200" max="2000" step="100" value={exerciseSettings.intervalDuration} onChange={e => setExerciseSettings({
-                    ...exerciseSettings,
-                    intervalDuration: parseInt(e.target.value) || 800
-                  })} className="h-8 text-sm" />
-                  </div>
-                  
-                  <div>
-                    <Label className="text-xs">Formato</Label>
-                    <Select value={exerciseSettings.textCase} onValueChange={value => setExerciseSettings({
-                    ...exerciseSettings,
-                    textCase: value as any
-                  })}>
-                      <SelectTrigger className="h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="original">Originale</SelectItem>
-                        <SelectItem value="uppercase">MAIUSCOLO</SelectItem>
-                        <SelectItem value="lowercase">minuscolo</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div className="mt-3">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="useMask" checked={exerciseSettings.useMask} onChange={e => setExerciseSettings({
-                      ...exerciseSettings,
-                      useMask: e.target.checked
-                    })} className="h-4 w-4" />
-                      <Label htmlFor="useMask" className="text-xs">Usa maschera</Label>
-                    </div>
-                    
-                    {exerciseSettings.useMask && <div className="flex items-center gap-2">
-                        <Label className="text-xs text-gray-600">Durata:</Label>
-                        <Input type="number" min="50" max="1000" value={exerciseSettings.maskDuration} onChange={e => setExerciseSettings({
-                      ...exerciseSettings,
-                      maskDuration: parseInt(e.target.value) || 100
-                    })} className="h-7 w-20 text-sm" />
-                        <span className="text-xs text-gray-500">ms</span>
-                      </div>}
-                  </div>
-                </div>
-              </div>
-            </details>
+            <ExerciseSettingsComponent
+              settings={exerciseSettings}
+              onSettingsChange={setExerciseSettings}
+            />
 
             {/* Bottoni azione */}
             <div className="flex gap-2 pt-2">
