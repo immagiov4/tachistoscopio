@@ -437,9 +437,9 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         errorMessage = "Impossibile eliminare la lista perché è utilizzata in esercizi attivi. Per procedere, rimuovi prima gli esercizi dalla sezione Gestione Pazienti.";
       } else if (error.code === 'PGRST116') {
         errorMessage = "Lista non trovata o non hai i permessi per eliminarla.";
-      } else if (error.message?.includes('network')) {
+      } else if (error?.message?.includes('network')) {
         errorMessage = "Errore di connessione. Controlla la rete e riprova.";
-      } else if (error.message) {
+      } else if (error?.message) {
         errorMessage = `Errore durante l'eliminazione: ${error.message}`;
       }
       toast({
@@ -510,9 +510,9 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       let errorMessage = "Impossibile aggiornare la lista.";
       if (error.code === 'PGRST116') {
         errorMessage = "Lista non trovata o non hai i permessi per modificarla.";
-      } else if (error.message?.includes('network')) {
+      } else if (error?.message?.includes('network')) {
         errorMessage = "Errore di connessione. Controlla la rete e riprova.";
-      } else if (error.message) {
+      } else if (error?.message) {
         errorMessage = `Errore durante l'aggiornamento: ${error.message}`;
       }
       toast({

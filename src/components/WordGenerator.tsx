@@ -317,11 +317,11 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
       
       let errorMessage = "Impossibile salvare la lista.";
       
-      if (error.message?.includes('network')) {
+      if (error?.message?.includes('network')) {
         errorMessage = "Errore di connessione. Controlla la rete e riprova.";
-      } else if (error.message?.includes('unique')) {
+      } else if (error?.message?.includes('unique')) {
         errorMessage = "Esiste già una lista con questo nome. Scegli un nome diverso.";
-      } else if (error.message) {
+      } else if (error?.message) {
         errorMessage = `Errore: ${error.message}`;
       }
       

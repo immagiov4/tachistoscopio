@@ -261,7 +261,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
       console.error('Error saving session:', error);
       toast({
         title: 'Errore nel salvare i risultati',
-        description: `Dettagli errore: ${error.message || 'Errore sconosciuto'}`,
+        description: `Dettagli errore: ${error?.message || 'Errore sconosciuto'}`,
         variant: 'destructive'
       });
     } finally {

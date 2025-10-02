@@ -38,7 +38,7 @@ export const AuthPage: React.FC = () => {
     const { error } = await signIn(loginEmail, loginPassword);
 
     if (error) {
-      setError(error.message === 'Invalid login credentials' 
+      setError(error?.message === 'Invalid login credentials' 
         ? 'Credenziali di accesso non valide'
         : 'Errore durante l\'accesso. Riprova.');
     }
@@ -67,7 +67,7 @@ export const AuthPage: React.FC = () => {
     const { error } = await signUp(sanitizedEmail, signupPassword, sanitizedFullName);
 
     if (error) {
-      if (error.message.includes('already registered')) {
+      if (error?.message?.includes('already registered')) {
         setError('Un utente con questa email è già registrato');
       } else {
         setError('Errore durante la registrazione. Riprova.');

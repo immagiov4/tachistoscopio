@@ -189,7 +189,7 @@ export const TherapistDashboard: React.FC = () => {
       console.error('Error creating patient:', error);
       toast({
         title: 'Errore',
-        description: error.message || 'Errore durante la creazione dello studente',
+        description: error?.message || 'Errore durante la creazione dello studente',
         variant: 'destructive',
       });
     } finally {
