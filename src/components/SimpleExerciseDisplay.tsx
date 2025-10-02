@@ -23,6 +23,7 @@ import {
   shouldAddError,
   createUpdatedSession
 } from './SimpleExerciseDisplay/sessionHelpers';
+import { startDisplaySequence } from './SimpleExerciseDisplay/timingHelpers';
 
 interface SimpleExerciseDisplayProps {
   session: ExerciseSession;
@@ -234,71 +235,24 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     if (session.isRunning && !session.isPaused && currentWordToShow && !isCountingDown) {
       console.log('Showing stimulus before word:', currentWordToShow);
       
-      // Reset state e mostra stimolo con timing fisso
-      setDisplayState('stimulus');
-      setStimulusVisible(true);
-      
-      // Timer per stimolo - ridotto per essere meno invadente
-      const stimulusTimer = addTimer(setTimeout(() => {
-        if (!isRunningRef.current) {
-          console.log('Session stopped during stimulus timer');
-          return;
-        }
-        setStimulusVisible(false);
-        
-        // Timer fisso per transizione - sempre 300ms
-        const transitionTimer = addTimer(setTimeout(() => {
-          if (!isRunningRef.current) {
-            console.log('Session stopped during transition timer');
-            return;
-          }
-                  console.log('Showing word:', currentWordToShow);
-                  setDisplayState('word');
-                  setCurrentWord(formatWord(currentWordToShow, session.settings.textCase));
-
-          // Timer per durata parola - basato su settings
-          const wordTimer = addTimer(setTimeout(() => {
-            if (!isRunningRef.current) {
-              console.log('Session stopped during word timer');
-              return;
-            }
-            console.log('Word timer finished. UseMask:', session.settings.useMask, 'MaskDuration:', session.settings.maskDuration);
-            if (session.settings.useMask) {
-              console.log('Showing mask for', session.settings.maskDuration, 'ms');
-              setDisplayState('mask');
-              const maskTimer = addTimer(setTimeout(() => {
-                if (!isRunningRef.current) {
-                  console.log('Session stopped during mask timer');
-                  return;
-                }
-                console.log('Mask timer finished, showing interval');
-                setDisplayState('interval');
-                const randomVariation = Math.random() * session.settings.intervalVariability * 2 - session.settings.intervalVariability;
-                const actualInterval = Math.max(50, session.settings.intervalDuration + randomVariation);
-                const intervalTimer = addTimer(setTimeout(() => {
-                  if (!isRunningRef.current) {
-                    console.log('Session stopped during interval timer');
-                    return;
-                  }
-                  nextWord();
-                }, actualInterval));
-              }, session.settings.maskDuration));
-            } else {
-              console.log('No mask, going directly to interval');
-              setDisplayState('interval');
-              const randomVariation = Math.random() * session.settings.intervalVariability * 2 - session.settings.intervalVariability;
-              const actualInterval = Math.max(50, session.settings.intervalDuration + randomVariation);
-              const intervalTimer = addTimer(setTimeout(() => {
-                if (!isRunningRef.current) {
-                  console.log('Session stopped during interval timer (no mask)');
-                  return;
-                }
-                nextWord();
-              }, actualInterval));
-            }
-          }, session.settings.exposureDuration));
-        }, 300)); // Timing fisso per transizione
-      }, 500)); // Timing ridotto per stimolo
+      startDisplaySequence({
+        isRunningRef,
+        config: {
+          exposureDuration: session.settings.exposureDuration,
+          intervalDuration: session.settings.intervalDuration,
+          intervalVariability: session.settings.intervalVariability || 0,
+          useMask: session.settings.useMask,
+          maskDuration: session.settings.maskDuration
+        },
+        addTimer,
+        setStimulusVisible,
+        setDisplayState,
+        setCurrentWord,
+        nextWord,
+        formatWord,
+        currentWord: currentWordToShow,
+        textCase: session.settings.textCase
+      });
 
       return () => {
         console.log('🧹 Cleaning up timers - exercise stopped');

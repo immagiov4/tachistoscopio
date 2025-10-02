@@ -21,6 +21,18 @@ import {
   generateNonWords as generateNonWordsHelper,
   ITALIAN_SYLLABLES 
 } from './WordListManager/wordGenerators';
+import {
+  prepareFormData,
+  generateDescriptionText,
+  validateWordList,
+  createTempWordList,
+  clearForm
+} from './WordListManager/formHelpers';
+import {
+  filterWordsBySyllables,
+  shuffleAndLimit,
+  selectWordSource
+} from './WordListManager/generatorHelpers';
 
 // Import the complete Italian word dataset
 import wordDatasetUrl from '@/data/parole_italiane_complete.txt?url';
@@ -234,19 +246,15 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   }, [generatorParams.type, generatorParams.syllableCount, generatorParams.startsWith, generatorParams.contains, generatorParams.count]);
 
   const generateRealWords = (): string[] => {
-    const wordsToUse = allWords.length > 1000 ? allWords : ITALIAN_WORDS;
+    const wordsToUse = selectWordSource(allWords, ITALIAN_WORDS);
     const syllables = parseInt(generatorParams.syllableCount) || 2;
 
-    const candidateWords = wordsToUse.filter(word => {
-      if (inappropriateWordsSet.has(word.toLowerCase())) return false;
-      if (word.length < 2) return false;
-      if (generatorParams.startsWith && !word.toLowerCase().startsWith(generatorParams.startsWith.toLowerCase())) return false;
-      if (generatorParams.contains && !word.toLowerCase().includes(generatorParams.contains.toLowerCase())) return false;
-      return countSyllables(word) === syllables;
+    const candidateWords = filterWordsBySyllables(wordsToUse, syllables, {
+      startsWith: generatorParams.startsWith,
+      contains: generatorParams.contains
     });
 
-    const shuffled = candidateWords.sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, generatorParams.count);
+    return shuffleAndLimit(candidateWords, generatorParams.count);
   };
 
   const generateSyllables = (): string[] => {
@@ -308,56 +316,58 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   };
   const handleCreateCustomList = async () => {
-    // Sanitize input data
-    const sanitizedListName = sanitizeInput(customListName || 'Nuovo esercizio', 100);
-    const rawWords = activeTab === 'generator' ? generatedWords : customWords.split(/[,\n]+/).map(word => word.trim()).filter(word => word.length > 0);
-    const wordsToSave = sanitizeWordList(rawWords);
-    if (!therapistId) {
-      // For non-therapists, just create temporary list
-      const tempList: WordList = {
-        id: 'temp-' + Date.now(),
-        name: sanitizedListName,
-        description: `Lista ${activeTab === 'generator' ? 'generata' : 'personalizzata'} con ${wordsToSave.length} parole`,
-        words: wordsToSave
-      };
-      onWordListChange(tempList);
-      return;
-    }
-    if (wordsToSave.length === 0) {
+    const formData = prepareFormData(
+      customListName,
+      generatedWords,
+      customWords,
+      activeTab,
+      exerciseSettings
+    );
+
+    const validation = validateWordList(formData.words);
+    if (!validation.isValid) {
       toast({
-        title: "Nessuna parola",
-        description: activeTab === 'generator' ? "Genera delle parole prima di salvare" : "Inserisci delle parole per creare una lista.",
+        title: "Errore",
+        description: validation.error,
         variant: "destructive"
       });
       return;
     }
+
+    if (!therapistId) {
+      const tempList = createTempWordList(formData, activeTab);
+      onWordListChange(tempList);
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const {
-        data,
-        error
-      } = await supabase.from('word_lists').insert({
-        name: sanitizedListName,
-        description: `${wordsToSave.length} parole • Esp: ${exerciseSettings.exposureDuration}ms • Int: ${exerciseSettings.intervalDuration}ms${exerciseSettings.useMask ? ` • Maschera: ${exerciseSettings.maskDuration}ms` : ''}`,
-        words: wordsToSave,
-        settings: exerciseSettings as any,
-        created_by: therapistId
-      }).select().single();
+      const descriptionText = generateDescriptionText(formData.words.length, formData.settings);
+      
+      const { data, error } = await supabase
+        .from('word_lists')
+        .insert({
+          name: formData.listName,
+          description: descriptionText,
+          words: formData.words,
+          settings: formData.settings as any,
+          created_by: therapistId
+        })
+        .select()
+        .single();
+
       if (error) throw error;
+
       const customList: WordList = {
         id: data.id,
         name: data.name,
-        description: data.description || `${wordsToSave.length} parole • Esp: ${exerciseSettings.exposureDuration}ms • Int: ${exerciseSettings.intervalDuration}ms${exerciseSettings.useMask ? ` • Maschera: ${exerciseSettings.maskDuration}ms` : ''}`,
+        description: data.description || descriptionText,
         words: data.words
       };
+
       await loadSavedWordLists();
       onWordListChange(customList);
-
-      // Clear form
-      if (activeTab === 'manual') {
-        setCustomWords('');
-      }
-      setCustomListName('Nuovo esercizio');
+      clearForm(activeTab, setCustomWords, setCustomListName);
     } catch (error) {
       console.error('Error saving word list:', error);
       toast({

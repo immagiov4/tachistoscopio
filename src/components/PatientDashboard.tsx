@@ -24,9 +24,93 @@ import {
   calculateTotalWords,
   getAccuracyColorClass
 } from './PatientDashboard/helpers';
+import { renderExerciseInfo, renderStats } from './PatientDashboard/renderHelpers';
 interface PatientDashboardProps {
   studioStudentId?: string; // Per modalità studio del coach
 }
+const renderSettingsPanel = (
+  accessibilitySettings: { fontSize: 'small' | 'medium' | 'large' | 'extra-large' },
+  setAccessibilitySettings: (settings: any) => void,
+  selectedTheme: ThemeType,
+  setSelectedTheme: (theme: ThemeType) => void
+) => {
+  return (
+    <Card className="border-2 border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base text-gray-800 flex items-center gap-2">
+          <span className="w-2 h-2 bg-primary rounded-full"></span>
+          Impostazioni Esercizio
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4 pt-0">
+        <div className="border border-gray-200 rounded-lg p-3 bg-gray-50/50">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-medium text-gray-700">Dimensione Testo</p>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
+                  const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
+                  if (currentIndex > 0) {
+                    setAccessibilitySettings({ fontSize: sizes[currentIndex - 1] });
+                  }
+                }}
+                disabled={accessibilitySettings.fontSize === 'small'}
+                className="w-7 h-7 sm:w-8 sm:h-8 p-0 border-2 hover:scale-110 transition-transform duration-200 text-xs"
+              >
+                -
+              </Button>
+              <span className="text-xs sm:text-sm font-bold text-primary min-w-[60px] sm:min-w-[70px] text-center px-2 sm:px-3 py-1 bg-primary/10 rounded-lg border border-primary/20">
+                {accessibilitySettings.fontSize === 'small'
+                  ? 'Piccolo'
+                  : accessibilitySettings.fontSize === 'medium'
+                  ? 'Medio'
+                  : accessibilitySettings.fontSize === 'large'
+                  ? 'Grande'
+                  : 'XL'}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
+                  const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
+                  if (currentIndex < sizes.length - 1) {
+                    setAccessibilitySettings({ fontSize: sizes[currentIndex + 1] });
+                  }
+                }}
+                disabled={accessibilitySettings.fontSize === 'extra-large'}
+                className="w-7 h-7 sm:w-8 sm:h-8 p-0 border-2 hover:scale-110 transition-transform duration-200 text-xs"
+              >
+                +
+              </Button>
+            </div>
+          </div>
+          <div className="text-center bg-white rounded-lg p-3 border border-gray-200">
+            <div
+              className={`font-bold text-gray-700 transition-all duration-300 ${
+                accessibilitySettings.fontSize === 'small'
+                  ? 'text-xl'
+                  : accessibilitySettings.fontSize === 'medium'
+                  ? 'text-2xl'
+                  : accessibilitySettings.fontSize === 'large'
+                  ? 'text-3xl'
+                  : 'text-4xl'
+              }`}
+            >
+              Aa
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Anteprima</p>
+          </div>
+        </div>
+        <ThemeSelector selectedTheme={selectedTheme} onThemeChange={setSelectedTheme} />
+      </CardContent>
+    </Card>
+  );
+};
+
 export const PatientDashboard: React.FC<PatientDashboardProps> = ({
   studioStudentId
 }) => {
@@ -235,118 +319,18 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {!todayExercise ? <div className="text-center py-8">
-                  <div className="text-6xl mb-4">😎</div>
-                  <p className="text-lg font-medium text-gray-700">
-                    Giorno libero!
-                  </p>
-                </div> : <div className="space-y-4">
-                  {completedToday && <div className="text-center py-3 bg-green-50 border border-green-200 rounded-lg">
-                      <CheckCircle className="h-6 w-6 text-green-500 mx-auto mb-1" />
-                      <p className="text-green-700 font-medium text-sm">
-                        Esercizio già completato oggi!
-                      </p>
-                      <p className="text-xs text-green-600">
-                        Puoi ripeterlo per migliorare
-                      </p>
-                    </div>}
-
-                  {/* Info della lista con design migliorato */}
-                  <div className="bg-gradient-to-r from-primary/5 to-primary/10 backdrop-blur-sm border border-primary/20 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
-                    <div className="flex items-start gap-3">
-                      <div className="w-3 h-3 rounded-full bg-primary mt-1 flex-shrink-0 animate-pulse"></div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-800 mb-1">{todayExercise.word_list?.name}</h4>
-                        {todayExercise.word_list?.description && <p className="text-sm text-gray-600 mb-2">
-                            {todayExercise.word_list.description}
-                          </p>}
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-primary/20 text-primary">
-                            {todayExercise.word_list?.words.length} parole
-                          </span>
-                          <span className="text-xs text-gray-500">da leggere</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CTA Principal - Pulsante di avvio/ripeti */}
-                  <Button onClick={startExercise} size="lg" className="w-full min-h-[64px] text-xl font-semibold touch-manipulation bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 border-0 mb-6">
-                    <Play className="h-7 w-7 mr-3" />
-                    {completedToday ? "Ripeti Esercizio" : "Inizia Esercizio"}
-                  </Button>
-
-                  {/* Card Impostazioni */}
-                  <Card className="border-2 border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base text-gray-800 flex items-center gap-2">
-                        <span className="w-2 h-2 bg-primary rounded-full"></span>
-                        Impostazioni Esercizio
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4 pt-0">
-                      {/* Controlli eleganti per dimensione testo */}
-                      <div className="border border-gray-200 rounded-lg p-3 bg-gray-50/50">
-                        <div className="flex items-center justify-between mb-3">
-                          <p className="text-sm font-medium text-gray-700">
-                            Dimensione Testo
-                          </p>
-                          <div className="flex items-center gap-2 sm:gap-3">
-                            <Button variant="outline" size="sm" onClick={() => {
-                          const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
-                          const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
-                          if (currentIndex > 0) {
-                            setAccessibilitySettings({
-                              fontSize: sizes[currentIndex - 1]
-                            });
-                          }
-                        }} disabled={accessibilitySettings.fontSize === 'small'} className="w-7 h-7 sm:w-8 sm:h-8 p-0 border-2 hover:scale-110 transition-transform duration-200 text-xs">
-                              -
-                            </Button>
-                            <span className="text-xs sm:text-sm font-bold text-primary min-w-[60px] sm:min-w-[70px] text-center px-2 sm:px-3 py-1 bg-primary/10 rounded-lg border border-primary/20">
-                              {accessibilitySettings.fontSize === 'small' ? 'Piccolo' : accessibilitySettings.fontSize === 'medium' ? 'Medio' : accessibilitySettings.fontSize === 'large' ? 'Grande' : 'XL'}
-                            </span>
-                            <Button variant="outline" size="sm" onClick={() => {
-                          const sizes = ['small', 'medium', 'large', 'extra-large'] as const;
-                          const currentIndex = sizes.indexOf(accessibilitySettings.fontSize);
-                          if (currentIndex < sizes.length - 1) {
-                            setAccessibilitySettings({
-                              fontSize: sizes[currentIndex + 1]
-                            });
-                          }
-                        }} disabled={accessibilitySettings.fontSize === 'extra-large'} className="w-7 h-7 sm:w-8 sm:h-8 p-0 border-2 hover:scale-110 transition-transform duration-200 text-xs">
-                              +
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="text-center bg-white rounded-lg p-3 border border-gray-200">
-                          <div className={`font-bold text-gray-700 transition-all duration-300 ${accessibilitySettings.fontSize === 'small' ? 'text-xl' : accessibilitySettings.fontSize === 'medium' ? 'text-2xl' : accessibilitySettings.fontSize === 'large' ? 'text-3xl' : 'text-4xl'}`}>
-                            Aa
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1">Anteprima</p>
-                        </div>
-                      </div>
-
-                      {/* Selezione Tema */}
-                      <ThemeSelector selectedTheme={selectedTheme} onThemeChange={setSelectedTheme} />
-                    </CardContent>
-                  </Card>
-
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div className="flex items-start gap-2">
-                      <div className="text-blue-500 text-sm">💡</div>
-                      <div className="text-xs">
-                        <p className="font-medium text-blue-800 mb-1">Consigli:</p>
-                        <div className="space-y-0.5 text-blue-700">
-                          <p>• Siediti comodamente di fronte allo schermo</p>
-                          <p>• Leggi ogni parola ad alta voce</p>
-                          <p>• Se sbagli, tocca ovunque sullo schermo</p>
-                          <p>• Concentrati e non avere fretta</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>}
+              {renderExerciseInfo({
+                todayExercise,
+                completedToday,
+                startExercise,
+                renderSettings: () =>
+                  renderSettingsPanel(
+                    accessibilitySettings,
+                    setAccessibilitySettings,
+                    selectedTheme,
+                    setSelectedTheme
+                  )
+              })}
             </CardContent>
           </Card>
 
@@ -358,97 +342,15 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {statsLoading ? <StatsSkeleton /> : recentSessions.length === 0 ? <div className="text-center py-8">
-                  <p className="text-gray-600">
-                    Completa il tuo primo esercizio per vedere le statistiche
-                  </p>
-                </div> : <div className="space-y-4">
-                  {/* Statistiche generali */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-3 rounded-lg border-l-4 border-blue-500" style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
-                  backdropFilter: 'blur(8px) saturate(1.2)',
-                  boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px, inset rgba(255, 255, 255, 0.5) 0px 1px 0px'
-                }}>
-                      <div className="text-2xl font-bold text-blue-700">
-                        {recentSessions.length}
-                      </div>
-                      <div className="text-xs text-blue-600">Sessioni</div>
-                    </div>
-                    <div className="text-center p-3 rounded-lg border-l-4 border-green-500" style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
-                  backdropFilter: 'blur(8px) saturate(1.2)',
-                  boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px, inset rgba(255, 255, 255, 0.5) 0px 1px 0px'
-                }}>
-                      <div className="text-2xl font-bold text-green-700">
-                        {calculateAverageAccuracy(recentSessions)}%
-                      </div>
-                      <div className="text-xs text-green-600">Precisione Media</div>
-                    </div>
-                    <div className="text-center p-3 rounded-lg border-l-4 border-orange-500" style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
-                  backdropFilter: 'blur(8px) saturate(1.2)',
-                  boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px, inset rgba(255, 255, 255, 0.5) 0px 1px 0px'
-                }}>
-                      <div className="text-2xl font-bold text-orange-700">
-                        {calculateTotalWords(recentSessions)}
-                      </div>
-                      <div className="text-xs text-orange-600">Parole Totali</div>
-                    </div>
-                  </div>
-
-                  {/* Ultime sessioni */}
-                  <div>
-                    <h4 className="font-medium text-gray-800 mb-3">Ultime Sessioni</h4>
-                    <div className="space-y-2 max-h-48 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                      {recentSessions.slice(0, 5).map((session) => (
-                        <div key={session.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-2 h-2 rounded-full ${getAccuracyColorClass(session.accuracy)}`}></div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-800">
-                                {session.correct_words}/{session.total_words} parole ({Math.round(session.accuracy)}%)
-                              </div>
-                              <div className="text-xs text-gray-600">
-                                {formatSessionDate(session.completed_at)}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {Math.round(session.duration / 1000)}s
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Progressi nel tempo */}
-                  {recentSessions.length >= 3 && <div>
-                      <h4 className="font-medium text-gray-800 mb-3">Andamento Precisione</h4>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <div className="flex items-end justify-between gap-1 h-24">
-                          {recentSessions.slice(0, 7).reverse().map((session, index) => {
-                            const height = Math.max(session.accuracy / 100 * 80, 8);
-                            return (
-                              <div key={index} className="flex-1 flex flex-col items-center gap-1">
-                                <div className="text-xs text-gray-600 font-medium">
-                                  {Math.round(session.accuracy)}%
-                                </div>
-                                <div 
-                                  className={`w-full rounded transition-all duration-300 ${getAccuracyColorClass(session.accuracy)}`}
-                                  style={{ height: `${height}px` }}
-                                  title={`Precisione: ${Math.round(session.accuracy)}%`}
-                                />
-                              </div>
-                            );
-                          })}
-                        </div>
-                        <div className="text-xs text-gray-500 text-center mt-2">
-                          Ultime {Math.min(recentSessions.length, 7)} sessioni
-                        </div>
-                      </div>
-                    </div>}
-                </div>}
+              {statsLoading ? (
+                <StatsSkeleton />
+              ) : (
+                renderStats({
+                  recentSessions,
+                  formatDate: formatSessionDate,
+                  getColorClass: getAccuracyColorClass
+                })
+              )}
             </CardContent>
           </Card>
 
