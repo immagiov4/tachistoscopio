@@ -1,16 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Play, Pause, Square, X } from 'lucide-react';
+import { Play, Pause, Square } from 'lucide-react';
 import { ThemeType, themes } from './ThemeSelector';
 import { playErrorSound } from './SimpleExerciseDisplay/audioHelpers';
 import { TIMING } from '@/constants/timing';
 import {
   getThemeGradient,
-  getThemeShadow,
   getTextShadow,
-  getWordShadow,
   getFontSize,
   getCountdownTextColor
 } from './SimpleExerciseDisplay/themeHelpers';

@@ -5,8 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Users, Calendar, BookOpen, LogOut, BarChart3, Edit2, Trash2, UserCog } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,7 +17,6 @@ import { sanitizeInput } from '@/utils/passwordValidation';
 
 import { PatientExerciseManager } from '@/components/PatientExerciseManager';
 import { TutorialModal } from './TutorialModal';
-import type { Database } from '@/integrations/supabase/types';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 import { WordListManager } from '@/components/WordListManager';
 import { WordGenerator } from '@/components/WordGenerator';

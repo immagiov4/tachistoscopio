@@ -11,15 +11,12 @@ import { Upload, Download, Plus, Trash2, BookOpen, Edit, X, RefreshCw, Save, Wan
 import { useToast } from '@/hooks/use-toast';
 import { WordList } from '@/types/tachistoscope';
 import { supabase } from '@/integrations/supabase/client';
-import { WordList as DBWordList, ExerciseSettings as ExerciseSettingsType, DEFAULT_SETTINGS } from '@/types/database';
+import { ExerciseSettings as ExerciseSettingsType, DEFAULT_SETTINGS } from '@/types/database';
 import { sanitizeInput, sanitizeWordList } from '@/utils/passwordValidation';
 import { 
-  countSyllables, 
-  inappropriateWordsSet,
   generateMinimalPairsFromDictionary,
   generateSyllables as generateSyllablesHelper,
-  generateNonWords as generateNonWordsHelper,
-  ITALIAN_SYLLABLES 
+  generateNonWords as generateNonWordsHelper
 } from './WordListManager/wordGenerators';
 import {
   prepareFormData,
@@ -38,7 +35,6 @@ import paroleItalianeText from '@/data/parole_italiane_complete.txt?raw';
 import { WordListItem } from './WordListManager/WordListItem';
 import { ExerciseSettings } from './WordListManager/ExerciseSettings';
 import { GeneratorTab } from './WordListManager/GeneratorTab';
-import type { Database } from '@/integrations/supabase/types';
 import { getWordListErrorMessage, getWordListUpdateErrorMessage } from '@/utils/errorHandling';
 
 // Import the complete Italian word dataset

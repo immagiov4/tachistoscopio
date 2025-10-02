@@ -26,7 +26,6 @@ import {
 } from './PatientDashboard/helpers';
 import { renderStats, renderExerciseInfo } from './PatientDashboard/renderHelpers';
 import { TutorialModal } from './TutorialModal';
-import type { Database } from '@/integrations/supabase/types';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 interface PatientDashboardProps {
   studioStudentId?: string; // Per modalità studio del coach
