@@ -40,8 +40,9 @@ export const validatePassword = (password: string): PasswordValidationResult => 
 
 export const sanitizeInput = (input: string, maxLength: number = 255): string => {
   // Remove HTML tags and limit length
+  // Using a safer regex that limits backtracking with length constraints
   const sanitized = input
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/<[^>]{0,100}>/g, '') // Remove HTML tags with max 100 chars (prevents ReDoS)
     .replace(/[<>'"&]/g, '') // Remove potentially dangerous characters
     .trim()
     .substring(0, maxLength);

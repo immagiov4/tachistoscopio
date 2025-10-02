@@ -14,7 +14,7 @@ const RATE_LIMIT_MAX_REQUESTS = 10; // Max 10 student creations per 5 minutes pe
 // Security utilities
 const sanitizeInput = (input: string, maxLength: number = 255): string => {
   return input
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/<[^>]{0,100}>/g, '') // Remove HTML tags with max 100 chars (prevents ReDoS)
     .replace(/[<>'"&]/g, '') // Remove potentially dangerous characters
     .trim()
     .substring(0, maxLength);
@@ -67,12 +67,12 @@ const sanitizeErrorMessage = (error: any): string => {
   // Sanitize error messages to prevent information disclosure
   const message = error?.message || 'Unknown error';
   
-  // Remove sensitive information patterns
+  // Remove sensitive information patterns with limited backtracking
   const sanitized = message
-    .replace(/user with email .* already exists/i, 'Email già registrata')
-    .replace(/password .* does not meet requirements/i, 'Password non valida')
-    .replace(/database .*/i, 'Errore di sistema')
-    .replace(/auth .*/i, 'Errore di autenticazione');
+    .replace(/user with email [^\s]{1,100} already exists/i, 'Email già registrata')
+    .replace(/password [^\s]{1,100} does not meet requirements/i, 'Password non valida')
+    .replace(/database [a-zA-Z0-9\s]{1,50}/i, 'Errore di sistema')
+    .replace(/auth [a-zA-Z0-9\s]{1,50}/i, 'Errore di autenticazione');
   
   return sanitized;
 };
@@ -104,8 +104,8 @@ serve(async (req) => {
     const sanitizedEmail = sanitizeInput(email, 254);
     const sanitizedFullName = sanitizeInput(fullName, 100);
     
-    // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Email format validation with safer regex
+    const emailRegex = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
     if (!emailRegex.test(sanitizedEmail)) {
       throw new Error('Formato email non valido');
     }

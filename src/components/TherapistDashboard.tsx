@@ -144,8 +144,8 @@ export const TherapistDashboard: React.FC = () => {
       return;
     }
 
-    // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Email format validation with safer regex
+    const emailRegex = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
     if (!emailRegex.test(sanitizedEmail)) {
       toast({
         title: 'Errore',
