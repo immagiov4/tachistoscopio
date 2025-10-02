@@ -1,80 +1,66 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { 
+  sanitizeInput, 
+  generateSecurePassword, 
+  checkRateLimit, 
+  sanitizeErrorMessage,
+  validateEmail 
+} from "./securityHelpers.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Rate limiting storage
-const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
-const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes
-const RATE_LIMIT_MAX_REQUESTS = 10; // Max 10 student creations per 5 minutes per coach
-
-// Security utilities
-const sanitizeInput = (input: string, maxLength: number = 255): string => {
-  return input
-    .replace(/<[^>]{0,100}>/g, '') // Remove HTML tags with max 100 chars (prevents ReDoS)
-    .replace(/[<>'"&]/g, '') // Remove potentially dangerous characters
-    .trim()
-    .substring(0, maxLength);
+const createUserAuth = async (supabaseAdmin: any, email: string, password: string, fullName: string) => {
+  return await supabaseAdmin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: false,
+    user_metadata: { full_name: fullName }
+  });
 };
 
-const generateSecurePassword = (): string => {
-  // Use crypto.getRandomValues for cryptographically secure random generation
-  const array = new Uint8Array(16);
-  crypto.getRandomValues(array);
-  
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let password = '';
-  
-  for (let i = 0; i < 12; i++) {
-    password += chars.charAt(array[i] % chars.length);
-  }
-  
-  // Ensure password meets complexity requirements
-  const hasUpper = /[A-Z]/.test(password);
-  const hasLower = /[a-z]/.test(password);
-  const hasNumber = /\d/.test(password);
-  
-  if (!hasUpper || !hasLower || !hasNumber) {
-    // Add required characters to ensure complexity
-    const complexChars = 'Aa1';
-    password = password.substring(0, 9) + complexChars;
-  }
-  
-  return password;
+const deleteOrphanedProfileData = async (supabaseAdmin: any, profileId: string) => {
+  await supabaseAdmin.from('exercise_sessions').delete().eq('patient_id', profileId);
+  await supabaseAdmin.from('exercises').delete().eq('patient_id', profileId);
+  await supabaseAdmin.from('profiles').delete().eq('id', profileId);
 };
 
-const checkRateLimit = (therapistId: string): boolean => {
-  const now = Date.now();
-  const entry = rateLimitMap.get(therapistId);
+const createStudentProfile = async (supabaseAdmin: any, userId: string, fullName: string, therapistId: string) => {
+  // Delete any existing profile first
+  await supabaseAdmin.from('profiles').delete().eq('user_id', userId);
   
-  if (!entry || now - entry.lastReset > RATE_LIMIT_WINDOW) {
-    rateLimitMap.set(therapistId, { count: 1, lastReset: now });
-    return true;
-  }
-  
-  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
-    return false;
-  }
-  
-  entry.count++;
-  return true;
+  return await supabaseAdmin.from('profiles').insert({
+    user_id: userId,
+    role: 'student',
+    full_name: fullName,
+    created_by: therapistId,
+  });
 };
 
-const sanitizeErrorMessage = (error: any): string => {
-  // Sanitize error messages to prevent information disclosure
-  const message = error?.message || 'Unknown error';
-  
-  // Remove sensitive information patterns with limited backtracking
-  const sanitized = message
-    .replace(/user with email [^\s]{1,100} already exists/i, 'Email già registrata')
-    .replace(/password [^\s]{1,100} does not meet requirements/i, 'Password non valida')
-    .replace(/database [a-zA-Z0-9\s]{1,50}/i, 'Errore di sistema')
-    .replace(/auth [a-zA-Z0-9\s]{1,50}/i, 'Errore di autenticazione');
-  
-  return sanitized;
+const sendWelcomeEmail = async (supabaseAdmin: any, email: string, fullName: string, password: string) => {
+  try {
+    const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+      redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/`,
+      data: {
+        full_name: fullName,
+        welcome_message: `Ciao ${fullName}! Le tue credenziali: Email: ${email}, Password: ${password}`
+      }
+    });
+
+    if (error) {
+      console.error('Errore invio email:', error);
+      return { success: false, error: sanitizeErrorMessage(error) };
+    }
+
+    console.log(`Email di benvenuto inviata con successo a ${email}`);
+    return { success: true, error: null };
+  } catch (emailException) {
+    console.error('Errore invio email:', emailException);
+    return { success: false, error: sanitizeErrorMessage(emailException) };
+  }
 };
 
 serve(async (req) => {

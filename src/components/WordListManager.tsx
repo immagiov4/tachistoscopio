@@ -373,11 +373,11 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
           for (const letter of letters) {
             if (letter === word[i]) continue; // Salta se è lo stesso carattere
 
-            const variant = word.slice(0, i) + letter + word.slice(i + 1);
+              const variant = word.slice(0, i) + letter + word.slice(i + 1);
 
             // Controlla se la variante esiste nel dizionario ed è appropriata
             if (dictionary.has(variant) && !inappropriateWords.has(variant.toLowerCase())) {
-              const pair = [word, variant].sort().join('-');
+              const pair = [word, variant].sort((a, b) => a.localeCompare(b)).join('-');
               if (!foundPairs.has(pair)) {
                 foundPairs.add(pair);
 
