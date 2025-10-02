@@ -1,4 +1,5 @@
 import { countSyllables, inappropriateWordsSet } from './wordGenerators';
+import { VALIDATION } from '@/constants/timing';
 
 export interface GeneratorParams {
   type: 'words' | 'syllables' | 'nonwords' | 'minimal-pairs';
@@ -15,7 +16,7 @@ export const filterWordsBySyllables = (
 ): string[] => {
   return words.filter(word => {
     if (inappropriateWordsSet.has(word.toLowerCase())) return false;
-    if (word.length < 2) return false;
+    if (word.length < VALIDATION.MIN_WORD_LENGTH) return false;
     if (params.startsWith && !word.toLowerCase().startsWith(params.startsWith.toLowerCase())) {
       return false;
     }

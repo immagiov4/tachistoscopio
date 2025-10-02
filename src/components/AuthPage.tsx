@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { validatePassword, sanitizeInput } from '@/utils/passwordValidation';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/constants/errorMessages';
 import { Loader2, User, UserPlus } from 'lucide-react';
 
 export const AuthPage: React.FC = () => {
@@ -39,8 +40,8 @@ export const AuthPage: React.FC = () => {
 
     if (error) {
       setError(error?.message === 'Invalid login credentials' 
-        ? 'Credenziali di accesso non valide'
-        : 'Errore durante l\'accesso. Riprova.');
+        ? ERROR_MESSAGES.AUTH_INVALID_CREDENTIALS
+        : ERROR_MESSAGES.AUTH_LOGIN_FAILED);
     }
 
     setLoading(false);
@@ -68,12 +69,12 @@ export const AuthPage: React.FC = () => {
 
     if (error) {
       if (error?.message?.includes('already registered')) {
-        setError('Un utente con questa email è già registrato');
+        setError(ERROR_MESSAGES.AUTH_EMAIL_ALREADY_REGISTERED);
       } else {
-        setError('Errore durante la registrazione. Riprova.');
+        setError(ERROR_MESSAGES.AUTH_SIGNUP_FAILED);
       }
     } else {
-      setSuccess('Registrazione completata! Controlla la tua email per confermare l\'account.');
+      setSuccess(SUCCESS_MESSAGES.AUTH_SIGNUP_SUCCESS);
       setSignupEmail('');
       setSignupPassword('');
       setSignupFullName('');
@@ -95,11 +96,11 @@ export const AuthPage: React.FC = () => {
 
       if (error) throw error;
 
-      setSuccess('Ti abbiamo inviato un link per reimpostare la password. Controlla la tua email.');
+      setSuccess(SUCCESS_MESSAGES.AUTH_RESET_EMAIL_SENT);
       setResetEmail('');
       setShowResetPassword(false);
     } catch (error: any) {
-      setError('Errore durante l\'invio dell\'email. Riprova.');
+      setError(ERROR_MESSAGES.AUTH_RESET_FAILED);
     }
 
     setLoading(false);

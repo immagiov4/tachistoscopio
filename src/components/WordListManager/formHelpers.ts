@@ -1,5 +1,6 @@
 import { sanitizeInput, sanitizeWordList } from '@/utils/passwordValidation';
 import { ExerciseSettings } from '@/types/database';
+import { VALIDATION } from '@/constants/timing';
 
 export interface FormData {
   listName: string;
@@ -44,10 +45,10 @@ export const validateWordList = (words: string[]): { isValid: boolean; error?: s
     };
   }
 
-  if (words.length > 1000) {
+  if (words.length > VALIDATION.MAX_WORDS_PER_LIST) {
     return {
       isValid: false,
-      error: 'Troppo parole (massimo 1000)'
+      error: `Troppo parole (massimo ${VALIDATION.MAX_WORDS_PER_LIST})`
     };
   }
 

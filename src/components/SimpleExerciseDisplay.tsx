@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Play, Pause, Square, X } from 'lucide-react';
 import { ThemeType, themes } from './ThemeSelector';
 import { playErrorSound } from './SimpleExerciseDisplay/audioHelpers';
+import { TIMING } from '@/constants/timing';
 import {
   getThemeGradient,
   getThemeShadow,
@@ -42,7 +43,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
 }) => {
   const [displayState, setDisplayState] = useState<'countdown' | 'stimulus' | 'word' | 'mask' | 'interval'>('countdown');
   const [currentWord, setCurrentWord] = useState('');
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState<number>(TIMING.COUNTDOWN_START);
   const [isCountingDown, setIsCountingDown] = useState(true);
   const [stimulusVisible, setStimulusVisible] = useState(false);
   
@@ -151,7 +152,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
           console.log('Countdown decreasing:', countdown - 1);
           setCountdown(countdown - 1);
         });
-      }, 1000);
+      }, TIMING.COUNTDOWN_INTERVAL);
       addTimer(timer);
       return () => clearTimeout(timer);
     } else if (isCountingDown && countdown === 0) {

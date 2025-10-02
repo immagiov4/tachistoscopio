@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
+import { TIMING } from '@/constants/timing';
 
 export const ResetPassword: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -53,13 +55,12 @@ export const ResetPassword: React.FC = () => {
 
       setSuccess('Password aggiornata con successo! Verrai reindirizzato alla pagina di accesso.');
       
-      // Redirect dopo 3 secondi
       setTimeout(() => {
         navigate('/auth');
-      }, 3000);
+      }, TIMING.REDIRECT_DELAY);
 
     } catch (error: any) {
-      setError('Errore durante l\'aggiornamento della password. Riprova.');
+      setError(ERROR_MESSAGES.AUTH_PASSWORD_UPDATE_FAILED);
     }
 
     setLoading(false);

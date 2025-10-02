@@ -14,18 +14,23 @@ export interface TimerCallbacks {
   onIntervalEnd: () => void;
 }
 
+// Timing constants
+const STIMULUS_DISPLAY_DURATION = 500;
+const TRANSITION_DISPLAY_DURATION = 300;
+const MIN_INTERVAL_DURATION = 50;
+
 export const createStimulusTimer = (
   callback: () => void,
   addTimer: (timer: NodeJS.Timeout) => NodeJS.Timeout
 ): NodeJS.Timeout => {
-  return addTimer(setTimeout(callback, 500));
+  return addTimer(setTimeout(callback, STIMULUS_DISPLAY_DURATION));
 };
 
 export const createTransitionTimer = (
   callback: () => void,
   addTimer: (timer: NodeJS.Timeout) => NodeJS.Timeout
 ): NodeJS.Timeout => {
-  return addTimer(setTimeout(callback, 300));
+  return addTimer(setTimeout(callback, TRANSITION_DISPLAY_DURATION));
 };
 
 export const createWordTimer = (
@@ -50,7 +55,7 @@ export const createIntervalTimer = (
   addTimer: (timer: NodeJS.Timeout) => NodeJS.Timeout
 ): NodeJS.Timeout => {
   const randomVariation = Math.random() * config.variability * 2 - config.variability;
-  const actualInterval = Math.max(50, config.duration + randomVariation);
+  const actualInterval = Math.max(MIN_INTERVAL_DURATION, config.duration + randomVariation);
   return addTimer(setTimeout(callback, actualInterval));
 };
 

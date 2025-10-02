@@ -18,7 +18,9 @@ import { LoadingPage } from '@/components/ui/loading';
 import { sanitizeInput } from '@/utils/passwordValidation';
 
 import { PatientExerciseManager } from '@/components/PatientExerciseManager';
-import { TutorialModal } from '@/components/TutorialModal';
+import { TutorialModal } from './TutorialModal';
+import type { Database } from '@/integrations/supabase/types';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
 import { WordListManager } from '@/components/WordListManager';
 import { WordGenerator } from '@/components/WordGenerator';
 import { WordList as TachistoscopeWordList } from '@/types/tachistoscope';
@@ -189,7 +191,7 @@ export const TherapistDashboard: React.FC = () => {
       console.error('Error creating patient:', error);
       toast({
         title: 'Errore',
-        description: error?.message || 'Errore durante la creazione dello studente',
+        description: error?.message || ERROR_MESSAGES.PATIENT_CREATE_FAILED,
         variant: 'destructive',
       });
     } finally {
@@ -222,7 +224,7 @@ export const TherapistDashboard: React.FC = () => {
       console.error('Error creating exercise template:', error);
       toast({
         title: 'Errore',
-        description: 'Errore durante la creazione del template',
+        description: ERROR_MESSAGES.EXERCISE_CREATE_FAILED,
         variant: 'destructive',
       });
     } finally {
@@ -265,7 +267,7 @@ export const TherapistDashboard: React.FC = () => {
       console.error('Error deleting patient:', error);
       toast({
         title: 'Errore',
-        description: 'Errore durante l\'eliminazione dello studente',
+        description: ERROR_MESSAGES.PATIENT_DELETE_FAILED,
         variant: 'destructive',
       });
     }
@@ -300,7 +302,7 @@ export const TherapistDashboard: React.FC = () => {
       console.error('Error deleting exercise:', error);
       toast({
         title: 'Errore',
-        description: 'Errore durante l\'eliminazione dell\'esercizio',
+        description: ERROR_MESSAGES.EXERCISE_DELETE_FAILED,
         variant: 'destructive',
       });
     }

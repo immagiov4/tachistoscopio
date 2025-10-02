@@ -1,11 +1,16 @@
 // Security utilities for create-patient edge function
 
-// Rate limiting storage
-const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
+// Constants for rate limiting and validation
 const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes
 const RATE_LIMIT_MAX_REQUESTS = 10;
+const DEFAULT_MAX_LENGTH = 255;
+const PASSWORD_LENGTH = 12;
+const PASSWORD_SAFE_LENGTH = 9;
 
-export const sanitizeInput = (input: string, maxLength: number = 255): string => {
+// Rate limiting storage
+const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
+
+export const sanitizeInput = (input: string, maxLength: number = DEFAULT_MAX_LENGTH): string => {
   return input
     .replace(/<[^>]{0,100}>/g, '')
     .replace(/[<>'"&]/g, '')
@@ -20,7 +25,7 @@ export const generateSecurePassword = (): string => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let password = '';
   
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < PASSWORD_LENGTH; i++) {
     password += chars.charAt(array[i] % chars.length);
   }
   
@@ -30,7 +35,7 @@ export const generateSecurePassword = (): string => {
   
   if (!hasUpper || !hasLower || !hasNumber) {
     const complexChars = 'Aa1';
-    password = password.substring(0, 9) + complexChars;
+    password = password.substring(0, PASSWORD_SAFE_LENGTH) + complexChars;
   }
   
   return password;

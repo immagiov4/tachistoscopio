@@ -24,7 +24,10 @@ import {
   calculateTotalWords,
   getAccuracyColorClass
 } from './PatientDashboard/helpers';
-import { renderExerciseInfo, renderStats } from './PatientDashboard/renderHelpers';
+import { renderStats, renderExerciseInfo } from './PatientDashboard/renderHelpers';
+import { TutorialModal } from './TutorialModal';
+import type { Database } from '@/integrations/supabase/types';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
 interface PatientDashboardProps {
   studioStudentId?: string; // Per modalità studio del coach
 }
@@ -260,8 +263,8 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
     } catch (error: any) {
       console.error('Error saving session:', error);
       toast({
-        title: 'Errore nel salvare i risultati',
-        description: `Dettagli errore: ${error?.message || 'Errore sconosciuto'}`,
+        title: ERROR_MESSAGES.EXERCISE_SESSION_SAVE_FAILED,
+        description: `Dettagli errore: ${error?.message || ERROR_MESSAGES.UNKNOWN_ERROR}`,
         variant: 'destructive'
       });
     } finally {

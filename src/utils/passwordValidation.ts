@@ -1,3 +1,5 @@
+import { VALIDATION } from '@/constants/timing';
+
 // Password validation utilities for secure registration
 export interface PasswordValidationResult {
   isValid: boolean;
@@ -8,8 +10,8 @@ export const validatePassword = (password: string): PasswordValidationResult => 
   const errors: string[] = [];
   
   // Minimum length check
-  if (password.length < 8) {
-    errors.push('La password deve essere di almeno 8 caratteri');
+  if (password.length < VALIDATION.MIN_PASSWORD_LENGTH) {
+    errors.push(`La password deve essere di almeno ${VALIDATION.MIN_PASSWORD_LENGTH} caratteri`);
   }
   
   // Uppercase letter check
@@ -38,7 +40,7 @@ export const validatePassword = (password: string): PasswordValidationResult => 
   };
 };
 
-export const sanitizeInput = (input: string, maxLength: number = 255): string => {
+export const sanitizeInput = (input: string, maxLength: number = VALIDATION.MAX_INPUT_LENGTH): string => {
   // Remove HTML tags and limit length
   // Using a safer regex that limits backtracking with length constraints
   const sanitized = input
@@ -52,7 +54,7 @@ export const sanitizeInput = (input: string, maxLength: number = 255): string =>
 
 export const sanitizeWordList = (words: string[]): string[] => {
   return words
-    .map(word => sanitizeInput(word, 50)) // Limit word length
-    .filter(word => word.length > 0) // Remove empty words
-    .slice(0, 1000); // Limit total words
+    .map(word => sanitizeInput(word, VALIDATION.MAX_WORD_LENGTH))
+    .filter(word => word.length > 0)
+    .slice(0, VALIDATION.MAX_WORDS_PER_LIST);
 };

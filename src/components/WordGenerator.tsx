@@ -10,6 +10,10 @@ import { RefreshCw, Save, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import paroleItalianeText from '@/data/parole_italiane_complete.txt?raw';
+import { Loader2 } from 'lucide-react';
+import { GeneratorParams, filterWordsBySyllables, shuffleAndLimit, selectWordSource } from './WordListManager/generatorHelpers';
+import { getErrorMessage } from '@/utils/errorHandling';
+import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
 interface WordGeneratorProps {
   therapistId?: string;
@@ -315,15 +319,10 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
     } catch (error: any) {
       console.error('Error saving word list:', error);
       
-      let errorMessage = "Impossibile salvare la lista.";
-      
-      if (error?.message?.includes('network')) {
-        errorMessage = "Errore di connessione. Controlla la rete e riprova.";
-      } else if (error?.message?.includes('unique')) {
-        errorMessage = "Esiste già una lista con questo nome. Scegli un nome diverso.";
-      } else if (error?.message) {
-        errorMessage = `Errore: ${error.message}`;
-      }
+      const errorMessage = getErrorMessage(error, ERROR_MESSAGES.WORDLIST_SAVE_FAILED);
+      const finalMessage = error?.message?.includes('unique') 
+        ? 'Esiste già una lista con questo nome. Scegli un nome diverso.'
+        : errorMessage;
       
       toast({
         title: "Errore di salvataggio",

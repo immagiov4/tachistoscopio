@@ -11,7 +11,7 @@ import { Upload, Download, Plus, Trash2, BookOpen, Edit, X, RefreshCw, Save, Wan
 import { useToast } from '@/hooks/use-toast';
 import { WordList } from '@/types/tachistoscope';
 import { supabase } from '@/integrations/supabase/client';
-import { WordList as DBWordList, ExerciseSettings, DEFAULT_SETTINGS } from '@/types/database';
+import { WordList as DBWordList, ExerciseSettings as ExerciseSettingsType, DEFAULT_SETTINGS } from '@/types/database';
 import { sanitizeInput, sanitizeWordList } from '@/utils/passwordValidation';
 import { 
   countSyllables, 
@@ -34,9 +34,12 @@ import {
   selectWordSource,
   GeneratorParams
 } from './WordListManager/generatorHelpers';
+import paroleItalianeText from '@/data/parole_italiane_complete.txt?raw';
 import { WordListItem } from './WordListManager/WordListItem';
+import { ExerciseSettings } from './WordListManager/ExerciseSettings';
 import { GeneratorTab } from './WordListManager/GeneratorTab';
-import { ExerciseSettings as ExerciseSettingsComponent } from './WordListManager/ExerciseSettings';
+import type { Database } from '@/integrations/supabase/types';
+import { getWordListErrorMessage, getWordListUpdateErrorMessage } from '@/utils/errorHandling';
 
 // Import the complete Italian word dataset
 import wordDatasetUrl from '@/data/parole_italiane_complete.txt?url';
@@ -69,7 +72,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Exercise settings state - Impostazioni ottimizzate per logopedia/dislessia
-  const [exerciseSettings, setExerciseSettings] = useState<ExerciseSettings>({
+  const [exerciseSettings, setExerciseSettings] = useState<ExerciseSettingsType>({
     exposureDuration: 150,
     // 150ms: ottimale per dislessia
     intervalDuration: 800,
@@ -82,7 +85,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
   });
 
   // Function to generate description from settings
-  const generateDescriptionFromSettings = (wordCount: number, settings: ExerciseSettings) => {
+  const generateDescriptionFromSettings = (wordCount: number, settings: ExerciseSettingsType) => {
     return `${wordCount} parole • Esp: ${settings.exposureDuration}ms • Int: ${settings.intervalDuration}ms${settings.useMask ? ` • Maschera: ${settings.maskDuration}ms` : ''}`;
   };
 
@@ -299,7 +302,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       });
       if (error) throw error;
       const wordLists: WordList[] = data.map(dbList => {
-        const settings = dbList.settings as unknown as ExerciseSettings || DEFAULT_SETTINGS;
+        const settings = dbList.settings as unknown as ExerciseSettingsType || DEFAULT_SETTINGS;
         return {
           id: dbList.id,
           name: dbList.name,
@@ -507,14 +510,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
       });
     } catch (error: any) {
       console.error('Error updating word list:', error);
-      let errorMessage = "Impossibile aggiornare la lista.";
-      if (error.code === 'PGRST116') {
-        errorMessage = "Lista non trovata o non hai i permessi per modificarla.";
-      } else if (error?.message?.includes('network')) {
-        errorMessage = "Errore di connessione. Controlla la rete e riprova.";
-      } else if (error?.message) {
-        errorMessage = `Errore durante l'aggiornamento: ${error.message}`;
-      }
+      const errorMessage = getWordListUpdateErrorMessage(error);
       toast({
         title: "Errore di modifica",
         description: errorMessage,
@@ -645,7 +641,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
               </div>}
 
             {/* Impostazioni Esercizio - Ridotte e raggruppate */}
-            <ExerciseSettingsComponent
+            <ExerciseSettings
               settings={exerciseSettings}
               onSettingsChange={setExerciseSettings}
             />
