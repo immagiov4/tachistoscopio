@@ -6,11 +6,30 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, BookOpen, BarChart3, Search, Copy, Plus, Trash2, UserCheck, ArrowUp, Users, UserCog, Edit } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { Profile, WordList, Exercise, ExerciseSettings, DAYS_OF_WEEK } from '@/types/database';
+import { WordList, Exercise, ExerciseSettings, DAYS_OF_WEEK } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
 import { LoadingPage } from '@/components/ui/loading';
 import { PatientDashboard } from '@/components/PatientDashboard';
+import {
+  PatientWithEmail,
+  PatientWithExerciseCount,
+  fetchPatientsWithEmails,
+  fetchWordLists,
+  fetchExercises,
+  calculateExerciseCounts,
+  fetchPatientExercises,
+  fetchPatientSessions,
+  buildWeeklyExercisesMap,
+  upsertExercise,
+  deleteExerciseWithSessions,
+  createPatientAccount,
+  deletePatientAccount,
+  getErrorMessage,
+  filterPatients,
+  paginatePatients,
+  calculateAverageAccuracy,
+  calculateTotalWords
+} from './PatientExerciseManager/helpers';
 interface PatientExerciseManagerProps {
   therapistId: string;
   onNavigateToWordLists?: () => void;
@@ -19,13 +38,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   therapistId,
   onNavigateToWordLists
 }) => {
-  type PatientWithEmail = Profile & {
-    email?: string;
-  };
   const [patients, setPatients] = useState<PatientWithEmail[]>([]);
-  const [patientsWithExercises, setPatientsWithExercises] = useState<Array<PatientWithEmail & {
-    exerciseCount: number;
-  }>>([]);
+  const [patientsWithExercises, setPatientsWithExercises] = useState<PatientWithExerciseCount[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<PatientWithEmail | null>(null);
   const [wordLists, setWordLists] = useState<WordList[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -162,41 +176,19 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   };
   
   const fetchInitialData = async () => {
-    setSelectedPatient(null); // Reset selection on data fetch
+    setSelectedPatient(null);
     try {
-      const [patientsData, wordListsData, exercisesData] = await Promise.all([supabase.rpc('get_patients_with_emails', {
-        therapist_profile_id: therapistId
-      }), supabase.from('word_lists').select('*').eq('created_by', therapistId), supabase.from('exercises').select('student_id').eq('coach_id', therapistId)]);
-      const patients = (patientsData.data || []).map(p => ({
-        ...p,
-        role: p.role as any // Force type conversion from string to UserRole
-      })) as PatientWithEmail[];
-      const exercises = exercisesData.data || [];
+      const [patients, allWordLists, exercises] = await Promise.all([
+        fetchPatientsWithEmails(therapistId),
+        fetchWordLists(therapistId),
+        fetchExercises(therapistId)
+      ]);
 
-      // Count exercises per patient
-      const exerciseCounts = exercises.reduce((acc: {
-        [key: string]: number;
-      }, exercise) => {
-        acc[exercise.student_id] = (acc[exercise.student_id] || 0) + 1;
-        return acc;
-      }, {});
-      const patientsWithCounts = patients.map(patient => ({
-        ...patient,
-        exerciseCount: exerciseCounts[patient.id] || 0
-      }));
-      const allWordLists = (wordListsData.data || []).map(list => ({
-        ...list,
-        settings: typeof list.settings === 'object' && list.settings !== null && !Array.isArray(list.settings) ? list.settings as any : {
-          exposureDuration: 500,
-          intervalDuration: 200,
-          textCase: 'original' as const,
-          useMask: false,
-          maskDuration: 200
-        }
-      }));
+      const patientsWithCounts = calculateExerciseCounts(patients, exercises);
+
       setPatients(patients);
       setPatientsWithExercises(patientsWithCounts);
-      setWordLists(allWordLists as unknown as WordList[]);
+      setWordLists(allWordLists);
     } catch (error) {
       console.error('Error fetching initial data:', error);
     } finally {
@@ -204,17 +196,13 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     }
   };
 
-  // Funzione per aggiornare dinamicamente il conteggio esercizi di uno studente
   const updatePatientExerciseCount = useCallback(async () => {
     if (!selectedPatient) return;
     
     try {
-      const { data: exercises } = await supabase
-        .from('exercises')
-        .select('student_id')
-        .eq('student_id', selectedPatient.id);
-        
-      const newCount = exercises?.length || 0;
+      const exercises = await fetchExercises(therapistId);
+      const studentExercises = exercises.filter(e => e.student_id === selectedPatient.id);
+      const newCount = studentExercises.length;
       
       setPatientsWithExercises(prev => 
         prev.map(patient => 
@@ -226,26 +214,19 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     } catch (error) {
       console.error('Error updating exercise count:', error);
     }
-  }, [selectedPatient]);
+  }, [selectedPatient, therapistId]);
   const fetchPatientData = async () => {
     if (!selectedPatient) return;
     try {
-      const [exercisesData, sessionsData] = await Promise.all([supabase.from('exercises').select(`
-            *,
-            word_list:word_lists(*)
-          `).eq('student_id', selectedPatient.id), supabase.from('exercise_sessions').select('*').eq('student_id', selectedPatient.id).order('completed_at', {
-        ascending: false
-      }).limit(10)]);
-      setPatientExercises(exercisesData.data as any || []);
-      setPatientSessions(sessionsData.data || []);
+      const [exercises, sessions] = await Promise.all([
+        fetchPatientExercises(selectedPatient.id),
+        fetchPatientSessions(selectedPatient.id)
+      ]);
 
-      // Initialize weekly exercises state
-      const weeklyData: {
-        [key: number]: Partial<Exercise>;
-      } = {};
-      exercisesData.data?.forEach((exercise: any) => {
-        weeklyData[exercise.day_of_week] = exercise;
-      });
+      setPatientExercises(exercises);
+      setPatientSessions(sessions);
+
+      const weeklyData = buildWeeklyExercisesMap(exercises);
       setWeeklyExercises(weeklyData);
     } catch (error) {
       console.error('Error fetching patient data:', error);
@@ -253,57 +234,14 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   };
   const updateExercise = async (dayOfWeek: number, wordListId: string, settings: ExerciseSettings) => {
     if (!selectedPatient) return;
+    
     try {
-      let finalWordListId = wordListId;
-
-      // Controlla se esiste già un esercizio per questo giorno
-      const {
-        data: existingExercise
-      } = await supabase.from('exercises').select('id').eq('student_id', selectedPatient.id).eq('day_of_week', dayOfWeek).single();
-      if (existingExercise) {
-        // Se esiste, aggiorna l'esercizio esistente
-        const {
-          error
-        } = await supabase.from('exercises').update({
-          word_list_id: finalWordListId,
-          settings: settings as any,
-          updated_at: new Date().toISOString()
-        }).eq('id', existingExercise.id);
-        if (error) throw error;
-      } else {
-        // Se non esiste, crea un nuovo esercizio
-        const {
-          error
-        } = await supabase.from('exercises').insert({
-          student_id: selectedPatient.id,
-          coach_id: therapistId,
-          word_list_id: finalWordListId,
-          day_of_week: dayOfWeek,
-          settings: settings as any
-        });
-        if (error) throw error;
-      }
+      await upsertExercise(selectedPatient.id, therapistId, dayOfWeek, wordListId, settings);
       await fetchPatientData();
-      // Aggiorna dinamicamente il conteggio esercizi senza ricaricare tutta la pagina
       updatePatientExerciseCount();
     } catch (error: any) {
       console.error('Error updating exercise:', error);
-      let errorMessage = 'Errore durante l\'aggiornamento dell\'esercizio';
-      if (error.code === '23503') {
-        if (error.message?.includes('exercises_patient_id_fkey')) {
-          errorMessage = 'Impossibile aggiornare: lo studente selezionato non esiste più. Ricarica la pagina.';
-        } else if (error.message?.includes('word_list')) {
-          errorMessage = 'Impossibile aggiornare: la lista di parole selezionata non esiste più.';
-        } else {
-          errorMessage = 'Errore di vincolo del database. Controlla che tutti i dati siano validi.';
-        }
-      } else if (error.code === 'PGRST116') {
-        errorMessage = 'Non hai i permessi per modificare questo esercizio.';
-      } else if (error.message?.includes('network')) {
-        errorMessage = 'Errore di connessione. Controlla la rete e riprova.';
-      } else if (error.message) {
-        errorMessage = `Errore: ${error.message}`;
-      }
+      const errorMessage = getErrorMessage(error, 'update');
       toast({
         title: 'Errore di aggiornamento',
         description: errorMessage,
@@ -317,58 +255,25 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     try {
       console.log(`Tentativo di rimozione esercizio per giorno ${dayOfWeek}, studente ${selectedPatient.id}`);
       
-      // Prima trova l'esercizio per il giorno
       const exercise = weeklyExercises[dayOfWeek];
-      if (!exercise) {
+      if (!exercise || !exercise.id) {
         console.log('Nessun esercizio trovato per questo giorno');
         return;
       }
 
-      // Prima elimina tutte le sessioni dell'esercizio
-      const { error: sessionsError } = await supabase
-        .from('exercise_sessions')
-        .delete()
-        .eq('exercise_id', exercise.id);
-
-      if (sessionsError) {
-        console.error('Errore eliminazione sessioni:', sessionsError);
-        throw sessionsError;
-      }
-
-      // Poi elimina l'esercizio
-      const { error: exerciseError } = await supabase
-        .from('exercises')
-        .delete()
-        .eq('id', exercise.id);
-
-      if (exerciseError) {
-        console.error('Errore nell\'eliminazione dell\'esercizio:', exerciseError);
-        throw exerciseError;
-      }
-
+      await deleteExerciseWithSessions(exercise.id);
       console.log('Esercizio eliminato con successo');
 
       await fetchPatientData();
-      // Aggiorna dinamicamente il conteggio esercizi senza ricaricare tutta la pagina
       updatePatientExerciseCount();
       
       toast({
         title: 'Successo',
         description: 'Esercizio eliminato con successo'
       });
-      
     } catch (error: any) {
       console.error('Error removing exercise:', error);
-      let errorMessage = 'Errore durante la rimozione dell\'esercizio';
-      if (error.code === 'PGRST116') {
-        errorMessage = 'Esercizio non trovato o non hai i permessi per rimuoverlo.';
-      } else if (error.message?.includes('network')) {
-        errorMessage = 'Errore di connessione. Controlla la rete e riprova.';
-      } else if (error.message?.includes('foreign key')) {
-        errorMessage = 'Impossibile eliminare: esistono ancora sessioni collegate';
-      } else if (error.message) {
-        errorMessage = `Errore: ${error.message}`;
-      }
+      const errorMessage = getErrorMessage(error, 'remove');
       toast({
         title: 'Errore di rimozione',
         description: errorMessage,
@@ -385,21 +290,11 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       });
       return;
     }
+
     setCreatePatientLoading(true);
     try {
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('create-patient', {
-        body: {
-          email: newPatientEmail,
-          fullName: newPatientName,
-          therapistId: therapistId
-        }
-      });
-      if (error) throw error;
+      const data = await createPatientAccount(newPatientEmail, newPatientName, therapistId);
 
-      // Mostra il risultato con eventuali warning
       if (data.warning) {
         toast({
           title: 'Studente creato con warning',
@@ -413,22 +308,12 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         });
       }
 
-      // Reset form and refresh data
       setNewPatientEmail('');
       setNewPatientName('');
       await fetchInitialData();
     } catch (error: any) {
       console.error('Error creating patient:', error);
-      let errorMessage = 'Errore durante la creazione dello studente';
-      if (error.message?.includes('email')) {
-        errorMessage = 'Email non valida o già utilizzata da un altro utente.';
-      } else if (error.message?.includes('already exists')) {
-        errorMessage = 'Uno studente con questa email esiste già.';
-      } else if (error.message?.includes('network')) {
-        errorMessage = 'Errore di connessione. Controlla la rete e riprova.';
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
+      const errorMessage = getErrorMessage(error, 'create');
       toast({
         title: 'Errore di creazione',
         description: errorMessage,
@@ -441,40 +326,24 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   const deletePatient = async (patientId: string) => {
     const patient = patients.find(p => p.id === patientId);
     if (!patient) return;
+    
     if (!confirm(`Sei sicuro di voler eliminare lo studente ${patient.full_name}? Verranno eliminati anche tutti i suoi esercizi e sessioni, e l'account verrà rimosso completamente dal sistema.`)) return;
+
     try {
-      // Use the edge function to delete patient from both database and auth
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('delete-patient', {
-        body: {
-          patientId
-        }
-      });
-      if (error) throw error;
+      const data = await deletePatientAccount(patientId);
+      
       toast({
         title: 'Successo',
         description: data.message || 'Studente eliminato con successo dal sistema'
       });
 
-      // Refresh data and clear selection if it was the deleted patient
       if (selectedPatient?.id === patientId) {
         setSelectedPatient(null);
       }
       await fetchInitialData();
     } catch (error: any) {
       console.error('Error deleting patient:', error);
-      let errorMessage = 'Errore durante l\'eliminazione dello studente';
-      if (error.message?.includes('network')) {
-        errorMessage = 'Errore di connessione. Controlla la rete e riprova.';
-      } else if (error.message?.includes('Unauthorized')) {
-        errorMessage = 'Non hai i permessi per eliminare questo studente.';
-      } else if (error.message?.includes('not found')) {
-        errorMessage = 'Studente non trovato.';
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
+      const errorMessage = getErrorMessage(error, 'delete');
       toast({
         title: 'Errore di eliminazione',
         description: errorMessage,
@@ -493,12 +362,8 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       }
     }));
   };
-  const filteredPatients = patientsWithExercises.filter(patient => patient.full_name.toLowerCase().includes(searchTerm.toLowerCase()) || patient.email && patient.email.toLowerCase().includes(searchTerm.toLowerCase()));
-
-  // Paginazione
-  const totalPages = Math.ceil(filteredPatients.length / patientsPerPage);
-  const startIndex = (currentPage - 1) * patientsPerPage;
-  const paginatedPatients = filteredPatients.slice(startIndex, startIndex + patientsPerPage);
+  const filteredPatients = filterPatients(patientsWithExercises, searchTerm);
+  const { paginatedPatients, totalPages } = paginatePatients(filteredPatients, currentPage, patientsPerPage);
   if (loading) {
     return (
       <LoadingPage 
@@ -758,13 +623,13 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
                     </div>
                     <div className="text-center p-4 border rounded-lg">
                       <div className="text-2xl font-bold text-primary">
-                        {Math.round(patientSessions.reduce((acc, session) => acc + session.accuracy, 0) / patientSessions.length)}%
+                        {calculateAverageAccuracy(patientSessions)}%
                       </div>
                       <div className="text-sm text-muted-foreground">Precisione Media</div>
                     </div>
                     <div className="text-center p-4 border rounded-lg">
                       <div className="text-2xl font-bold text-primary">
-                        {patientSessions.reduce((acc, session) => acc + session.total_words, 0)}
+                        {calculateTotalWords(patientSessions)}
                       </div>
                       <div className="text-sm text-muted-foreground">Parole Totali</div>
                     </div>
