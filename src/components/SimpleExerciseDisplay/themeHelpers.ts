@@ -1,5 +1,16 @@
 import { ThemeType } from '../ThemeSelector';
 
+export const getThemeGradient = (themeId: ThemeType): string => {
+  switch(themeId) {
+    case 'space': return 'bg-gradient-to-br';
+    case 'nature': return 'bg-gradient-to-bl';
+    case 'ocean': return 'bg-gradient-to-tr';
+    case 'rainbow': return 'bg-gradient-to-r';
+    case 'clouds': return 'bg-gradient-to-r';
+    default: return 'bg-gradient-to-r';
+  }
+};
+
 export const getThemeShadow = (themeId: ThemeType) => {
   switch(themeId) {
     case 'space': return 'drop-shadow-[0_0_50px_rgba(255,255,255,0.15)]';
@@ -40,5 +51,14 @@ export const getFontSize = (size: string): string => {
     case 'large': return 'text-5xl md:text-8xl';
     case 'extra-large': return 'text-6xl md:text-9xl';
     default: return 'text-5xl md:text-8xl';
+  }
+};
+
+export const getCountdownTextColor = (themeId: ThemeType): string => {
+  switch(themeId) {
+    case 'space': return 'text-white/90';
+    case 'nature':
+    case 'clouds': return 'text-gray-700';
+    default: return 'text-white/80';
   }
 };

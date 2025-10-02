@@ -4,26 +4,25 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Play, Pause, Square, X } from 'lucide-react';
 import { ThemeType, themes } from './ThemeSelector';
-
-interface ExerciseSession {
-  words: string[];
-  settings: any;
-  startTime: number;
-  currentWordIndex: number;
-  errors: number[];
-  isRunning: boolean;
-  isPaused: boolean;
-}
-
-interface SessionResult {
-  totalWords: number;
-  correctWords: number;
-  incorrectWords: number;
-  accuracy: number;
-  duration: number;
-  missedWords: string[];
-  settings: any;
-}
+import { playErrorSound } from './SimpleExerciseDisplay/audioHelpers';
+import {
+  getThemeGradient,
+  getThemeShadow,
+  getTextShadow,
+  getWordShadow,
+  getFontSize,
+  getCountdownTextColor
+} from './SimpleExerciseDisplay/themeHelpers';
+import {
+  ExerciseSession,
+  SessionResult,
+  formatWord,
+  calculateSessionResult,
+  calculateProgress,
+  calculateAccuracy,
+  shouldAddError,
+  createUpdatedSession
+} from './SimpleExerciseDisplay/sessionHelpers';
 
 interface SimpleExerciseDisplayProps {
   session: ExerciseSession;
@@ -66,7 +65,6 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     return timerId;
   };
   
-  // Funzione per cancellare tutti i timer attivi
   const clearAllTimers = useCallback(() => {
     console.log('🛑 Clearing all active timers:', activeTimersRef.current.length);
     activeTimersRef.current.forEach(timerId => {
@@ -75,7 +73,6 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     activeTimersRef.current = [];
   }, []);
 
-  // Cleanup al dismount del componente
   useEffect(() => {
     return () => {
       console.log('🧹 Component unmounting - cleaning up all timers and state');
@@ -84,118 +81,6 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     };
   }, [clearAllTimers]);
 
-  // Funzione per ottenere l'ombra appropriata per ogni tema
-  const getThemeShadow = (themeId: ThemeType) => {
-    switch(themeId) {
-      case 'space': return 'drop-shadow-[0_0_50px_rgba(255,255,255,0.15)]'; // Ombra molto estesa e quasi impercettibile
-      case 'nature': return 'drop-shadow-[0_0_50px_rgba(0,0,0,0.1)]'; // Ombra molto estesa per temi chiari
-      case 'ocean': return 'drop-shadow-[0_0_50px_rgba(0,0,0,0.12)]'; // Ombra molto estesa
-      case 'rainbow': return 'drop-shadow-[0_0_50px_rgba(0,0,0,0.15)]'; // Ombra molto estesa
-      case 'clouds': return 'drop-shadow-[0_0_50px_rgba(0,0,0,0.1)]'; // Ombra molto estesa per temi chiari
-      default: return 'drop-shadow-[0_0_50px_rgba(0,0,0,0.1)]';
-    }
-  };
-
-  const getTextShadow = (themeId: ThemeType) => {
-    switch(themeId) {
-      case 'space': return 'text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]'; // Testo bianco con ombra bianca
-      case 'nature': return 'text-gray-800 drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]'; // Testo scuro con ombra bianca
-      case 'ocean': return 'text-white drop-shadow-[0_0_10px_rgba(0,0,0,0.6)]'; // Testo bianco con ombra scura
-      case 'rainbow': return 'text-white drop-shadow-[0_0_12px_rgba(0,0,0,0.7)]'; // Testo bianco con ombra scura forte
-      case 'clouds': return 'text-gray-800 drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]'; // Testo scuro con ombra bianca
-      default: return 'text-white drop-shadow-lg';
-    }
-  };
-
-  // Ombra invisibile per le parole - grande raggio, bassa opacità per aumentare contrasto senza essere vista
-  const getWordShadow = (themeId: ThemeType) => {
-    switch(themeId) {
-      case 'space': return 'drop-shadow-[0_0_60px_rgba(255,255,255,0.2)] drop-shadow-[0_0_120px_rgba(255,255,255,0.15)]';
-      case 'nature': return 'drop-shadow-[0_0_60px_rgba(0,0,0,0.25)] drop-shadow-[0_0_120px_rgba(0,0,0,0.2)]';
-      case 'ocean': return 'drop-shadow-[0_0_60px_rgba(0,0,0,0.3)] drop-shadow-[0_0_120px_rgba(0,0,0,0.2)]';
-      case 'rainbow': return 'drop-shadow-[0_0_60px_rgba(0,0,0,0.35)] drop-shadow-[0_0_120px_rgba(0,0,0,0.25)]';
-      case 'clouds': return 'drop-shadow-[0_0_60px_rgba(0,0,0,0.25)] drop-shadow-[0_0_120px_rgba(0,0,0,0.2)]';
-      default: return 'drop-shadow-[0_0_60px_rgba(0,0,0,0.25)]';
-    }
-  };
-
-  const getFontSize = (size: string): string => {
-    switch (size) {
-      case 'small': return 'text-2xl md:text-4xl';
-      case 'medium': return 'text-4xl md:text-6xl';
-      case 'large': return 'text-5xl md:text-8xl';
-      case 'extra-large': return 'text-6xl md:text-9xl';
-      default: return 'text-5xl md:text-8xl';
-    }
-  };
-
-  const formatWord = useCallback((word: string): string => {
-    switch (session.settings.textCase) {
-      case 'uppercase': return word.toUpperCase();
-      case 'lowercase': return word.toLowerCase();
-      default: return word;
-    }
-  }, [session.settings.textCase]);
-
-  const playErrorSound = () => {
-    console.log('🔊 playErrorSound called on mobile');
-    
-    // PRIMA: Vibrazione immediata (funziona sempre)
-    if ('vibrate' in navigator) {
-      console.log('📳 Attempting vibration...');
-      try {
-        const result = navigator.vibrate([200, 100, 200]); // Pattern più percettibile
-        console.log('📳 Vibration result:', result);
-      } catch (e) {
-        console.log('📳 Vibration failed:', e);
-      }
-    } else {
-      console.log('📳 Vibration not supported');
-    }
-    
-    // SECONDO: Tentativo audio (può fallire su mobile)
-    try {
-      console.log('🎵 Creating AudioContext...');
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      console.log('🎵 AudioContext state:', audioContext.state);
-      
-      const playSound = () => {
-        console.log('🎵 Playing sound...');
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.1);
-        
-        gainNode.gain.setValueAtTime(1.0, audioContext.currentTime); // Volume al 100% - massimo
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.1);
-        console.log('🎵 Sound started');
-      };
-      
-      if (audioContext.state === 'suspended') {
-        console.log('🎵 Resuming AudioContext...');
-        audioContext.resume().then(() => {
-          console.log('🎵 AudioContext resumed successfully');
-          playSound();
-        }).catch(e => {
-          console.log('🎵 Failed to resume AudioContext:', e);
-        });
-      } else {
-        playSound();
-      }
-      
-    } catch (error) {
-      console.log('🎵 Audio completely failed:', error);
-    }
-  };
-
   // Usa ref per mantenere una versione stabile di markError
   const markErrorRef = useRef<() => void>();
   
@@ -203,23 +88,20 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     console.log('Marking error for word index:', session.currentWordIndex);
     console.log('Current errors before:', session.errors);
     
-    // Limita il numero massimo di errori al numero totale di parole
-    if (session.errors.length >= session.words.length) {
+    if (!shouldAddError(session.errors, session.words.length)) {
       console.log('Maximum errors reached, not adding more');
       return;
     }
     
-    // Riproduci suono
     try {
       playErrorSound();
     } catch (error) {
       console.log('Audio not available:', error);
     }
     
-    const newSession = {
-      ...session,
+    const newSession = createUpdatedSession(session, {
       errors: [...session.errors, session.currentWordIndex]
-    };
+    });
     console.log('New errors after:', newSession.errors);
     onUpdateSession(newSession);
   };
@@ -237,34 +119,14 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     console.log('Current errors in nextWord:', session.errors);
     
     if (newIndex >= session.words.length) {
-      const endTime = Date.now();
-      const duration = endTime - session.startTime;
-      const totalWords = session.words.length;
-      const incorrectWords = session.errors.length;
-      const correctWords = totalWords - incorrectWords;
-      const accuracy = (correctWords / totalWords) * 100;
-
-      const missedWords = session.errors.map(index => session.words[index]);
-
-      const result: SessionResult = {
-        totalWords,
-        correctWords,
-        incorrectWords,
-        accuracy,
-        duration,
-        missedWords,
-        settings: session.settings,
-      };
-
+      const result = calculateSessionResult(session);
       onComplete(result);
       return;
     }
 
-    // IMPORTANTE: Preservo tutti i dati della sessione inclusi gli errori
-    const newSession = {
-      ...session,
+    const newSession = createUpdatedSession(session, {
       currentWordIndex: newIndex
-    };
+    });
     console.log('Updating session with preserved errors:', newSession.errors);
     onUpdateSession(newSession);
   };
@@ -274,10 +136,9 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   }, []); // Dipendenze vuote - funzione sempre stabile
 
   const pauseResume = useCallback(() => {
-    onUpdateSession({
-      ...session,
+    onUpdateSession(createUpdatedSession(session, {
       isPaused: !session.isPaused
-    });
+    }));
   }, [session, onUpdateSession]);
 
   useEffect(() => {
@@ -391,9 +252,9 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
             console.log('Session stopped during transition timer');
             return;
           }
-          console.log('Showing word:', currentWordToShow);
-          setDisplayState('word');
-          setCurrentWord(formatWord(currentWordToShow));
+                  console.log('Showing word:', currentWordToShow);
+                  setDisplayState('word');
+                  setCurrentWord(formatWord(currentWordToShow, session.settings.textCase));
 
           // Timer per durata parola - basato su settings
           const wordTimer = addTimer(setTimeout(() => {
@@ -454,35 +315,23 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     session.settings.maskDuration,
     session.settings.exposureDuration,
     session.settings.intervalDuration,
-    isCountingDown, 
-    formatWord
+    session.settings.textCase,
+    isCountingDown
   ]);
 
-  const currentWordNumber = session.currentWordIndex + 1;
-  const progress = (currentWordNumber / session.words.length) * 100;
-  const accuracy = session.currentWordIndex > 0 ? 
-    ((session.currentWordIndex - session.errors.length) / session.currentWordIndex) * 100 : 100;
+  const progress = calculateProgress(session.currentWordIndex, session.words.length);
+  const accuracy = calculateAccuracy(session.currentWordIndex, session.errors);
 
   if (isCountingDown) {
     const currentTheme = themes.find(t => t.id === theme) || themes[3];
     
     return (
-      <div className={`min-h-screen ${
-        theme === 'rainbow' ? 'bg-gradient-to-r' : 
-        theme === 'space' ? 'bg-gradient-to-br' :
-        theme === 'ocean' ? 'bg-gradient-to-tr' :
-        theme === 'nature' ? 'bg-gradient-to-bl' :
-        'bg-gradient-to-r'
-      } ${currentTheme.preview.background} flex items-center justify-center`}>
+      <div className={`min-h-screen ${getThemeGradient(theme)} ${currentTheme.preview.background} flex items-center justify-center`}>
         <div className="text-center">
           <h1 className={`text-6xl font-bold mb-8 ${getTextShadow(theme)}`}>
             {countdown > 0 ? countdown : 'INIZIA!'}
           </h1>
-          <p className={`text-xl ${getTextShadow(theme)} ${
-            theme === 'space' ? 'text-white/90' :
-            theme === 'nature' || theme === 'clouds' ? 'text-gray-700' :
-            'text-white/80'
-          }`}>
+          <p className={`text-xl ${getTextShadow(theme)} ${getCountdownTextColor(theme)}`}>
             Preparati a leggere le parole...
           </p>
         </div>
@@ -493,13 +342,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   const currentTheme = themes.find(t => t.id === theme) || themes[3]; // Default rainbow
 
   return (
-    <div className={`min-h-screen relative ${
-      theme === 'rainbow' ? 'bg-gradient-to-r' : 
-      theme === 'space' ? 'bg-gradient-to-br' :
-      theme === 'ocean' ? 'bg-gradient-to-tr' :
-      theme === 'nature' ? 'bg-gradient-to-bl' :
-      'bg-gradient-to-r'
-    } ${currentTheme.preview.background} flex flex-col overflow-hidden`}>
+    <div className={`min-h-screen relative ${getThemeGradient(theme)} ${currentTheme.preview.background} flex flex-col overflow-hidden`}>
       <div 
         className="absolute inset-0 opacity-15 pointer-events-none z-0"
         style={{
@@ -539,7 +382,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
                       fontFamily: '"Inter", system-ui, sans-serif'
                     }}
                   >
-                    {formatWord(currentWord)}
+                    {currentWord}
                   </p>
                 </div>
               </div>
@@ -587,11 +430,11 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
                    <p className="text-sm text-gray-700 font-semibold">
-                     Progresso: {currentWordNumber}/{session.words.length}
+                     Progresso: {session.currentWordIndex + 1}/{session.words.length}
                    </p>
                 </div>
                 <div className="text-sm text-gray-600 font-medium">
-                  Precisione: {Math.round(((session.currentWordIndex - session.errors.length) / Math.max(session.currentWordIndex, 1)) * 100)}%
+                  Precisione: {Math.round(accuracy)}%
                 </div>
               </div>
               <div className="relative">
