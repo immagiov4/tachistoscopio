@@ -77,17 +77,20 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
+  const checkFloatingActionsVisibility = useCallback(() => {
+    const patientListCard = document.querySelector('[data-patient-list]');
+    if (patientListCard) {
+      const rect = patientListCard.getBoundingClientRect();
+      const shouldShow = rect.bottom < window.innerHeight * 0.6;
+      setShowFloatingActions(shouldShow);
+    }
+  }, []);
   
   
   // Show floating buttons when scrolled past patient list - using CSS transitions only
   useEffect(() => {
     const handleScroll = () => {
-      const patientListCard = document.querySelector('[data-patient-list]');
-      if (patientListCard) {
-        const rect = patientListCard.getBoundingClientRect();
-        const shouldShow = rect.bottom < window.innerHeight * 0.6;
-        setShowFloatingActions(shouldShow);
-      }
+      checkFloatingActionsVisibility();
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -96,23 +99,14 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [checkFloatingActionsVisibility]);
 
   // Re-check floating buttons when filtered list changes size
   useEffect(() => {
-    const checkAfterResize = () => {
-      const patientListCard = document.querySelector('[data-patient-list]');
-      if (patientListCard) {
-        const rect = patientListCard.getBoundingClientRect();
-        const shouldShow = rect.bottom < window.innerHeight * 0.6;
-        setShowFloatingActions(shouldShow);
-      }
-    };
-
     // Small delay to let DOM update after filtering
-    const timeoutId = setTimeout(checkAfterResize, 100);
+    const timeoutId = setTimeout(checkFloatingActionsVisibility, 100);
     return () => clearTimeout(timeoutId);
-  }, [patientsWithExercises.length, searchTerm]);
+  }, [patientsWithExercises.length, searchTerm, checkFloatingActionsVisibility]);
   
   
   const scrollToPatientList = () => {
