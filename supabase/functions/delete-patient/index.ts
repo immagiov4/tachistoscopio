@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
       }
     )
 
-    // Get the current user (therapist) from the request
+    // Get the current user (coach) from the request
     const authHeader = req.headers.get('Authorization')!
     const token = authHeader.replace('Bearer ', '')
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
@@ -36,16 +36,16 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Get therapist profile
-    const { data: therapistProfile, error: profileError } = await supabaseAdmin
+    // Get coach profile
+    const { data: coachProfile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('id, role')
       .eq('user_id', user.id)
       .single()
 
-    if (profileError || !therapistProfile || therapistProfile.role !== 'therapist') {
+    if (profileError || !coachProfile || coachProfile.role !== 'coach') {
       return new Response(
-        JSON.stringify({ error: 'Only therapists can delete patients' }),
+        JSON.stringify({ error: 'Solo i coach possono eliminare studenti' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -54,36 +54,36 @@ Deno.serve(async (req) => {
 
     if (!patientId) {
       return new Response(
-        JSON.stringify({ error: 'Patient ID is required' }),
+        JSON.stringify({ error: 'Student ID è richiesto' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Get patient profile to find the user_id
-    const { data: patient, error: patientError } = await supabaseAdmin
+    // Get student profile to find the user_id
+    const { data: student, error: studentError } = await supabaseAdmin
       .from('profiles')
       .select('user_id, full_name, created_by')
       .eq('id', patientId)
-      .eq('role', 'patient')
+      .eq('role', 'student')
       .single()
 
-    if (patientError || !patient) {
+    if (studentError || !student) {
       return new Response(
-        JSON.stringify({ error: 'Patient not found' }),
+        JSON.stringify({ error: 'Studente non trovato' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Verify the therapist owns this patient
-    if (patient.created_by !== therapistProfile.id) {
+    // Verify the coach owns this student
+    if (student.created_by !== coachProfile.id) {
       return new Response(
-        JSON.stringify({ error: 'You can only delete your own patients' }),
+        JSON.stringify({ error: 'Puoi eliminare solo i tuoi studenti' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Try to delete patient from auth.users first
-    const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(patient.user_id)
+    // Try to delete student from auth.users first
+    const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(student.user_id)
     
     let warningMessage = ''
     
@@ -98,58 +98,57 @@ Deno.serve(async (req) => {
       } else {
         // Per altri errori, fallisci comunque
         return new Response(
-          JSON.stringify({ error: 'Errore durante l\'eliminazione del paziente dal sistema di autenticazione' }),
+          JSON.stringify({ error: 'Errore durante l\'eliminazione dello studente dal sistema di autenticazione' }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
     }
 
-    // Elimina prima gli esercizi associati al paziente
+    // Delete exercises with CASCADE handled by foreign keys
     const { error: deleteExercisesError } = await supabaseAdmin
       .from('exercises')
       .delete()
-      .eq('patient_id', patientId)
+      .eq('student_id', patientId)
 
     if (deleteExercisesError) {
-      console.error('Errore eliminazione esercizi paziente:', deleteExercisesError)
+      console.error('Errore eliminazione esercizi studente:', deleteExercisesError)
       return new Response(
-        JSON.stringify({ error: 'Errore durante l\'eliminazione degli esercizi del paziente' }),
+        JSON.stringify({ error: 'Errore durante l\'eliminazione degli esercizi dello studente' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Elimina le sessioni di esercizio associate al paziente
+    // Delete exercise sessions with CASCADE handled by foreign keys
     const { error: deleteSessionsError } = await supabaseAdmin
       .from('exercise_sessions')
       .delete()
-      .eq('patient_id', patientId)
+      .eq('student_id', patientId)
 
     if (deleteSessionsError) {
-      console.error('Errore eliminazione sessioni paziente:', deleteSessionsError)
+      console.error('Errore eliminazione sessioni studente:', deleteSessionsError)
       return new Response(
-        JSON.stringify({ error: 'Errore durante l\'eliminazione delle sessioni del paziente' }),
+        JSON.stringify({ error: 'Errore durante l\'eliminazione delle sessioni dello studente' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Elimina profilo paziente dal database
-    // Questo garantisce la pulizia anche se l'eliminazione dall'auth è fallita per utente non trovato
+    // Delete student profile from database
     const { error: deleteProfileError } = await supabaseAdmin
       .from('profiles')
       .delete()
       .eq('id', patientId)
 
     if (deleteProfileError) {
-      console.error('Errore eliminazione profilo paziente:', deleteProfileError)
+      console.error('Errore eliminazione profilo studente:', deleteProfileError)
       return new Response(
-        JSON.stringify({ error: 'Errore durante l\'eliminazione del profilo paziente dal database' }),
+        JSON.stringify({ error: 'Errore durante l\'eliminazione del profilo studente dal database' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     return new Response(
       JSON.stringify({ 
-        message: `Paziente ${patient.full_name} eliminato con successo dal database${warningMessage}` 
+        message: `Studente ${student.full_name} eliminato con successo dal database${warningMessage}` 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
