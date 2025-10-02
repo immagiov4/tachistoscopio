@@ -122,3 +122,59 @@ export const saveSessionToDatabase = async (
     throw error;
   }
 };
+
+export const fetchStudioPatientProfile = async (studentId: string) => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', studentId)
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
+export const formatSessionDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  const isToday = date.toDateString() === new Date().toDateString();
+  const isYesterday = date.toDateString() === new Date(Date.now() - 86400000).toDateString();
+
+  if (isToday) {
+    return `Oggi ${date.toLocaleTimeString('it-IT', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })}`;
+  }
+
+  if (isYesterday) {
+    return `Ieri ${date.toLocaleTimeString('it-IT', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })}`;
+  }
+
+  return date.toLocaleDateString('it-IT', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+export const calculateAverageAccuracy = (sessions: DBExerciseSession[]): number => {
+  if (sessions.length === 0) return 0;
+  return Math.round(sessions.reduce((acc, s) => acc + s.accuracy, 0) / sessions.length);
+};
+
+export const calculateTotalWords = (sessions: DBExerciseSession[]): number => {
+  return sessions.reduce((acc, s) => acc + s.total_words, 0);
+};
+
+export const getAccuracyColorClass = (accuracy: number): string => {
+  if (accuracy >= 90) return 'bg-green-500';
+  if (accuracy >= 70) return 'bg-yellow-500';
+  return 'bg-red-500';
+};

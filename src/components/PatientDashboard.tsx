@@ -5,30 +5,25 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Calendar, Play, LogOut, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { Exercise, ExerciseSession as DBExerciseSession, DAYS_OF_WEEK } from '@/types/database';
+import { Exercise, ExerciseSession as DBExerciseSession } from '@/types/database';
 import { SimpleExerciseDisplay } from './SimpleExerciseDisplay';
 import { ThemeSelector, ThemeType, themes } from './ThemeSelector';
 import { toast } from '@/hooks/use-toast';
 import { LoadingPage, StatsSkeleton } from '@/components/ui/loading';
-interface ExerciseSession {
-  words: string[];
-  settings: any;
-  startTime: number;
-  currentWordIndex: number;
-  errors: number[];
-  isRunning: boolean;
-  isPaused: boolean;
-}
-interface SessionResult {
-  totalWords: number;
-  correctWords: number;
-  incorrectWords: number;
-  accuracy: number;
-  duration: number;
-  missedWords: string[];
-  settings: any;
-}
+import {
+  ExerciseSession,
+  SessionResult,
+  fetchTodayExercise,
+  checkIfCompletedToday,
+  fetchRecentSessions,
+  createExerciseSession,
+  saveSessionToDatabase,
+  fetchStudioPatientProfile,
+  formatSessionDate,
+  calculateAverageAccuracy,
+  calculateTotalWords,
+  getAccuracyColorClass
+} from './PatientDashboard/helpers';
 interface PatientDashboardProps {
   studioStudentId?: string; // Per modalità studio del coach
 }
@@ -83,66 +78,36 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
   }, [selectedTheme]);
   useEffect(() => {
     if (effectiveStudentId) {
-      fetchTodayExercise();
-      fetchRecentSessions();
+      loadTodayExercise();
+      loadRecentSessions();
       
-      // Se in modalità studio, carica il profilo dello studente
       if (studioStudentId) {
-        fetchStudioPatientProfile();
+        loadStudioPatientProfile();
       }
     }
   }, [effectiveStudentId, studioStudentId]);
   
-  const fetchStudioPatientProfile = async () => {
+  const loadStudioPatientProfile = async () => {
+    if (!studioStudentId) return;
+    
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', studioStudentId)
-        .single();
-      
-      if (error) {
-        console.error('Error fetching studio patient profile:', error);
-      } else {
-        setStudioPatientProfile(data);
-      }
+      const data = await fetchStudioPatientProfile(studioStudentId);
+      setStudioPatientProfile(data);
     } catch (error) {
       console.error('Error fetching studio patient profile:', error);
     }
   };
-  const fetchTodayExercise = async () => {
+
+  const loadTodayExercise = async () => {
+    if (!effectiveStudentId) return;
+
     try {
-      const today = new Date().getDay(); // 0 = Sunday, 6 = Saturday
+      const exercise = await fetchTodayExercise(effectiveStudentId);
+      setTodayExercise(exercise);
 
-      // Check if exercise for today exists
-      const {
-        data: exercise,
-        error: exerciseError
-      } = await supabase.from('exercises').select(`
-          *,
-          word_list:word_lists(*)
-        `).eq('student_id', effectiveStudentId).eq('day_of_week', today).single();
-      if (exerciseError && exerciseError.code !== 'PGRST116') {
-        console.error('Error fetching today exercise:', exerciseError);
-        setLoading(false);
-        return;
-      }
-      setTodayExercise(exercise as any || null);
-
-      // Check if already completed today
       if (exercise) {
-        const today = new Date();
-        const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-        const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
-        const {
-          data: sessions,
-          error: sessionsError
-        } = await supabase.from('exercise_sessions').select('*').eq('exercise_id', exercise.id).eq('student_id', effectiveStudentId).gte('completed_at', startOfDay.toISOString()).lte('completed_at', endOfDay.toISOString());
-        if (sessionsError) {
-          console.error('Error checking today sessions:', sessionsError);
-        } else {
-          setCompletedToday(sessions && sessions.length > 0);
-        }
+        const completed = await checkIfCompletedToday(exercise.id, effectiveStudentId);
+        setCompletedToday(completed);
       }
     } catch (error) {
       console.error('Error fetching today exercise:', error);
@@ -150,22 +115,14 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
       setLoading(false);
     }
   };
-  const fetchRecentSessions = async () => {
+
+  const loadRecentSessions = async () => {
+    if (!effectiveStudentId) return;
+
     try {
       setStatsLoading(true);
-
-      // Recupera le ultime 10 sessioni dell'utente
-      const {
-        data: sessions,
-        error
-      } = await supabase.from('exercise_sessions').select('*').eq('student_id', effectiveStudentId).order('completed_at', {
-        ascending: false
-      }).limit(10);
-      if (error) {
-        console.error('Error fetching sessions:', error);
-      } else {
-        setRecentSessions(sessions || []);
-      }
+      const sessions = await fetchRecentSessions(effectiveStudentId);
+      setRecentSessions(sessions);
     } catch (error) {
       console.error('Error fetching recent sessions:', error);
     } finally {
@@ -181,94 +138,50 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
       });
       return;
     }
-    const session: ExerciseSession = {
-      words: todayExercise.word_list.words,
-      settings: {
-        ...todayExercise.settings,
-        fontSize: accessibilitySettings.fontSize,
-        // Usa le preferenze dello studente
-        theme: selectedTheme // Aggiungi il tema
-      },
-      startTime: Date.now(),
-      currentWordIndex: 0,
-      errors: [],
-      isRunning: true,
-      isPaused: false
-    };
+
+    const session = createExerciseSession(
+      todayExercise.word_list.words,
+      todayExercise.settings,
+      accessibilitySettings,
+      selectedTheme
+    );
     setCurrentSession(session);
   };
   const handleExerciseComplete = async (result: SessionResult) => {
+    if (!effectiveStudentId || !todayExercise) {
+      console.error('Missing required data:', { effectiveStudentId, todayExercise });
+      toast({
+        title: 'Errore',
+        description: 'Dati mancanti per salvare la sessione',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     try {
-      // Check if we have the required data
-      if (!effectiveStudentId || !todayExercise) {
-        console.error('Missing required data:', {
-          effectiveStudentId,
-          todayExercise
-        });
-        toast({
-          title: 'Errore',
-          description: 'Dati mancanti per salvare la sessione',
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      // Verifica che abbiamo uno student_id valido
-      if (!effectiveStudentId) {
-        toast({
-          title: 'Errore',
-          description: 'ID studente non trovato',
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      // Save session to database - use effectiveStudentId (the actual student)
-      const sessionData = {
-        exercise_id: todayExercise.id,
-        student_id: effectiveStudentId,
-        // Use the student ID, not the coach profile ID
-        total_words: result.totalWords,
-        correct_words: result.correctWords,
-        incorrect_words: result.incorrectWords,
-        accuracy: result.accuracy,
-        duration: result.duration,
-        missed_words: result.missedWords
-      };
-      
       console.log('Attempting to save session:', {
-        sessionData,
         userProfile: profile,
         isStudent: profile?.role === 'student',
         isCoach: profile?.role === 'coach',
         studioMode: !!studioStudentId
       });
+
+      await saveSessionToDatabase(result, todayExercise.id, effectiveStudentId);
       
-      const {
-        error
-      } = await supabase.from('exercise_sessions').insert(sessionData);
-      if (error) {
-        console.error('Error saving session:', error);
-        console.error('Session data:', sessionData);
-        console.error('Student ID:', effectiveStudentId);
-        console.error('Exercise ID:', todayExercise?.id);
-        toast({
-          title: 'Errore nel salvare i risultati',
-          description: `Dettagli errore: ${error.message || 'Errore sconosciuto'}`,
-          variant: 'destructive'
-        });
-      } else {
-        toast({
-          title: 'Esercizio Completato!',
-          description: `Precisione: ${result.accuracy.toFixed(1)}%`
-        });
-        setCompletedToday(true);
-        await fetchRecentSessions(); // Aggiorna anche le statistiche
-      }
-    } catch (error) {
+      toast({
+        title: 'Esercizio Completato!',
+        description: `Precisione: ${result.accuracy.toFixed(1)}%`
+      });
+      setCompletedToday(true);
+      await loadRecentSessions();
+    } catch (error: any) {
       console.error('Error saving session:', error);
+      toast({
+        title: 'Errore nel salvare i risultati',
+        description: `Dettagli errore: ${error.message || 'Errore sconosciuto'}`,
+        variant: 'destructive'
+      });
     } finally {
-      // Evita doppio trigger rimuovendo immediatamente la sessione corrente
       setCurrentSession(null);
     }
   };
@@ -468,7 +381,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
                   boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px, inset rgba(255, 255, 255, 0.5) 0px 1px 0px'
                 }}>
                       <div className="text-2xl font-bold text-green-700">
-                        {Math.round(recentSessions.reduce((acc, s) => acc + s.accuracy, 0) / recentSessions.length)}%
+                        {calculateAverageAccuracy(recentSessions)}%
                       </div>
                       <div className="text-xs text-green-600">Precisione Media</div>
                     </div>
@@ -478,7 +391,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
                   boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 8px, inset rgba(255, 255, 255, 0.5) 0px 1px 0px'
                 }}>
                       <div className="text-2xl font-bold text-orange-700">
-                        {recentSessions.reduce((acc, s) => acc + s.total_words, 0)}
+                        {calculateTotalWords(recentSessions)}
                       </div>
                       <div className="text-xs text-orange-600">Parole Totali</div>
                     </div>
@@ -488,44 +401,24 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
                   <div>
                     <h4 className="font-medium text-gray-800 mb-3">Ultime Sessioni</h4>
                     <div className="space-y-2 max-h-48 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                      {recentSessions.slice(0, 5).map((session, index) => {
-                    const date = new Date(session.completed_at);
-                    const isToday = date.toDateString() === new Date().toDateString();
-                    const isYesterday = date.toDateString() === new Date(Date.now() - 86400000).toDateString();
-                    let dateLabel;
-                    if (isToday) {
-                      dateLabel = `Oggi ${date.toLocaleTimeString('it-IT', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}`;
-                    } else if (isYesterday) {
-                      dateLabel = `Ieri ${date.toLocaleTimeString('it-IT', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}`;
-                    } else {
-                      dateLabel = date.toLocaleDateString('it-IT', {
-                        day: 'numeric',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      });
-                    }
-                    return <div key={session.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-2 h-2 rounded-full ${session.accuracy >= 90 ? 'bg-green-500' : session.accuracy >= 70 ? 'bg-yellow-500' : 'bg-red-500'}`}></div>
-                              <div>
-                                <div className="text-sm font-medium text-gray-800">
-                                  {session.correct_words}/{session.total_words} parole ({Math.round(session.accuracy)}%)
-                                </div>
-                                <div className="text-xs text-gray-600">{dateLabel}</div>
+                      {recentSessions.slice(0, 5).map((session) => (
+                        <div key={session.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-2 h-2 rounded-full ${getAccuracyColorClass(session.accuracy)}`}></div>
+                            <div>
+                              <div className="text-sm font-medium text-gray-800">
+                                {session.correct_words}/{session.total_words} parole ({Math.round(session.accuracy)}%)
+                              </div>
+                              <div className="text-xs text-gray-600">
+                                {formatSessionDate(session.completed_at)}
                               </div>
                             </div>
-                            <div className="text-xs text-gray-500">
-                              {Math.round(session.duration / 1000)}s
-                            </div>
-                          </div>;
-                  })}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {Math.round(session.duration / 1000)}s
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -535,16 +428,20 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex items-end justify-between gap-1 h-24">
                           {recentSessions.slice(0, 7).reverse().map((session, index) => {
-                      const height = Math.max(session.accuracy / 100 * 80, 8); // Minimo 8px di altezza
-                      return <div key={index} className="flex-1 flex flex-col items-center gap-1">
+                            const height = Math.max(session.accuracy / 100 * 80, 8);
+                            return (
+                              <div key={index} className="flex-1 flex flex-col items-center gap-1">
                                 <div className="text-xs text-gray-600 font-medium">
                                   {Math.round(session.accuracy)}%
                                 </div>
-                                <div className={`w-full rounded transition-all duration-300 ${session.accuracy >= 90 ? 'bg-green-500' : session.accuracy >= 70 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{
-                          height: `${height}px`
-                        }} title={`Precisione: ${Math.round(session.accuracy)}%`}></div>
-                              </div>;
-                    })}
+                                <div 
+                                  className={`w-full rounded transition-all duration-300 ${getAccuracyColorClass(session.accuracy)}`}
+                                  style={{ height: `${height}px` }}
+                                  title={`Precisione: ${Math.round(session.accuracy)}%`}
+                                />
+                              </div>
+                            );
+                          })}
                         </div>
                         <div className="text-xs text-gray-500 text-center mt-2">
                           Ultime {Math.min(recentSessions.length, 7)} sessioni
