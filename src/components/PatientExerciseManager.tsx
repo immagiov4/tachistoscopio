@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, BookOpen, BarChart3, Search, Copy, Plus, Trash2, UserCheck, ArrowUp, Users, UserCog, Edit } from 'lucide-react';
+import { Calendar, BookOpen, BarChart3, Search, Trash2, UserCheck, ArrowUp, UserCog, Edit } from 'lucide-react';
 import { WordList, Exercise, ExerciseSettings, DAYS_OF_WEEK } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
 import { LoadingPage } from '@/components/ui/loading';

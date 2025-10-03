@@ -1,6 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, WordList, Exercise, ExerciseSettings } from '@/types/database';
-import { toast } from '@/hooks/use-toast';
 
 export type PatientWithEmail = Profile & {
   email?: string;

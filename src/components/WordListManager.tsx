@@ -4,10 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Upload, Download, Plus, Trash2, BookOpen, Edit, X, RefreshCw, Save, Wand2 } from 'lucide-react';
+import { Upload, BookOpen, Edit, RefreshCw, Save, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { WordList } from '@/types/tachistoscope';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,11 +28,10 @@ import {
   selectWordSource,
   GeneratorParams
 } from './WordListManager/generatorHelpers';
-import paroleItalianeText from '@/data/parole_italiane_complete.txt?raw';
 import { WordListItem } from './WordListManager/WordListItem';
 import { ExerciseSettings } from './WordListManager/ExerciseSettings';
 import { GeneratorTab } from './WordListManager/GeneratorTab';
-import { getWordListErrorMessage, getWordListUpdateErrorMessage } from '@/utils/errorHandling';
+import { getWordListUpdateErrorMessage } from '@/utils/errorHandling';
 
 // Import the complete Italian word dataset
 import wordDatasetUrl from '@/data/parole_italiane_complete.txt?url';

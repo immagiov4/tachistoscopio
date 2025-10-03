@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings } from 'lucide-react';
 import { SettingsPanel } from './SettingsPanel';

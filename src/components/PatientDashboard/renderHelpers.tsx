@@ -1,11 +1,8 @@
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Play } from 'lucide-react';
 import { Exercise, ExerciseSession as DBExerciseSession } from '@/types/database';
-import { ThemeType } from '../ThemeSelector';
-import { formatSessionDate, getAccuracyColorClass } from './helpers';
 
 interface ExerciseInfoProps {
   todayExercise: Exercise | null;

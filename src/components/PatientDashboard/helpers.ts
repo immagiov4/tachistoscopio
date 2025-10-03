@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Exercise, ExerciseSession as DBExerciseSession } from '@/types/database';
+import { ExerciseSession as DBExerciseSession } from '@/types/database';
 
 export interface ExerciseSession {
   words: string[];

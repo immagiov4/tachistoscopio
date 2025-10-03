@@ -4,14 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, Save, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import paroleItalianeText from '@/data/parole_italiane_complete.txt?raw';
-import { Loader2 } from 'lucide-react';
-import { GeneratorParams, filterWordsBySyllables, shuffleAndLimit, selectWordSource } from './WordListManager/generatorHelpers';
 import { getErrorMessage } from '@/utils/errorHandling';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 
@@ -45,16 +42,6 @@ const ITALIAN_SYLLABLES = [
   'va', 've', 'vi', 'vo', 'vu',
   'za', 'ze', 'zi', 'zo', 'zu'
 ];
-
-// Parole italiane base per generazione
-const ITALIAN_WORD_STEMS = [
-  'cas', 'mar', 'sol', 'lun', 'vit', 'man', 'tes', 'cuo', 'amo', 'nom',
-  'pac', 'mon', 'tem', 'gior', 'not', 'don', 'uom', 'fig', 'mad', 'pad',
-  'fio', 'acq', 'ter', 'cie', 'alt', 'ben', 'dov', 'com', 'cos', 'mol',
-  'lib', 'scu', 'lav', 'stu', 'par', 'pen', 'sen', 'viv', 'mor', 'nas'
-];
-
-const WORD_ENDINGS = ['a', 'e', 'i', 'o', 'u', 'are', 'ere', 'ire', 'ato', 'uto', 'ito'];
 
 // Lista di parole inappropriate da filtrare
 const INAPPROPRIATE_WORDS = [

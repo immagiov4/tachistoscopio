@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Calendar, Play, LogOut, CheckCircle } from 'lucide-react';
+import { Calendar, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Exercise, ExerciseSession as DBExerciseSession } from '@/types/database';
 import { SimpleExerciseDisplay } from './SimpleExerciseDisplay';
@@ -20,12 +18,9 @@ import {
   saveSessionToDatabase,
   fetchStudioPatientProfile,
   formatSessionDate,
-  calculateAverageAccuracy,
-  calculateTotalWords,
   getAccuracyColorClass
 } from './PatientDashboard/helpers';
 import { renderStats, renderExerciseInfo } from './PatientDashboard/renderHelpers';
-import { TutorialModal } from './TutorialModal';
 import { ERROR_MESSAGES } from '@/constants/errorMessages';
 interface PatientDashboardProps {
   studioStudentId?: string; // Per modalità studio del coach
