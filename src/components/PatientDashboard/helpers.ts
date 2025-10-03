@@ -1,9 +1,9 @@
 import { supabase } from '@/integrations/supabase/client';
-import { ExerciseSession as DBExerciseSession } from '@/types/database';
+import { ExerciseSession as DBExerciseSession, ExerciseSettings, Exercise } from '@/types/database';
 
 export interface ExerciseSession {
   words: string[];
-  settings: any;
+  settings: ExerciseSettings;
   startTime: number;
   currentWordIndex: number;
   errors: number[];
@@ -18,7 +18,7 @@ export interface SessionResult {
   accuracy: number;
   duration: number;
   missedWords: string[];
-  settings: any;
+  settings: ExerciseSettings;
 }
 
 export const fetchTodayExercise = async (effectiveStudentId: string) => {
@@ -39,7 +39,7 @@ export const fetchTodayExercise = async (effectiveStudentId: string) => {
     throw exerciseError;
   }
 
-  return exercise as any || null;
+  return exercise as unknown as Exercise | null;
 };
 
 export const checkIfCompletedToday = async (exerciseId: string, effectiveStudentId: string) => {
@@ -79,16 +79,15 @@ export const fetchRecentSessions = async (effectiveStudentId: string) => {
 
 export const createExerciseSession = (
   words: string[],
-  settings: any,
-  accessibilitySettings: any,
+  settings: ExerciseSettings,
+  accessibilitySettings: { fontSize: 'small' | 'medium' | 'large' | 'extra-large' },
   selectedTheme: string
 ): ExerciseSession => {
   return {
     words,
     settings: {
       ...settings,
-      fontSize: accessibilitySettings.fontSize,
-      theme: selectedTheme
+      fontSize: accessibilitySettings.fontSize
     },
     startTime: Date.now(),
     currentWordIndex: 0,

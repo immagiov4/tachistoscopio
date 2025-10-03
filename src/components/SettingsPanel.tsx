@@ -183,7 +183,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               <Label>Dimensione Font</Label>
               <Select
                 value={settings.fontSize}
-                onValueChange={(value: any) => 
+                onValueChange={(value: 'small' | 'medium' | 'large' | 'extra-large') => 
                   onSettingsChange({ ...settings, fontSize: value })
                 }
               >
@@ -203,7 +203,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               <Label>Formato Testo</Label>
               <Select
                 value={settings.textCase}
-                onValueChange={(value: any) => 
+                onValueChange={(value: 'original' | 'uppercase' | 'lowercase') => 
                   onSettingsChange({ ...settings, textCase: value })
                 }
               >

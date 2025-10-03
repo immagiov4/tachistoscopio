@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Profile, WordList, Exercise, ExerciseSettings } from '@/types/database';
+import { Profile, WordList, Exercise, ExerciseSettings, ExerciseSession } from '@/types/database';
 
 export type PatientWithEmail = Profile & {
   email?: string;
@@ -18,7 +18,7 @@ export const fetchPatientsWithEmails = async (therapistId: string) => {
 
   return (data || []).map(p => ({
     ...p,
-    role: p.role as any
+    role: p.role as 'coach' | 'student'
   })) as PatientWithEmail[];
 };
 
@@ -33,13 +33,14 @@ export const fetchWordLists = async (therapistId: string) => {
   return (data || []).map(list => ({
     ...list,
     settings: typeof list.settings === 'object' && list.settings !== null && !Array.isArray(list.settings)
-      ? list.settings as any
+      ? list.settings as unknown as ExerciseSettings
       : {
           exposureDuration: 500,
           intervalDuration: 200,
           textCase: 'original' as const,
           useMask: false,
-          maskDuration: 200
+          maskDuration: 200,
+          fontSize: 'large' as const
         }
   })) as unknown as WordList[];
 };
@@ -81,7 +82,7 @@ export const fetchPatientExercises = async (studentId: string) => {
 
   if (error) throw error;
 
-  return data as any || [];
+  return (data as unknown as (Exercise & { word_list: WordList })[]) || [];
 };
 
 export const fetchPatientSessions = async (studentId: string) => {
@@ -97,9 +98,9 @@ export const fetchPatientSessions = async (studentId: string) => {
   return data || [];
 };
 
-export const buildWeeklyExercisesMap = (exercises: any[]): { [key: number]: Partial<Exercise> } => {
+export const buildWeeklyExercisesMap = (exercises: (Exercise & { word_list?: WordList })[]): { [key: number]: Partial<Exercise> } => {
   const weeklyData: { [key: number]: Partial<Exercise> } = {};
-  exercises.forEach((exercise: any) => {
+  exercises.forEach((exercise) => {
     weeklyData[exercise.day_of_week] = exercise;
   });
   return weeklyData;
@@ -124,7 +125,7 @@ export const upsertExercise = async (
       .from('exercises')
       .update({
         word_list_id: wordListId,
-        settings: settings as any,
+        settings: settings as unknown as never,
         updated_at: new Date().toISOString()
       })
       .eq('id', existingExercise.id);
@@ -138,7 +139,7 @@ export const upsertExercise = async (
         coach_id: therapistId,
         word_list_id: wordListId,
         day_of_week: dayOfWeek,
-        settings: settings as any
+        settings: settings as unknown as never
       });
 
     if (error) throw error;
@@ -212,7 +213,7 @@ const ERROR_MESSAGES = {
   }
 } as const;
 
-const getUpdateError = (error: any): string => {
+const getUpdateError = (error: { code?: string; message?: string }): string => {
   if (error.code === '23503') {
     if (error.message?.includes('exercises_patient_id_fkey')) {
       return ERROR_MESSAGES.update['23503_patient'];
@@ -228,7 +229,7 @@ const getUpdateError = (error: any): string => {
   return '';
 };
 
-const getRemoveError = (error: any): string => {
+const getRemoveError = (error: { code?: string; message?: string }): string => {
   if (error.code === 'PGRST116') {
     return ERROR_MESSAGES.remove.PGRST116;
   }
@@ -238,7 +239,7 @@ const getRemoveError = (error: any): string => {
   return '';
 };
 
-const getCreateError = (error: any): string => {
+const getCreateError = (error: { message?: string }): string => {
   if (error.message?.includes('email')) {
     return ERROR_MESSAGES.create.email;
   }
@@ -248,7 +249,7 @@ const getCreateError = (error: any): string => {
   return '';
 };
 
-const getDeleteError = (error: any): string => {
+const getDeleteError = (error: { message?: string }): string => {
   if (error.message?.includes('Unauthorized')) {
     return ERROR_MESSAGES.delete.unauthorized;
   }
@@ -258,7 +259,7 @@ const getDeleteError = (error: any): string => {
   return '';
 };
 
-export const getErrorMessage = (error: any, context: 'update' | 'remove' | 'create' | 'delete'): string => {
+export const getErrorMessage = (error: { code?: string; message?: string }, context: 'update' | 'remove' | 'create' | 'delete'): string => {
   const contextHandlers = {
     update: getUpdateError,
     remove: getRemoveError,
@@ -303,11 +304,11 @@ export const paginatePatients = (
   };
 };
 
-export const calculateAverageAccuracy = (sessions: any[]): number => {
+export const calculateAverageAccuracy = (sessions: ExerciseSession[]): number => {
   if (sessions.length === 0) return 0;
   return Math.round(sessions.reduce((acc, session) => acc + session.accuracy, 0) / sessions.length);
 };
 
-export const calculateTotalWords = (sessions: any[]): number => {
+export const calculateTotalWords = (sessions: ExerciseSession[]): number => {
   return sessions.reduce((acc, session) => acc + session.total_words, 0);
 };

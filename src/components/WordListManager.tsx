@@ -179,10 +179,14 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   };
 
-  // Load dataset on component mount
-  useEffect(() => {
+  const loadWordsDatasetCallback = useCallback(() => {
     loadWordsDataset();
   }, []);
+
+  // Load dataset on component mount
+  useEffect(() => {
+    loadWordsDatasetCallback();
+  }, [loadWordsDatasetCallback]);
 
   // Separated function without useCallback to avoid infinite loops
   const performWordGeneration = async () => {
@@ -227,22 +231,29 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
     }
   };
 
-  // Load saved word lists from database
-  useEffect(() => {
+  const loadSavedWordListsCallback = useCallback(() => {
     if (therapistId) {
       loadSavedWordLists();
     }
   }, [therapistId]);
 
-  // Effect automatico per generazione con debounce appropriato
+  // Load saved word lists from database
   useEffect(() => {
-    // Solo genera se siamo nel tab Generator e non se cambiamo tab
+    loadSavedWordListsCallback();
+  }, [loadSavedWordListsCallback]);
+
+  const performWordGenerationCallback = useCallback(() => {
     if (activeTab !== 'generator') return;
     const timeoutId = setTimeout(() => {
       performWordGeneration();
     }, 300);
     return () => clearTimeout(timeoutId);
-  }, [generatorParams.type, generatorParams.syllableCount, generatorParams.startsWith, generatorParams.contains, generatorParams.count]);
+  }, [activeTab, generatorParams.type, generatorParams.syllableCount, generatorParams.startsWith, generatorParams.contains, generatorParams.count]);
+
+  // Effect automatico per generazione con debounce appropriato
+  useEffect(() => {
+    return performWordGenerationCallback();
+  }, [performWordGenerationCallback]);
 
   const generateRealWords = (): string[] => {
     const wordsToUse = selectWordSource(allWords, ITALIAN_WORDS);
@@ -349,7 +360,6 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
           name: formData.listName,
           description: descriptionText,
           words: formData.words,
-          settings: formData.settings as any,
           created_by: therapistId
         })
         .select()
@@ -423,19 +433,19 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         });
       }
       await loadSavedWordLists();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting word list:', error);
+      const err = error as { code?: string; message?: string };
       let errorMessage = "Impossibile eliminare la lista.";
 
-      // Check for specific error types
-      if (error.code === '23503') {
+      if (err.code === '23503') {
         errorMessage = "Impossibile eliminare la lista perché è utilizzata in esercizi attivi. Per procedere, rimuovi prima gli esercizi dalla sezione Gestione Pazienti.";
-      } else if (error.code === 'PGRST116') {
+      } else if (err.code === 'PGRST116') {
         errorMessage = "Lista non trovata o non hai i permessi per eliminarla.";
-      } else if (error?.message?.includes('network')) {
+      } else if (err.message?.includes('network')) {
         errorMessage = "Errore di connessione. Controlla la rete e riprova.";
-      } else if (error?.message) {
-        errorMessage = `Errore durante l'eliminazione: ${error.message}`;
+      } else if (err.message) {
+        errorMessage = `Errore durante l'eliminazione: ${err.message}`;
       }
       toast({
         title: "Errore di eliminazione",
@@ -500,7 +510,7 @@ export const WordListManager: React.FC<WordListManagerProps> = ({
         title: "Esercizio aggiornato",
         description: `"${updatedList.name}" è stato aggiornato.`
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating word list:', error);
       const errorMessage = getWordListUpdateErrorMessage(error);
       toast({

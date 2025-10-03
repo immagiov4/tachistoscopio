@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -127,7 +127,7 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
     const syllables = parseInt(params.syllableCount) || 2;
     
     // Filtra le parole del dizionario
-    let filteredWords = italianWords.filter(word => {
+    const filteredWords = italianWords.filter(word => {
       // Filter inappropriate words first
       if (INAPPROPRIATE_WORDS.includes(word.toLowerCase())) return false;
       
@@ -303,11 +303,11 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
       }
 
       setListName('');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error saving word list:', error);
       
-      const errorMessage = getErrorMessage(error, ERROR_MESSAGES.WORDLIST_SAVE_FAILED);
-      const finalMessage = error?.message?.includes('unique') 
+      const errorMessage = getErrorMessage(error instanceof Error ? error : { message: String(error) }, ERROR_MESSAGES.WORDLIST_SAVE_FAILED);
+      const finalMessage = error instanceof Error && error.message?.includes('unique') 
         ? 'Esiste già una lista con questo nome. Scegli un nome diverso.'
         : errorMessage;
       
@@ -321,9 +321,13 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
     }
   };
 
-  useEffect(() => {
+  const generateWordsCallback = useCallback(() => {
     generateWords();
   }, []);
+
+  useEffect(() => {
+    generateWordsCallback();
+  }, [generateWordsCallback]);
 
   return (
     <div className="w-full space-y-6">
@@ -348,7 +352,7 @@ export const WordGenerator: React.FC<WordGeneratorProps> = ({ therapistId, onSav
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Tipo di lista</Label>
-                <Select value={params.type} onValueChange={(value: any) => setParams(prev => ({ ...prev, type: value }))}>
+                <Select value={params.type} onValueChange={(value: 'words' | 'syllables' | 'nonwords' | 'minimal-pairs') => setParams(prev => ({ ...prev, type: value }))}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, BookOpen, BarChart3, Search, Trash2, UserCheck, ArrowUp, UserCog, Edit } from 'lucide-react';
-import { WordList, Exercise, ExerciseSettings, DAYS_OF_WEEK } from '@/types/database';
+import { WordList, Exercise, ExerciseSettings, DAYS_OF_WEEK, ExerciseSession } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
 import { LoadingPage } from '@/components/ui/loading';
 import { PatientDashboard } from '@/components/PatientDashboard';
@@ -42,7 +42,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   const [patientsWithExercises, setPatientsWithExercises] = useState<PatientWithExerciseCount[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<PatientWithEmail | null>(null);
   const [wordLists, setWordLists] = useState<WordList[]>([]);
-  const [patientSessions, setPatientSessions] = useState<any[]>([]);
+  const [patientSessions, setPatientSessions] = useState<ExerciseSession[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -64,14 +64,54 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
   // Floating button state
   const [showFloatingActions, setShowFloatingActions] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
+
+  const fetchInitialData = useCallback(async () => {
+    setSelectedPatient(null);
+    try {
+      const [patients, allWordLists, exercises] = await Promise.all([
+        fetchPatientsWithEmails(therapistId),
+        fetchWordLists(therapistId),
+        fetchExercises(therapistId)
+      ]);
+
+      const patientsWithCounts = calculateExerciseCounts(patients, exercises);
+
+      setPatients(patients);
+      setPatientsWithExercises(patientsWithCounts);
+      setWordLists(allWordLists);
+    } catch (error) {
+      console.error('Error fetching initial data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [therapistId]);
+
+  const fetchPatientData = useCallback(async () => {
+    if (!selectedPatient) return;
+    try {
+      const [exercises, sessions] = await Promise.all([
+        fetchPatientExercises(selectedPatient.id),
+        fetchPatientSessions(selectedPatient.id)
+      ]);
+
+      setPatientSessions(sessions);
+
+      const weeklyData = buildWeeklyExercisesMap(exercises);
+      setWeeklyExercises(weeklyData);
+    } catch (error) {
+      console.error('Error fetching patient data:', error);
+    }
+  }, [selectedPatient]);
+
   useEffect(() => {
     fetchInitialData();
-  }, [therapistId]);
+  }, [fetchInitialData]);
+
   useEffect(() => {
     if (selectedPatient) {
       fetchPatientData();
     }
-  }, [selectedPatient]);
+  }, [selectedPatient, fetchPatientData]);
 
   // Reset pagination when searching
   useEffect(() => {
@@ -116,7 +156,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
     }
   };
 
-  const enterStudioModeForSelected = () => {
+  const enterStudioModeForSelected = useCallback(() => {
     if (selectedPatient) {
       enterStudioMode(selectedPatient.id);
     } else {
@@ -126,7 +166,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         variant: 'destructive'
       });
     }
-  };
+  }, [selectedPatient]);
   
   const scrollToPatientIndicator = () => {
     setTimeout(() => {
@@ -166,27 +206,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       }, 500);
     }, 100);
   };
-  
-  const fetchInitialData = async () => {
-    setSelectedPatient(null);
-    try {
-      const [patients, allWordLists, exercises] = await Promise.all([
-        fetchPatientsWithEmails(therapistId),
-        fetchWordLists(therapistId),
-        fetchExercises(therapistId)
-      ]);
-
-      const patientsWithCounts = calculateExerciseCounts(patients, exercises);
-
-      setPatients(patients);
-      setPatientsWithExercises(patientsWithCounts);
-      setWordLists(allWordLists);
-    } catch (error) {
-      console.error('Error fetching initial data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const updatePatientExerciseCount = useCallback(async () => {
     if (!selectedPatient) return;
@@ -207,22 +226,6 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       console.error('Error updating exercise count:', error);
     }
   }, [selectedPatient, therapistId]);
-  const fetchPatientData = async () => {
-    if (!selectedPatient) return;
-    try {
-      const [exercises, sessions] = await Promise.all([
-        fetchPatientExercises(selectedPatient.id),
-        fetchPatientSessions(selectedPatient.id)
-      ]);
-
-      setPatientSessions(sessions);
-
-      const weeklyData = buildWeeklyExercisesMap(exercises);
-      setWeeklyExercises(weeklyData);
-    } catch (error) {
-      console.error('Error fetching patient data:', error);
-    }
-  };
   const updateExercise = async (dayOfWeek: number, wordListId: string, settings: ExerciseSettings) => {
     if (!selectedPatient) return;
     
@@ -230,7 +233,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       await upsertExercise(selectedPatient.id, therapistId, dayOfWeek, wordListId, settings);
       await fetchPatientData();
       updatePatientExerciseCount();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating exercise:', error);
       const errorMessage = getErrorMessage(error, 'update');
       toast({
@@ -262,7 +265,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         title: 'Successo',
         description: 'Esercizio eliminato con successo'
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error removing exercise:', error);
       const errorMessage = getErrorMessage(error, 'remove');
       toast({
@@ -302,7 +305,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
       setNewPatientEmail('');
       setNewPatientName('');
       await fetchInitialData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating patient:', error);
       const errorMessage = getErrorMessage(error, 'create');
       toast({
@@ -332,7 +335,7 @@ export const PatientExerciseManager: React.FC<PatientExerciseManagerProps> = ({
         setSelectedPatient(null);
       }
       await fetchInitialData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting patient:', error);
       const errorMessage = getErrorMessage(error, 'delete');
       toast({

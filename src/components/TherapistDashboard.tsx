@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -44,6 +44,15 @@ export const TherapistDashboard: React.FC = () => {
   // Tutorial state
   const [showTutorial, setShowTutorial] = useState(false);
 
+  const fetchData = useCallback(async () => {
+    await Promise.all([
+      fetchPatients(),
+      fetchWordLists(),
+      fetchExercises(),
+    ]);
+    setLoading(false);
+  }, []);
+
   useEffect(() => {
     if (profile) {
       fetchData();
@@ -53,16 +62,8 @@ export const TherapistDashboard: React.FC = () => {
         setShowTutorial(true);
       }
     }
-  }, [profile]);
+  }, [profile, fetchData]);
 
-  const fetchData = async () => {
-    await Promise.all([
-      fetchPatients(),
-      fetchWordLists(),
-      fetchExercises(),
-    ]);
-    setLoading(false);
-  };
 
   const fetchWordLists = async () => {
     try {
@@ -75,12 +76,13 @@ export const TherapistDashboard: React.FC = () => {
 
       const allWordLists = (data || []).map(list => ({
         ...list,
-        settings: (typeof list.settings === 'object' && list.settings !== null && !Array.isArray(list.settings)) ? list.settings as any : {
+        settings: (typeof list.settings === 'object' && list.settings !== null && !Array.isArray(list.settings)) ? list.settings as unknown as ExerciseSettings : {
           exposureDuration: 500,
           intervalDuration: 200,
           textCase: 'original' as const,
           useMask: false,
-          maskDuration: 200
+          maskDuration: 200,
+          fontSize: 'large' as const
         }
       }));
       setWordLists(allWordLists as unknown as WordList[]);
@@ -118,7 +120,7 @@ export const TherapistDashboard: React.FC = () => {
         .order('day_of_week', { ascending: true });
 
       if (error) throw error;
-      setExercises(data as any || []);
+      setExercises((data as unknown as Exercise[]) || []);
     } catch (error) {
       console.error('Error fetching exercises:', error);
     }
@@ -179,11 +181,12 @@ export const TherapistDashboard: React.FC = () => {
       setNewPatientEmail('');
       setNewPatientName('');
       await fetchPatients();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating patient:', error);
+      const errorMessage = error instanceof Error ? error.message : ERROR_MESSAGES.PATIENT_CREATE_FAILED;
       toast({
         title: 'Errore',
-        description: error?.message || ERROR_MESSAGES.PATIENT_CREATE_FAILED,
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {

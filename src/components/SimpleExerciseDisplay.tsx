@@ -73,11 +73,12 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   }, []);
 
   useEffect(() => {
-    return () => {
+    const cleanupFn = () => {
       console.log('🧹 Component unmounting - cleaning up all timers and state');
       isMountedRef.current = false;
       clearAllTimers();
     };
+    return cleanupFn;
   }, [clearAllTimers]);
 
   // Usa ref per mantenere una versione stabile di markError
@@ -159,7 +160,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
         onUpdateSession({ ...session, isRunning: true });
       });
     }
-  }, [countdown, isCountingDown, session, onUpdateSession]);
+  }, [countdown, isCountingDown, session, onUpdateSession, safeSetState]);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -268,7 +269,10 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
     session.settings.exposureDuration,
     session.settings.intervalDuration,
     session.settings.textCase,
-    isCountingDown
+    session.settings.intervalVariability,
+    isCountingDown,
+    clearAllTimers,
+    nextWord
   ]);
 
   const progress = calculateProgress(session.currentWordIndex, session.words.length);

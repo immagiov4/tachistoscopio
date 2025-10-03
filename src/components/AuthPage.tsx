@@ -99,7 +99,7 @@ export const AuthPage: React.FC = () => {
       setSuccess(SUCCESS_MESSAGES.AUTH_RESET_EMAIL_SENT);
       setResetEmail('');
       setShowResetPassword(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setError(ERROR_MESSAGES.AUTH_RESET_FAILED);
     }
 

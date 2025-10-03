@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { Exercise, ExerciseSession as DBExerciseSession } from '@/types/database';
+import { Exercise, ExerciseSession as DBExerciseSession, Profile } from '@/types/database';
 import { SimpleExerciseDisplay } from './SimpleExerciseDisplay';
 import { ThemeSelector, ThemeType, themes } from './ThemeSelector';
 import { toast } from '@/hooks/use-toast';
@@ -27,7 +27,7 @@ interface PatientDashboardProps {
 }
 const renderSettingsPanel = (
   accessibilitySettings: { fontSize: 'small' | 'medium' | 'large' | 'extra-large' },
-  setAccessibilitySettings: (settings: any) => void,
+  setAccessibilitySettings: (settings: { fontSize: 'small' | 'medium' | 'large' | 'extra-large' }) => void,
   selectedTheme: ThemeType,
   setSelectedTheme: (theme: ThemeType) => void
 ) => {
@@ -127,7 +127,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
   const [selectedTheme, setSelectedTheme] = useState<ThemeType>('rainbow');
   const [recentSessions, setRecentSessions] = useState<DBExerciseSession[]>([]);
   const [statsLoading, setStatsLoading] = useState(true);
-  const [studioPatientProfile, setStudioPatientProfile] = useState<any>(null);
+  const [studioPatientProfile, setStudioPatientProfile] = useState<Profile | null>(null);
 
   // Usa lo studentId dalla modalità studio o dal profilo corrente
   const effectiveStudentId = studioStudentId || profile?.id;
@@ -156,18 +156,8 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
   useEffect(() => {
     localStorage.setItem('tachistoscope-theme', selectedTheme);
   }, [selectedTheme]);
-  useEffect(() => {
-    if (effectiveStudentId) {
-      loadTodayExercise();
-      loadRecentSessions();
-      
-      if (studioStudentId) {
-        loadStudioPatientProfile();
-      }
-    }
-  }, [effectiveStudentId, studioStudentId]);
-  
-  const loadStudioPatientProfile = async () => {
+
+  const loadStudioPatientProfile = useCallback(async () => {
     if (!studioStudentId) return;
     
     try {
@@ -176,9 +166,9 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
     } catch (error) {
       console.error('Error fetching studio patient profile:', error);
     }
-  };
+  }, [studioStudentId]);
 
-  const loadTodayExercise = async () => {
+  const loadTodayExercise = useCallback(async () => {
     if (!effectiveStudentId) return;
 
     try {
@@ -194,9 +184,9 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [effectiveStudentId]);
 
-  const loadRecentSessions = async () => {
+  const loadRecentSessions = useCallback(async () => {
     if (!effectiveStudentId) return;
 
     try {
@@ -208,7 +198,18 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
     } finally {
       setStatsLoading(false);
     }
-  };
+  }, [effectiveStudentId]);
+
+  useEffect(() => {
+    if (effectiveStudentId) {
+      loadTodayExercise();
+      loadRecentSessions();
+      
+      if (studioStudentId) {
+        loadStudioPatientProfile();
+      }
+    }
+  }, [effectiveStudentId, studioStudentId, loadTodayExercise, loadRecentSessions, loadStudioPatientProfile]);
   const startExercise = () => {
     if (!todayExercise?.word_list) {
       toast({
@@ -254,11 +255,12 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
       });
       setCompletedToday(true);
       await loadRecentSessions();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error saving session:', error);
+      const errorMessage = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
       toast({
         title: ERROR_MESSAGES.EXERCISE_SESSION_SAVE_FAILED,
-        description: `Dettagli errore: ${error?.message || ERROR_MESSAGES.UNKNOWN_ERROR}`,
+        description: `Dettagli errore: ${errorMessage}`,
         variant: 'destructive'
       });
     } finally {

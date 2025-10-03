@@ -4,7 +4,7 @@ import { Palette } from 'lucide-react';
 
 export type ThemeType = 'space' | 'nature' | 'ocean' | 'rainbow' | 'clouds';
 
-interface Theme {
+export interface Theme {
   id: ThemeType;
   name: string;
   icon: string;
@@ -14,59 +14,6 @@ interface Theme {
     shapes: string[];
   };
 }
-
-const themes: Theme[] = [
-  {
-    id: 'space',
-    name: 'Spazio',
-    icon: '🚀',
-    description: 'Stelle, pianeti e galassie',
-    preview: {
-      background: 'from-indigo-300 via-purple-300 via-blue-300 to-violet-400',
-      shapes: ['🌟'] // Emoji principale per lo stimolo
-    }
-  },
-  {
-    id: 'nature',
-    name: 'Natura',
-    icon: '🌳',
-    description: 'Foreste, fiori e animali',
-    preview: {
-      background: 'from-emerald-200 via-teal-200 via-green-200 to-lime-300',
-      shapes: ['🦋'] // Emoji principale per lo stimolo
-    }
-  },
-  {
-    id: 'ocean',
-    name: 'Oceano',
-    icon: '🌊',
-    description: 'Mare, pesci e coralli',
-    preview: {
-      background: 'from-cyan-200 via-blue-200 via-sky-200 to-teal-300',
-      shapes: ['🐠'] // Emoji principale per lo stimolo
-    }
-  },
-  {
-    id: 'rainbow',
-    name: 'Arcobaleno',
-    icon: '🌈',
-    description: 'Colori vivaci e gioia',
-    preview: {
-      background: 'from-pink-200 via-rose-200 via-orange-200 via-yellow-200 via-green-200 via-blue-200 to-purple-300',
-      shapes: ['🌈'] // Emoji principale per lo stimolo
-    }
-  },
-  {
-    id: 'clouds',
-    name: 'Nuvole',
-    icon: '☁️',
-    description: 'Cielo sereno e dolcezza',
-    preview: {
-      background: 'from-sky-100 via-blue-100 via-indigo-100 to-purple-200',
-      shapes: ['☁️'] // Emoji principale per lo stimolo
-    }
-  }
-];
 
 interface ThemeSelectorProps {
   selectedTheme: ThemeType;
@@ -120,6 +67,55 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
   );
 };
 
-// Export dei temi per uso in altri componenti
-export { themes };
-export type { Theme };
+export const themes: Theme[] = [
+  {
+    id: 'space',
+    name: 'Spazio',
+    icon: '🚀',
+    description: 'Stelle, pianeti e galassie',
+    preview: {
+      background: 'from-indigo-300 via-purple-300 via-blue-300 to-violet-400',
+      shapes: ['🌟']
+    }
+  },
+  {
+    id: 'nature',
+    name: 'Natura',
+    icon: '🌳',
+    description: 'Foreste, fiori e animali',
+    preview: {
+      background: 'from-emerald-200 via-teal-200 via-green-200 to-lime-300',
+      shapes: ['🦋']
+    }
+  },
+  {
+    id: 'ocean',
+    name: 'Oceano',
+    icon: '🌊',
+    description: 'Mare, pesci e coralli',
+    preview: {
+      background: 'from-cyan-200 via-blue-200 via-sky-200 to-teal-300',
+      shapes: ['🐠']
+    }
+  },
+  {
+    id: 'rainbow',
+    name: 'Arcobaleno',
+    icon: '🌈',
+    description: 'Colori vivaci e gioia',
+    preview: {
+      background: 'from-pink-200 via-rose-200 via-orange-200 via-yellow-200 via-green-200 via-blue-200 to-purple-300',
+      shapes: ['🌈']
+    }
+  },
+  {
+    id: 'clouds',
+    name: 'Nuvole',
+    icon: '☁️',
+    description: 'Cielo sereno e dolcezza',
+    preview: {
+      background: 'from-sky-100 via-blue-100 via-indigo-100 to-purple-200',
+      shapes: ['☁️']
+    }
+  }
+];
