@@ -361,10 +361,12 @@ export const TherapistDashboard: React.FC = () => {
           </TabsList>
 
           <TabsContent value="patients" className="mt-6">
-            <PatientExerciseManager 
-              therapistId={profile?.id || ''} 
-              onNavigateToWordLists={() => setActiveTab('wordlists')}
-            />
+            {profile?.id && (
+              <PatientExerciseManager 
+                therapistId={profile.id} 
+                onNavigateToWordLists={() => setActiveTab('wordlists')}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="wordlists" className="mt-6">
