@@ -56,16 +56,10 @@ const renderWordListInfo = (todayExercise: Exercise) => (
           {todayExercise.word_list?.name}
         </h4>
         {todayExercise.word_list?.description && (
-          <p className="text-sm text-gray-600 mb-2">
+          <p className="text-sm text-gray-600">
             {todayExercise.word_list.description}
           </p>
         )}
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-primary/20 text-primary">
-            {todayExercise.word_list?.words.length} parole
-          </span>
-          <span className="text-xs text-gray-500">da leggere</span>
-        </div>
       </div>
     </div>
   </div>

@@ -312,9 +312,6 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({
                 <Calendar className="h-5 w-5" />
                 Esercizio di Oggi
               </CardTitle>
-              <CardDescription className="text-gray-600">
-                {todayExercise ? `${todayExercise.word_list?.words.length} parole da leggere` : 'Rilassati, oggi niente esercizi!'}
-              </CardDescription>
             </CardHeader>
             <CardContent>
               {renderExerciseInfo({
