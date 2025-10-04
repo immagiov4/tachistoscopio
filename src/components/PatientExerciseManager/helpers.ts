@@ -10,8 +10,8 @@ export type PatientWithExerciseCount = PatientWithEmail & {
 };
 
 export const fetchPatientsWithEmails = async (therapistId: string) => {
-  const { data, error } = await supabase.rpc('get_patients_with_emails', {
-    therapist_profile_id: therapistId
+  const { data, error } = await supabase.rpc('get_students_with_emails', {
+    coach_profile_id: therapistId
   });
 
   if (error) throw error;
