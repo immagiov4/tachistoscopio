@@ -22,6 +22,7 @@ import {
   createUpdatedSession
 } from './SimpleExerciseDisplay/sessionHelpers';
 import { startDisplaySequence } from './SimpleExerciseDisplay/timingHelpers';
+import { PrecisionTimer } from '@/utils/precisionTiming';
 
 interface SimpleExerciseDisplayProps {
   session: ExerciseSession;
@@ -47,7 +48,7 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   // Ref per controllare se il componente è ancora montato
   const isMountedRef = useRef(true);
   const isRunningRef = useRef(session.isRunning);
-  const activeTimersRef = useRef<NodeJS.Timeout[]>([]);
+  const activeTimersRef = useRef<(NodeJS.Timeout | PrecisionTimer)[]>([]);
   
   // Funzione per controllare se possiamo aggiornare lo stato
   const safeSetState = useCallback((fn: () => void) => {
@@ -57,17 +58,21 @@ export const SimpleExerciseDisplay: React.FC<SimpleExerciseDisplayProps> = ({
   }, []);
   
   // Funzione per aggiungere un timer da tracciare
-  const addTimer = (timerId: NodeJS.Timeout) => {
+  const addTimer = (timer: NodeJS.Timeout | PrecisionTimer) => {
     if (isMountedRef.current) {
-      activeTimersRef.current.push(timerId);
+      activeTimersRef.current.push(timer);
     }
-    return timerId;
+    return timer;
   };
   
   const clearAllTimers = useCallback(() => {
     console.log('🛑 Clearing all active timers:', activeTimersRef.current.length);
-    activeTimersRef.current.forEach(timerId => {
-      clearTimeout(timerId);
+    activeTimersRef.current.forEach(timer => {
+      if (timer instanceof PrecisionTimer) {
+        timer.stop();
+      } else {
+        clearTimeout(timer);
+      }
     });
     activeTimersRef.current = [];
   }, []);
