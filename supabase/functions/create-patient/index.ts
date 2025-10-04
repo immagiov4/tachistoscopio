@@ -42,27 +42,12 @@ const createStudentProfile = async (supabaseAdmin: any, userId: string, fullName
   });
 };
 
+// Note: Email sending requires Resend integration
+// For now, credentials must be provided manually to students
 const sendWelcomeEmail = async (supabaseAdmin: any, email: string, fullName: string, password: string) => {
-  try {
-    const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-      redirectTo: `${Deno.env.get('SUPABASE_URL').replace('.supabase.co', '.supabase.app')}/`,
-      data: {
-        full_name: fullName,
-        welcome_message: `Ciao ${fullName}! Le tue credenziali: Email: ${email}, Password: ${password}`
-      }
-    });
-
-    if (error) {
-      console.error('Errore invio email:', error);
-      return { success: false, error: sanitizeErrorMessage(error) };
-    }
-
-    console.log(`Email di benvenuto inviata con successo a ${email}`);
-    return { success: true, error: null };
-  } catch (emailException) {
-    console.error('Errore invio email:', emailException);
-    return { success: false, error: sanitizeErrorMessage(emailException) };
-  }
+  console.log(`Credenziali generate per ${email}: Password: ${password}`);
+  console.log(`NOTA: Implementare Resend per invio automatico email`);
+  return { success: false, error: null };
 };
 
 const handleUserCreation = async (
@@ -161,13 +146,9 @@ serve(async (req) => {
 
     console.log(`SECURITY_LOG: Student created - Coach: ${therapistId}, Student: ${sanitizedEmail}, Timestamp: ${new Date().toISOString()}`);
 
-    let message = userRecreated 
-      ? `Studente ${sanitizedFullName} ricreato con successo (dati precedenti eliminati).`
-      : `Studente ${sanitizedFullName} creato con successo.`;
-    
-    if (emailResult.success) {
-      message += ` Email di benvenuto inviata a ${sanitizedEmail} con credenziali di accesso.`;
-    }
+    const message = userRecreated 
+      ? `Studente ${sanitizedFullName} ricreato con successo (dati precedenti eliminati). Fornisci le credenziali allo studente.`
+      : `Studente ${sanitizedFullName} creato con successo. Fornisci le credenziali allo studente.`;
 
     return new Response(
       JSON.stringify({ 
@@ -175,9 +156,7 @@ serve(async (req) => {
         password,
         magic_link: resetData?.properties?.action_link,
         message,
-        warning: !emailResult.success ? `ATTENZIONE: Lo studente è stato creato ma l'email non è stata inviata. Fornisci manualmente le credenziali allo studente.` : null,
-        emailSent: emailResult.success,
-        emailError: emailResult.error
+        emailSent: false
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
